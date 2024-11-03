@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Pistol : ProjectileLauncher
 {
-    [SerializeField] protected Transform ShootPoint;
+    [SerializeField] protected Transform shootPoint;
+    [SerializeField] protected int ammoCount;
 
     public void Update()
     {
@@ -16,8 +17,25 @@ public class Pistol : ProjectileLauncher
 
     public override void LaunchProjectile()
     {
+        // Out of ammo
+        if (ammoCount <= 0)
+        {
+            // Start reload instead
+            ReloadProjectile();
+            return;
+        }
+
+        // Is currently reloading
+        if(isReloading)
+        {
+            return;
+        }
+
+        // Subtract 1 ammo
+        ammoCount--;
+
         // Spawn projectile at barrel, facing same forward dir as barrel
-        GameObject bullet = SpawnProjectile(ShootPoint);
+        GameObject bullet = SpawnProjectile(shootPoint);
 
         // Launch projectile rigidbody forward with a very fast force
         Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
@@ -30,8 +48,15 @@ public class Pistol : ProjectileLauncher
         bulletRb.AddRelativeForce(forward, ForceMode.Impulse);
     }
 
-    public override void ReloadProjectile()
+    protected override IEnumerator ReloadProjectileCoroutine_WaitForSeconds()
     {
-        throw new System.NotImplementedException();
+        yield return new WaitForSeconds(3f);
+    }
+
+    protected override IEnumerator ReloadProjectileCoroutine_RefillAmmunitionCount()
+    {
+        int reloadToAmmo = 7;
+        ammoCount = reloadToAmmo;
+        yield break;
     }
 }
