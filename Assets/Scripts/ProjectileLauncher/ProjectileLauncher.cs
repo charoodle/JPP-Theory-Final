@@ -4,7 +4,10 @@ using UnityEngine;
 
 public abstract class ProjectileLauncher : MonoBehaviour
 {
-    [SerializeField] private GameObject _projectile;
+    /// <summary>
+    /// The projectile prefab to be launched.
+    /// </summary>
+    [SerializeField] protected GameObject _projectile;
     public GameObject projectile
     {
         get
@@ -16,6 +19,11 @@ public abstract class ProjectileLauncher : MonoBehaviour
             _projectile = value;
         }
     }
+
+    /// <summary>
+    /// How much force the projectile should be launched with.
+    /// </summary>
+    [SerializeField] protected float launchForce;
 
     public abstract void LaunchProjectile();
 

@@ -17,10 +17,17 @@ public class Pistol : ProjectileLauncher
     public override void LaunchProjectile()
     {
         // Spawn projectile at barrel, facing same forward dir as barrel
-        GameObject projectile = SpawnProjectile(ShootPoint);
+        GameObject bullet = SpawnProjectile(ShootPoint);
 
-        // TODO: Launch projectile rigidbody forward with a very fast force
-        // ...
+        // Launch projectile rigidbody forward with a very fast force
+        Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
+        if (!bulletRb)
+        {
+            Debug.LogError("No projectile rigidbody found.");
+            return;
+        }
+        Vector3 forward = Vector3.forward * launchForce;
+        bulletRb.AddRelativeForce(forward, ForceMode.Impulse);
     }
 
     public override void ReloadProjectile()

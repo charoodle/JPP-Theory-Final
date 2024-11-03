@@ -474,6 +474,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _projectile: {fileID: 3224477399523267912, guid: 8e6796f90fe432e428518acc8dc373c2, type: 3}
+  launchForce: 100
   ShootPoint: {fileID: 1575870440}
 --- !u!1 &1575870439
 GameObject:
