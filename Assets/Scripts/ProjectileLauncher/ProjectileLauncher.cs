@@ -63,7 +63,7 @@ public abstract class ProjectileLauncher : MonoBehaviour
     /// <summary>
     /// (Backing Field) How much ammo to refill per reload.
     /// </summary>
-    protected int _ammoToRefillPerReload;
+    private int _ammoToRefillPerReload;
 
     [SerializeField] protected Transform shootPoint;
 
@@ -84,14 +84,18 @@ public abstract class ProjectileLauncher : MonoBehaviour
     /// <summary>
     /// How long the UI pops up "Done reloading!" after reloading.
     /// </summary>
-    protected float doneReloadPopupTime = 0.5f;
+    private float doneReloadPopupTime = 0.5f;
 
     /// <summary>
     /// Can the ReloadProjectileCoroutine be stopped early?
     /// </summary>
     protected bool reloadProjectileCoroutine_CanStopEarly = false;
     
-
+    protected virtual void Init(float doneReloadPopupTime = 0.5f, int ammoToRefillPerReload = 1)
+    {
+        this.doneReloadPopupTime = doneReloadPopupTime;
+        this.ammoToRefillPerReload = ammoToRefillPerReload;
+    }
 
     protected virtual void Start()
     {

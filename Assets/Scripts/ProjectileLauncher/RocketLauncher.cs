@@ -6,7 +6,8 @@ public class RocketLauncher : ProjectileLauncher
 {
     protected override void Start()
     {
-        ammoToRefillPerReload = 1;
+        // Init - Shorter popup time after reload finished
+        Init(ammoToRefillPerReload: 1);
 
         base.Start();
     }
