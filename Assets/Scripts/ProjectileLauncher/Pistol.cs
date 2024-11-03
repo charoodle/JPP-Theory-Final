@@ -4,6 +4,15 @@ using UnityEngine;
 
 public class Pistol : ProjectileLauncher
 {
+    protected override void Start()
+    {
+        // Shorter popup time after reload finished
+        doneReloadPopupTime = 0.5f;
+        ammoToRefillPerReload = 7;
+
+        base.Start();
+    }
+
     protected override bool CheckForLaunchInput()
     {
         // Use mouse click to desire shooting
@@ -15,10 +24,9 @@ public class Pistol : ProjectileLauncher
         yield return new WaitForSeconds(3f);
     }
 
-    protected override IEnumerator ReloadProjectileCoroutine_RefillAmmunitionCount()
+    protected override IEnumerator ReloadProjectileCoroutine_RefillAmmunitionCount(int ammoToRefill)
     {
-        int reloadToAmmo = 7;
-        ammoCount = reloadToAmmo;
+        this.ammoCount = ammoToRefill;
         yield break;
     }
 

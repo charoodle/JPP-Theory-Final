@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class RocketLauncher : ProjectileLauncher
 {
+    protected override void Start()
+    {
+        ammoToRefillPerReload = 1;
+
+        base.Start();
+    }
+
     protected override bool CheckForLaunchInput()
     {
         // Must use left and right mouse button to fire
@@ -20,12 +27,6 @@ public class RocketLauncher : ProjectileLauncher
         // Let rocket propel itself
         rocket.InitializeRocket(launchForce);
         return;
-    }
-
-    protected override IEnumerator ReloadProjectileCoroutine_RefillAmmunitionCount()
-    {
-        ammoCount = 1;
-        yield break;
     }
 
     protected override IEnumerator ReloadProjectileCoroutine_WaitForSeconds()

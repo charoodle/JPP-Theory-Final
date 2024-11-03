@@ -803,7 +803,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _projectilePrefab: {fileID: 3111324948450727635, guid: 5481ba8fe51fd684e8492b563ef4ce1d, type: 3}
   shootPoint: {fileID: 1187925278}
-  _reloadingText: {fileID: 1309701458}
+  reloadingText: {fileID: 1309701458}
   launchForce: 100
   ammoCount: 0
 --- !u!1 &904648073
@@ -855,7 +855,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _projectilePrefab: {fileID: 3224477399523267912, guid: 8e6796f90fe432e428518acc8dc373c2, type: 3}
   shootPoint: {fileID: 1575870440}
-  _reloadingText: {fileID: 681925555}
+  reloadingText: {fileID: 681925555}
   launchForce: 100
   ammoCount: 0
 --- !u!1 &1007624579

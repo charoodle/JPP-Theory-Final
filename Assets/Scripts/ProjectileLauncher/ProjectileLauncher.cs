@@ -8,12 +8,6 @@ using TMPro;
 /// </summary>
 public abstract class ProjectileLauncher : MonoBehaviour
 {
-    protected void Start()
-    {
-        GunUICanvasEnabled(false);
-        ReloadProjectile();
-    }
-
     /// <summary>
     /// The projectile prefab to be launched out.
     /// </summary>
@@ -37,7 +31,7 @@ public abstract class ProjectileLauncher : MonoBehaviour
         get
         {
             // Stop coroutine if coroutine says it can be stopped early (ex: early shoot/reload)
-            if (ReloadProjectileCoroutine_CanStopEarly)
+            if (reloadProjectileCoroutine_CanStopEarly)
                 ReloadProjectileCoroutine_StopEarly();
 
             return reloadCoroutine != null;
@@ -45,13 +39,35 @@ public abstract class ProjectileLauncher : MonoBehaviour
     }
 
     /// <summary>
-    /// The projectile prefab to be launched.
+    /// How many projectiles get refilled per reload cycle.
+    /// </summary>
+    protected int ammoToRefillPerReload
+    {
+        get
+        {
+            return _ammoToRefillPerReload;
+        }
+        set
+        {
+            if (value <= 0)
+                Debug.LogError($"Ammo to refill per reload cannot be <= 0. value={value}");
+            _ammoToRefillPerReload = value;
+        }
+    }
+
+    /// <summary>
+    /// (Backing Field + Inspector Field) The projectile prefab to be launched.
     /// </summary>
     [SerializeField] protected GameObject _projectilePrefab;
 
+    /// <summary>
+    /// (Backing Field) How much ammo to refill per reload.
+    /// </summary>
+    protected int _ammoToRefillPerReload;
+
     [SerializeField] protected Transform shootPoint;
 
-    [SerializeField] protected TextMeshProUGUI _reloadingText;
+    [SerializeField] protected TextMeshProUGUI reloadingText;
 
     /// <summary>
     /// How much force the projectile should be launched with.
@@ -66,10 +82,22 @@ public abstract class ProjectileLauncher : MonoBehaviour
     protected Coroutine reloadCoroutine;
 
     /// <summary>
+    /// How long the UI pops up "Done reloading!" after reloading.
+    /// </summary>
+    protected float doneReloadPopupTime = 0.5f;
+
+    /// <summary>
     /// Can the ReloadProjectileCoroutine be stopped early?
     /// </summary>
-    protected bool ReloadProjectileCoroutine_CanStopEarly = false;
+    protected bool reloadProjectileCoroutine_CanStopEarly = false;
+    
 
+
+    protected virtual void Start()
+    {
+        GunUICanvasEnabled(false);
+        ReloadProjectile();
+    }
 
     protected void Update()
     {
@@ -124,49 +152,52 @@ public abstract class ProjectileLauncher : MonoBehaviour
     protected virtual IEnumerator ReloadProjectileCoroutine()
     {
         // Cannot skip this reloading part.
-        ReloadProjectileCoroutine_CanStopEarly = false;
+        reloadProjectileCoroutine_CanStopEarly = false;
 
         // Reload Gun UI Canvas turn on
         GunUICanvasEnabled(true);
-        _reloadingText.SetText("Reloading...");
+        GunUICanvasSetText("Reloading...");
 
         // Customized reload delay - wait for different amount of time/different procedures.
         yield return ReloadProjectileCoroutine_WaitForSeconds();
 
         // Customized reload amount for each projectile launcher.
-        yield return ReloadProjectileCoroutine_RefillAmmunitionCount();
+        yield return ReloadProjectileCoroutine_RefillAmmunitionCount(ammoToRefillPerReload);
 
         // Allowed to skip the rest of this coroutine, and skip into the next shoot/reload cycle.
-        ReloadProjectileCoroutine_CanStopEarly = true;
-        
+        reloadProjectileCoroutine_CanStopEarly = true;
+
         // Pop up that it's done reloading briefly
-        _reloadingText.SetText("Done reloading!");
-        yield return new WaitForSeconds(0.5f);
-        // Reload Gun UI Canvas Turn off
-        GunUICanvasEnabled(false);
+        yield return ReloadProjectileCoroutine_DoneReloadTextPopup(doneReloadPopupTime);
 
         // Null out coroutine for next use
         reloadCoroutine = null;
         // No coroutine, so nothing to stop early
-        ReloadProjectileCoroutine_CanStopEarly = false;
+        reloadProjectileCoroutine_CanStopEarly = false;
 
         yield break;
     }
 
+    protected virtual IEnumerator ReloadProjectileCoroutine_DoneReloadTextPopup(float seconds)
+    {
+        GunUICanvasSetText("Done reloading!");
+        yield return new WaitForSeconds(seconds);
+        // Reload Gun UI Canvas Turn off
+        GunUICanvasEnabled(false);
+    }
+
     /// <summary>
-    /// Customize your own reload coroutine here.
+    /// Customize your own reload coroutine here (ex: delay wait for seconds, play a reload animation, ...)
     /// </summary>
     protected abstract IEnumerator ReloadProjectileCoroutine_WaitForSeconds();
 
     /// <summary>
-    /// Customize how much ammo gets reloaded here. You manage your own ammo counts.
+    /// Customize how much ammo gets reloaded here per reload.
     /// </summary>
-    protected abstract IEnumerator ReloadProjectileCoroutine_RefillAmmunitionCount();
-
-    /// Spawn a projectile at location with rotation.
-    protected virtual GameObject SpawnProjectile(Vector3 location, Quaternion rotation)
+    protected virtual IEnumerator ReloadProjectileCoroutine_RefillAmmunitionCount(int ammoToRefill)
     {
-        return Instantiate(projectilePrefab, location, rotation);
+        ammoCount = ammoToRefill;
+        yield break;
     }
 
     /// <summary>
@@ -177,8 +208,17 @@ public abstract class ProjectileLauncher : MonoBehaviour
         if (reloadCoroutine == null)
             return;
 
+        // Turn off Gun Canvas if stopping reload early - player wants to shoot
+        GunUICanvasEnabled(false);
+
         StopCoroutine(reloadCoroutine);
         reloadCoroutine = null;
+    }
+
+    /// Spawn a projectile at location with rotation.
+    protected virtual GameObject SpawnProjectile(Vector3 location, Quaternion rotation)
+    {
+        return Instantiate(projectilePrefab, location, rotation);
     }
 
     /// Spawn a projectile at transform's position, matching forward dir with transform's forward dir rotation.
@@ -193,6 +233,11 @@ public abstract class ProjectileLauncher : MonoBehaviour
     protected virtual void GunUICanvasEnabled(bool enabled)
     {
         // Reload Gun UI Canvas
-        _reloadingText.gameObject.SetActive(enabled);
+        reloadingText.gameObject.SetActive(enabled);
+    }
+
+    protected virtual void GunUICanvasSetText(string text)
+    {
+        reloadingText.SetText(text);
     }
 }
