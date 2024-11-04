@@ -12,6 +12,9 @@ public class TrebuchetTemp : MonoBehaviour
 
     public HingeJoint postHingeJoint;
 
+    public Transform reloadHingeArmAttachPoint;
+    public Transform projectileSpawnPoint;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,11 +39,23 @@ public class TrebuchetTemp : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.R))
         {
-            StartCoroutine(MoveArmToDefaultRotation());
+            StartCoroutine(ReloadTrebuchet());
         }
     }
 
-    private IEnumerator MoveArmToDefaultRotation()
+    private IEnumerator ReloadTrebuchet()
+    {
+        // Freeze arm and weight from moving
+        yield return FreezeArmAndWeightVelocities();
+
+        // Reset main arm to neutral rotation
+        yield return ResetEntireArmToNeutralRotation();
+
+        // Load another projectile into it
+        yield return LoadProjectile();
+    }
+
+    private IEnumerator FreezeArmAndWeightVelocities()
     {
         // Bring rigidbodies to zero velocity over a time duration
         Debug.Log("Bringing weight and arm to zero velocity...");
@@ -64,10 +79,6 @@ public class TrebuchetTemp : MonoBehaviour
         // Freeze rigidbodies
         mainArmRb.isKinematic = true;
         weightRb.isKinematic = true;
-
-        // Reset main arm to neutral rotation
-        yield return ResetEntireArmToNeutralRotation();
-
         yield break;
     }
 
@@ -77,7 +88,8 @@ public class TrebuchetTemp : MonoBehaviour
         yield break;
     }
 
-    [SerializeField] Vector3 mainArmEulers;
+    [Range(0f,1f)]
+    [SerializeField] float armPctRotation;
     private IEnumerator ResetEntireArmToNeutralRotation(float neutralXRotation = 0f)
     {
         /*
@@ -88,35 +100,59 @@ public class TrebuchetTemp : MonoBehaviour
          * Make Main arm rotate around left post's anchor axis
          */
 
-        Vector3 hingeJointLocal = postHingeJoint.anchor;
+        // Make weight free so it doesn't look so weird when resetting arm
+        weightRb.isKinematic = false;
 
         // Convert from local hinge joint anchor to point in world
+        Vector3 hingeJointLocal = postHingeJoint.anchor;
         Vector3 hingeJointWorld = postHingeJoint.transform.TransformPoint(hingeJointLocal);
         Vector3 axis = Vector3.right;   //x axis
-        float angle = -1f;  // rotate backwards
+        float angleSpeed = -1f;  // rotate backwards
 
         // TEST: Rotate around the position for x seconds
         Debug.Log("Beginning to rotate around hinge point...");
         float time = 0.0f;
         float duration = 5.0f;
+
+        float origMainArmRotation = mainArm.transform.localRotation.eulerAngles.x;
+        float targetMainArmXRotation = 3f;
+
+        Debug.Log($"Start: {origMainArmRotation}. End: {targetMainArmXRotation}");
+
+        while (mainArm.transform.localRotation.eulerAngles.x > targetMainArmXRotation)
+        {
+            // How many pct is the rotation complete so far, from orig position to target position?
+            //  - subtract by origMainArmRotation because it would otherwise offset the percentage calculation?
+            //  - problem: euler angles have wonky values?
+            armPctRotation = (mainArm.transform.localRotation.eulerAngles.x - origMainArmRotation) / (targetMainArmXRotation - origMainArmRotation);
+            Debug.Log("Percent:" + armPctRotation);
+
+            // Make the weight go towards 0 velocity anyways, even with wonky percent numbers
+            yield return ReduceRigidbodyToZeroVelocity(weightRb, armPctRotation);
+
+            // Rotate arm around hinge post
+            mainArm.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
+
+            yield return new WaitForFixedUpdate();
+        }
+
         while(time < duration)
         {
             time += Time.fixedDeltaTime;
-
-            // Rotate arm
-            mainArm.transform.RotateAround(hingeJointWorld, axis, angle);
-
-            mainArmEulers = mainArm.transform.localRotation.eulerAngles;
             // Stop if arm reaches zero'd rotation (default arm position)
-            if (mainArm.transform.localRotation.eulerAngles.x <= 0 || mainArm.transform.localRotation.eulerAngles.x >= 350f)
+            //  - MainArm is child of Arm, so if MainArm's local rotation = 0, that means it's the default rotation it was first given
+            //  - localRotation goes from 0-360 only, so try to catch both cases? (this seems pretty bad)
+            if (mainArm.transform.localRotation.eulerAngles.x <= 5 || mainArm.transform.localRotation.eulerAngles.x >= 350f)
             {
-                Debug.Log("Arm is at zero rotation, breaking out of loop.");
                 yield break;
             }
 
             yield return new WaitForFixedUpdate();
         }
         Debug.Log("Finished rotating around hinge joint.");
+
+        // Freeze weight to prepare for next shot
+        weightRb.isKinematic = true;
 
         yield break;
 
@@ -146,5 +182,10 @@ public class TrebuchetTemp : MonoBehaviour
 
         yield break;
         */
+    }
+
+    private IEnumerator LoadProjectile()
+    {
+        yield break;
     }
 }
