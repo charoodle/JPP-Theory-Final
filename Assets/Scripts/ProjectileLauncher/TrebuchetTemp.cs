@@ -25,11 +25,6 @@ public class TrebuchetTemp : MonoBehaviour
             StartCoroutine(ShootTrebuchet());
         }
 
-        if(Input.GetKeyUp(KeyCode.Space))
-        {
-            
-        }
-
         if(Input.GetKeyDown(KeyCode.R))
         {
             StartCoroutine(ReloadTrebuchet());
@@ -38,12 +33,12 @@ public class TrebuchetTemp : MonoBehaviour
 
     private IEnumerator ShootTrebuchet()
     {
-        // Release weight
+        // Release weight to start launch
         weightRb.isKinematic = false;
 
+        /// Wait for ball to be about 90* (or slightly less) to launch
         // Check for when point from ball to arm exceeds roughly 90* (dot product?)
         Vector3 armUp = Vector3.up;
-
         // Calculate a random point after 1 to release for some randomness
         float randomness = Random.Range(0, 0.04f);
         bool readyToRelease = false;
@@ -78,6 +73,9 @@ public class TrebuchetTemp : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Detach ball from the sling of the arm.
+    /// </summary>
     private void ReleaseSling()
     {
         // Launch projectile
