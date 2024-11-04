@@ -4018,14 +4018,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbabb2d96503d57489858a2a7fdd36ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _projectilePrefab: {fileID: 0}
+  _projectilePrefab: {fileID: 1289639807328802742, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
   shootPoint: {fileID: 0}
   reloadingText: {fileID: 1991552526}
   launchForce: 0
   ammoCount: 0
   projectile: {fileID: 1072789418}
+  projectileSpawnPoint: {fileID: 260515771}
+  reloadHingeArmAttachPoint: {fileID: 671885494}
   counterweightRb: {fileID: 1012611358}
+  slingArmRb: {fileID: 1471176005}
+  mainArmRb: {fileID: 935815949}
   mainArm: {fileID: 935815944}
+  postHingeJoint: {fileID: 1615654609}
 --- !u!1001 &766715241000146605
 PrefabInstance:
   m_ObjectHideFlags: 0

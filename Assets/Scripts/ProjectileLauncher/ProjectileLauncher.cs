@@ -77,7 +77,25 @@ public abstract class ProjectileLauncher : MonoBehaviour
     /// <summary>
     /// How much ammo that is currently loaded in the magazine.
     /// </summary>
-    [SerializeField] protected int ammoCount;
+    protected int ammoCount
+    {
+        get
+        {
+            return _ammoCount;
+        }
+        set
+        {
+            if(value < 0)
+            {
+                Debug.LogError($"Cannot set ammoCount to < 0. value={value}");
+                return;
+            }
+
+            _ammoCount = value;
+        }
+    }
+
+    [SerializeField] protected int _ammoCount;
 
     protected Coroutine reloadCoroutine;
 
@@ -90,15 +108,22 @@ public abstract class ProjectileLauncher : MonoBehaviour
     /// Can the ReloadProjectileCoroutine be stopped early?
     /// </summary>
     protected bool reloadProjectileCoroutine_CanStopEarly = false;
+
+    /// <summary>
+    /// Has the derived class initialized this launcher with appropriate values?
+    /// </summary>
+    protected bool isInit;
     
     protected virtual void Init(float doneReloadPopupTime = 0.5f, int ammoToRefillPerReload = 1)
     {
         this.doneReloadPopupTime = doneReloadPopupTime;
         this.ammoToRefillPerReload = ammoToRefillPerReload;
+        isInit = true;
     }
 
     protected virtual void Start()
     {
+        Init();
         GunUICanvasEnabled(false);
         ReloadProjectile();
     }
@@ -132,6 +157,10 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
     protected virtual bool LaunchProjectile_Validation()
     {
+        // Potential warning
+        if (!isInit)
+            Debug.LogWarning("ProjectileLauncher is not init.", gameObject);
+
         // Out of ammo - start reload instead
         if (ammoCount <= 0)
         {
