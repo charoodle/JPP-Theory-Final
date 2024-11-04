@@ -4,27 +4,20 @@ using UnityEngine;
 
 public class TrebuchetTemp : MonoBehaviour
 {
-    public Rigidbody weightRb;
+    public GameObject projectilePrefab;
     public GameObject projectile;
-
+    public Transform projectileSpawnPoint;
+    public Transform reloadHingeArmAttachPoint;
+    public Rigidbody weightRb;
+    public Rigidbody slingArmRb;
     public Rigidbody mainArmRb;
     public GameObject mainArm;
-
     public HingeJoint postHingeJoint;
 
-    public GameObject rockProjectile;
-    public Transform reloadHingeArmAttachPoint;
-    public Transform projectileSpawnPoint;
+    // Debug
+    [Range(0f, 1f)]
+    [SerializeField] float armPctRotation;
 
-    public Rigidbody slingArmRb;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.Space))
@@ -58,6 +51,9 @@ public class TrebuchetTemp : MonoBehaviour
         yield return LoadProjectile();
     }
 
+    /// <summary>
+    /// Stop the arm and weight from wiggling around.
+    /// </summary>
     private IEnumerator FreezeArmAndWeightVelocities()
     {
         // Bring rigidbodies to zero velocity over a time duration
@@ -85,24 +81,25 @@ public class TrebuchetTemp : MonoBehaviour
         yield break;
     }
 
+    /// <summary>
+    /// Make a rigidbody lerp towards zero velocity.
+    /// </summary>
+    /// <param name="lerpPct">Percent from 0 to 1.</param>
+    /// <returns></returns>
     private IEnumerator ReduceRigidbodyToZeroVelocity(Rigidbody rb, float lerpPct)
     {
         rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, lerpPct);
         yield break;
     }
 
-    [Range(0f,1f)]
-    [SerializeField] float armPctRotation;
-    private IEnumerator ResetEntireArmToNeutralRotation(float neutralXRotation = 0f)
+    /// <summary>
+    /// Rotate the trebuchet arm backwards until it reaches a local rotation angle of < 3 degrees.
+    ///     Assumes the trebuchet at 0* (local rotation) is the neutral position (waiting to be shot).
+    /// </summary>
+    /// <param name="neutralXRotation"></param>
+    /// <returns></returns>
+    private IEnumerator ResetEntireArmToNeutralRotation()
     {
-        /*
-         * Main arm moves secondary and sling arm through hinge joints
-         * Main arm rb is frozen at this point
-         * 
-         * 
-         * Make Main arm rotate around left post's anchor axis
-         */
-
         // Make weight free so it doesn't look so weird when resetting arm
         weightRb.isKinematic = false;
 
@@ -112,23 +109,17 @@ public class TrebuchetTemp : MonoBehaviour
         Vector3 axis = Vector3.right;   //x axis
         float angleSpeed = -1f;  // rotate backwards
 
-        // TEST: Rotate around the position for x seconds
-        Debug.Log("Beginning to rotate around hinge point...");
-        float time = 0.0f;
-        float duration = 5.0f;
-
+        // Rotate around the position for x seconds
         float origMainArmRotation = mainArm.transform.localRotation.eulerAngles.x;
         float targetMainArmXRotation = 3f;
-
-        Debug.Log($"Start: {origMainArmRotation}. End: {targetMainArmXRotation}");
 
         while (mainArm.transform.localRotation.eulerAngles.x > targetMainArmXRotation)
         {
             // How many pct is the rotation complete so far, from orig position to target position?
             //  - subtract by origMainArmRotation because it would otherwise offset the percentage calculation?
-            //  - problem: euler angles have wonky values?
+            //  - TODO: problem - euler angles have wonky values?
+            //      - this isn't accurate
             armPctRotation = (mainArm.transform.localRotation.eulerAngles.x - origMainArmRotation) / (targetMainArmXRotation - origMainArmRotation);
-            Debug.Log("Percent:" + armPctRotation);
 
             // Make the weight go towards 0 velocity anyways, even with wonky percent numbers
             yield return ReduceRigidbodyToZeroVelocity(weightRb, armPctRotation);
@@ -139,27 +130,15 @@ public class TrebuchetTemp : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        while(time < duration)
-        {
-            time += Time.fixedDeltaTime;
-            // Stop if arm reaches zero'd rotation (default arm position)
-            //  - MainArm is child of Arm, so if MainArm's local rotation = 0, that means it's the default rotation it was first given
-            //  - localRotation goes from 0-360 only, so try to catch both cases? (this seems pretty bad)
-            if (mainArm.transform.localRotation.eulerAngles.x <= 5 || mainArm.transform.localRotation.eulerAngles.x >= 350f)
-            {
-                yield break;
-            }
-
-            yield return new WaitForFixedUpdate();
-        }
-        Debug.Log("Finished rotating around hinge joint.");
-
         // Freeze weight to prepare for next shot
         weightRb.isKinematic = true;
 
         yield break;
     }
 
+    /// <summary>
+    /// Load and prepare a projectile to be shot again.
+    /// </summary>
     private IEnumerator LoadProjectile()
     {
         // Can unfreeze main arm. Relies on unfreezing weight to fire.
@@ -170,7 +149,7 @@ public class TrebuchetTemp : MonoBehaviour
         weightRb.isKinematic = true;
 
         // Spawn another ball at projectile spawn point
-        GameObject projectile = Instantiate(rockProjectile, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
+        GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
 
         // Move hinge joint anchor (local) of ball to reloadHingeArmAttachPoint's position (world)
         //  -- get world position as local position relative to the ball
