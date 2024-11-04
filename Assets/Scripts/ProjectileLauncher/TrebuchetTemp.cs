@@ -14,10 +14,6 @@ public class TrebuchetTemp : MonoBehaviour
     public GameObject mainArm;
     public HingeJoint postHingeJoint;
 
-    // Debug
-    [Range(0f, 1f)]
-    [SerializeField] float armPctRotation;
-
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.Space))
@@ -53,7 +49,6 @@ public class TrebuchetTemp : MonoBehaviour
                 yield break;
             }
 
-            Debug.Log(dot);
             yield return null;
         }
     }
@@ -125,7 +120,6 @@ public class TrebuchetTemp : MonoBehaviour
     private IEnumerator FreezeArmAndWeightVelocities()
     {
         // Bring rigidbodies to zero velocity over a time duration
-        Debug.Log("Bringing weight and arm to zero velocity...");
         float time = 0.0f;
         float duration = 5f;
         while (time < duration)
@@ -141,7 +135,6 @@ public class TrebuchetTemp : MonoBehaviour
 
             yield return new WaitForFixedUpdate();
         }
-        Debug.Log("Done! Brought weight and arm to zero velocity.");
 
         // Freeze rigidbodies
         mainArmRb.isKinematic = true;
@@ -186,8 +179,8 @@ public class TrebuchetTemp : MonoBehaviour
             // How many pct is the rotation complete so far, from orig position to target position?
             //  - subtract by origMainArmRotation because it would otherwise offset the percentage calculation?
             //  - TODO: problem - euler angles have wonky values?
-            //      - this isn't accurate
-            armPctRotation = (mainArm.transform.localRotation.eulerAngles.x - origMainArmRotation) / (targetMainArmXRotation - origMainArmRotation);
+            //      - inspector eulers differs tfm.rotation.eulers call (quaternions?)
+            float armPctRotation = (mainArm.transform.localRotation.eulerAngles.x - origMainArmRotation) / (targetMainArmXRotation - origMainArmRotation);
 
             // Make the weight go towards 0 velocity anyways, even with wonky percent numbers
             yield return ReduceRigidbodyToZeroVelocity(counterweightRb, armPctRotation);
@@ -210,8 +203,8 @@ public class TrebuchetTemp : MonoBehaviour
     private IEnumerator LoadProjectile()
     {
         // Can unfreeze main arm. Relies on unfreezing weight to fire.
-        mainArmRb.velocity = Vector3.zero;
         mainArmRb.isKinematic = false;
+        mainArmRb.velocity = Vector3.zero;
 
         // Make sure weight is frozen
         counterweightRb.isKinematic = true;
