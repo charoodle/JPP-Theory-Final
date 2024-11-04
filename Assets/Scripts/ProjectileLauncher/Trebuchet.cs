@@ -13,6 +13,15 @@ public class Trebuchet : ProjectileLauncher
     public GameObject mainArm;
     public HingeJoint postHingeJoint;
 
+    protected Coroutine shootingCoroutine;
+    protected bool isLaunching
+    {
+        get
+        {
+            return shootingCoroutine != null;
+        }
+    }
+
     protected override void Start()
     {
         Init(ammoToRefillPerReload: 1);
@@ -23,12 +32,21 @@ public class Trebuchet : ProjectileLauncher
         ammoCount = 1;
     }
 
+    protected override bool LaunchProjectile_Validation()
+    {
+        // Cannot launch again if already launching
+        if (isLaunching)
+            return false;
+
+        return base.LaunchProjectile_Validation();
+    }
+
     public override void LaunchProjectile()
     {
         if (!LaunchProjectile_Validation())
             return;
 
-        StartCoroutine(ShootTrebuchet());
+        shootingCoroutine = StartCoroutine(ShootTrebuchet());
     }
 
     private IEnumerator ShootTrebuchet()
@@ -50,6 +68,7 @@ public class Trebuchet : ProjectileLauncher
             if (readyToRelease && IsProjectileReadyToReleaseFromSling(dot))
             {
                 ReleaseProjectileFromSling();
+                shootingCoroutine = null;
                 yield break;
             }
 
@@ -105,7 +124,7 @@ public class Trebuchet : ProjectileLauncher
         HingeJoint projectileToArmHinge = projectile.GetComponent<HingeJoint>();
         Destroy(projectileToArmHinge);
 
-        // Add some slight left/right deviation
+        // TODO: Add some slight left/right deviation
         // ...
     }
 
