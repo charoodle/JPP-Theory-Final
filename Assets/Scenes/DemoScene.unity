@@ -3908,7 +3908,7 @@ MonoBehaviour:
   projectile: {fileID: 1072789418}
   projectileSpawnPoint: {fileID: 260515771}
   reloadHingeArmAttachPoint: {fileID: 671885494}
-  weightRb: {fileID: 1012611358}
+  counterweightRb: {fileID: 1012611358}
   slingArmRb: {fileID: 1471176005}
   mainArmRb: {fileID: 935815949}
   mainArm: {fileID: 935815944}

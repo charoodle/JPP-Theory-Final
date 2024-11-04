@@ -8,7 +8,7 @@ public class TrebuchetTemp : MonoBehaviour
     public GameObject projectile;
     public Transform projectileSpawnPoint;
     public Transform reloadHingeArmAttachPoint;
-    public Rigidbody weightRb;
+    public Rigidbody counterweightRb;
     public Rigidbody slingArmRb;
     public Rigidbody mainArmRb;
     public GameObject mainArm;
@@ -33,38 +33,23 @@ public class TrebuchetTemp : MonoBehaviour
 
     private IEnumerator ShootTrebuchet()
     {
-        // Release weight to start launch
-        weightRb.isKinematic = false;
+        ReleaseCounterweight();
 
         /// Wait for ball to be about 90* (or slightly less) to launch
-        // Check for when point from ball to arm exceeds roughly 90* (dot product?)
-        Vector3 armUp = Vector3.up;
-        // Calculate a random point after 1 to release for some randomness
-        float randomness = Random.Range(0, 0.04f);
         bool readyToRelease = false;
         while(true)
         {
-            Vector3 armToBall = (projectile.transform.position - mainArm.transform.position).normalized;
-            Debug.DrawRay(mainArm.transform.position, armToBall * 3f, Color.red);
-            Debug.DrawRay(mainArm.transform.position, armUp * 3f, Color.green);
-
-            // -1 at rest
-            // 0 when orthogonal
-            // 1 at launch
-            float dot = Vector3.Dot(armUp, armToBall);
-
-            // Release hinge joint automatically
-            // Ball is near highest point; get ready to release
-            if (dot >= 0.95f && !readyToRelease)
+            float dot = GetProjectileDotProduct(projectile.transform, mainArm.transform);
+            if (IsProjectileReadyToRelease(dot) && !readyToRelease)
             {
                 readyToRelease = true;
             }
 
-            // Release ball before highest point. Break out of infinite loop.
+            // Release ball before highest point automatically. Break out of infinite loop.
             //  - dot product is at least at .95, so it should release before dot product hits 1 (90*)
-            if(readyToRelease && dot < 1 - randomness)
+            if(readyToRelease && IsProjectileReadyToReleaseFromSling(dot))
             {
-                ReleaseSling();
+                ReleaseProjectileFromSling();
                 yield break;
             }
 
@@ -73,10 +58,46 @@ public class TrebuchetTemp : MonoBehaviour
         }
     }
 
+    private float GetProjectileDotProduct(Transform projectile, Transform mainArmCenter)
+    {
+        // Check for when point from ball to arm is near Vector3.up
+        Vector3 worldUp = Vector3.up;
+        Vector3 armToBall = (projectile.transform.position - mainArmCenter.transform.position).normalized;
+
+        Debug.DrawRay(mainArmCenter.transform.position, armToBall * 3f, Color.red);
+        Debug.DrawRay(mainArmCenter.transform.position, worldUp * 3f, Color.green);
+
+        return Vector3.Dot(worldUp, armToBall);
+    }
+
+    private bool IsProjectileReadyToRelease(float dotProductOfProjectileToWorldUp)
+    {
+        // dot < 0 when neutral position to launch
+        // dot == 0 when orthogonal
+        // dot == 1 when near launch (same as Vector3.up)
+        //  dot < 1 when past launch, have to be careful
+
+        // Ball is near highest point; get ready to release
+        return dotProductOfProjectileToWorldUp >= 0.95f;
+    }
+
+    private bool IsProjectileReadyToReleaseFromSling(float dotProductOfProjectileToWorldUp, float maxRandomDotProductOffset = 0.04f)
+    {
+        // Calculate a random point after 1 to release for some randomness
+        float dotOffset = Random.Range(0, maxRandomDotProductOffset);
+        return dotProductOfProjectileToWorldUp < 1 - dotOffset;
+    }
+
+    private void ReleaseCounterweight()
+    {
+        // Release counterweight to start launch
+        counterweightRb.isKinematic = false;
+    }
+
     /// <summary>
     /// Detach ball from the sling of the arm.
     /// </summary>
-    private void ReleaseSling()
+    private void ReleaseProjectileFromSling()
     {
         // Launch projectile
         HingeJoint projectileToArmHinge = projectile.GetComponent<HingeJoint>();
@@ -115,7 +136,7 @@ public class TrebuchetTemp : MonoBehaviour
             float pct = time / duration;
 
             // Reduce arm and weight velocities to 0
-            yield return ReduceRigidbodyToZeroVelocity(weightRb, pct);
+            yield return ReduceRigidbodyToZeroVelocity(counterweightRb, pct);
             yield return ReduceRigidbodyToZeroVelocity(mainArmRb, pct);
 
             yield return new WaitForFixedUpdate();
@@ -124,7 +145,7 @@ public class TrebuchetTemp : MonoBehaviour
 
         // Freeze rigidbodies
         mainArmRb.isKinematic = true;
-        weightRb.isKinematic = true;
+        counterweightRb.isKinematic = true;
         yield break;
     }
 
@@ -148,7 +169,7 @@ public class TrebuchetTemp : MonoBehaviour
     private IEnumerator ResetEntireArmToNeutralRotation()
     {
         // Make weight free so it doesn't look so weird when resetting arm
-        weightRb.isKinematic = false;
+        counterweightRb.isKinematic = false;
 
         // Convert from local hinge joint anchor to point in world
         Vector3 hingeJointLocal = postHingeJoint.anchor;
@@ -169,7 +190,7 @@ public class TrebuchetTemp : MonoBehaviour
             armPctRotation = (mainArm.transform.localRotation.eulerAngles.x - origMainArmRotation) / (targetMainArmXRotation - origMainArmRotation);
 
             // Make the weight go towards 0 velocity anyways, even with wonky percent numbers
-            yield return ReduceRigidbodyToZeroVelocity(weightRb, armPctRotation);
+            yield return ReduceRigidbodyToZeroVelocity(counterweightRb, armPctRotation);
 
             // Rotate arm around hinge post
             mainArm.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
@@ -178,7 +199,7 @@ public class TrebuchetTemp : MonoBehaviour
         }
 
         // Freeze weight to prepare for next shot
-        weightRb.isKinematic = true;
+        counterweightRb.isKinematic = true;
 
         yield break;
     }
@@ -193,7 +214,7 @@ public class TrebuchetTemp : MonoBehaviour
         mainArmRb.isKinematic = false;
 
         // Make sure weight is frozen
-        weightRb.isKinematic = true;
+        counterweightRb.isKinematic = true;
 
         // Spawn another ball at projectile spawn point
         GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
