@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Trebuchet : ProjectileLauncher
 {
+    // TODO: Make these protected
     public GameObject projectile;
     public Transform projectileSpawnPoint;
     public Transform reloadHingeArmAttachPoint;
@@ -24,7 +25,7 @@ public class Trebuchet : ProjectileLauncher
 
     protected override void Start()
     {
-        Init(ammoToRefillPerReload: 1);
+        Init(doneReloadPopupTime: 5f, ammoToRefillPerReload: 1);
 
         GunUICanvasEnabled(false);
         
