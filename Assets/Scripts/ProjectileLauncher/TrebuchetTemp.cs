@@ -22,21 +22,70 @@ public class TrebuchetTemp : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            // Release weight
-            weightRb.isKinematic = false;
+            StartCoroutine(ShootTrebuchet());
         }
 
         if(Input.GetKeyUp(KeyCode.Space))
         {
-            // Launch projectile
-            HingeJoint projectileToArmHinge = projectile.GetComponent<HingeJoint>();
-            Destroy(projectileToArmHinge);
+            
         }
 
         if(Input.GetKeyDown(KeyCode.R))
         {
             StartCoroutine(ReloadTrebuchet());
         }
+    }
+
+    private IEnumerator ShootTrebuchet()
+    {
+        // Release weight
+        weightRb.isKinematic = false;
+
+        // Check for when point from ball to arm exceeds roughly 90* (dot product?)
+        Vector3 armUp = Vector3.up;
+
+        // Calculate a random point after 1 to release for some randomness
+        float randomness = Random.Range(0, 0.04f);
+        bool readyToRelease = false;
+        while(true)
+        {
+            Vector3 armToBall = (projectile.transform.position - mainArm.transform.position).normalized;
+            Debug.DrawRay(mainArm.transform.position, armToBall * 3f, Color.red);
+            Debug.DrawRay(mainArm.transform.position, armUp * 3f, Color.green);
+
+            // -1 at rest
+            // 0 when orthogonal
+            // 1 at launch
+            float dot = Vector3.Dot(armUp, armToBall);
+
+            // Release hinge joint automatically
+            // Ball is near highest point; get ready to release
+            if (dot >= 0.95f && !readyToRelease)
+            {
+                readyToRelease = true;
+            }
+
+            // Release ball before highest point. Break out of infinite loop.
+            //  - dot product is at least at .95, so it should release before dot product hits 1 (90*)
+            if(readyToRelease && dot < 1 - randomness)
+            {
+                ReleaseSling();
+                yield break;
+            }
+
+            Debug.Log(dot);
+            yield return null;
+        }
+    }
+
+    private void ReleaseSling()
+    {
+        // Launch projectile
+        HingeJoint projectileToArmHinge = projectile.GetComponent<HingeJoint>();
+        Destroy(projectileToArmHinge);
+
+        // Add some slight left/right deviation
+        // ...
     }
 
     private IEnumerator ReloadTrebuchet()
