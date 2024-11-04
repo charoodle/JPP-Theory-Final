@@ -12,8 +12,11 @@ public class TrebuchetTemp : MonoBehaviour
 
     public HingeJoint postHingeJoint;
 
+    public GameObject rockProjectile;
     public Transform reloadHingeArmAttachPoint;
     public Transform projectileSpawnPoint;
+
+    public Rigidbody slingArmRb;
 
     // Start is called before the first frame update
     void Start()
@@ -155,37 +158,32 @@ public class TrebuchetTemp : MonoBehaviour
         weightRb.isKinematic = true;
 
         yield break;
-
-        // --------
-
-        // Make arm rotation go to default
-        /*
-        Debug.Log("Bringing arm to neutral rotation...");
-        float time = 0.0f;
-        float duration = 5f;
-        GameObject arm = mainArmRb.gameObject;
-        Quaternion armRotation = arm.transform.rotation;
-        Quaternion targetRotation = Quaternion.Euler(neutralXRotation, 0f, 0f);
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-
-            // How much time has elapsed as a percent
-            float pct = time / duration;
-
-            // Rotate arm's x axis towards netural rotation
-            //arm.transform.localRotation = Quaternion.Lerp(armRotation, targetRotation, pct);
-
-            yield return new WaitForFixedUpdate();
-        }
-        Debug.Log("Done! Brought arm to neutral position.");
-
-        yield break;
-        */
     }
 
     private IEnumerator LoadProjectile()
     {
+        // Can unfreeze main arm. Relies on unfreezing weight to fire.
+        mainArmRb.velocity = Vector3.zero;
+        mainArmRb.isKinematic = false;
+
+        // Make sure weight is frozen
+        weightRb.isKinematic = true;
+
+        // Spawn another ball at projectile spawn point
+        GameObject projectile = Instantiate(rockProjectile, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
+
+        // Move hinge joint anchor (local) of ball to reloadHingeArmAttachPoint's position (world)
+        //  -- get world position as local position relative to the ball
+        HingeJoint hingejoint = projectile.GetComponent<HingeJoint>();
+        Vector3 armAttachPointLocalToProjectile = projectile.transform.InverseTransformPoint(reloadHingeArmAttachPoint.transform.position);
+        hingejoint.anchor = armAttachPointLocalToProjectile;
+
+        // Connect hingejoint to the trebuchet's sling arm
+        hingejoint.connectedBody = slingArmRb;
+
+        // Assign projectile
+        this.projectile = projectile;
+
         yield break;
     }
 }
