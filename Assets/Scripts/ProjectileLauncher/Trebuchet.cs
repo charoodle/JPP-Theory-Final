@@ -13,8 +13,11 @@ public class Trebuchet : ProjectileLauncher
     public Rigidbody mainArmRb;
     public GameObject mainArm;
     public HingeJoint postHingeJoint;
+    public LineRenderer rope;
 
     protected Coroutine shootingCoroutine;
+    protected Coroutine tetherCoroutine;
+
     protected bool isLaunching
     {
         get
@@ -31,6 +34,35 @@ public class Trebuchet : ProjectileLauncher
         
         // TEMP
         ammoCount = 1;
+
+        // TEMP
+        tetherCoroutine = StartCoroutine(TestRopeTetherToProjectile());
+    }
+
+    private IEnumerator TestRopeTetherToProjectile()
+    {
+        while(true)
+        {
+            rope.positionCount = 2;
+
+            Vector3 slingPoint = reloadHingeArmAttachPoint.transform.position;
+            rope.SetPosition(0, slingPoint);
+
+            Vector3 projectilePoint = projectile.transform.position;
+            rope.SetPosition(1, projectilePoint);
+
+            yield return null;
+        }
+    }
+
+    private IEnumerator TestRopeDetachFromProjectile()
+    {
+        if(tetherCoroutine != null)
+            StopCoroutine(tetherCoroutine);
+
+        rope.positionCount = 0;
+
+        yield break;
     }
 
     protected override bool LaunchProjectile_Validation()
@@ -68,6 +100,7 @@ public class Trebuchet : ProjectileLauncher
             //  - dot product is at least at .95, so it should release before dot product hits 1 (90*)
             if (readyToRelease && IsProjectileReadyToReleaseFromSling(dot))
             {
+                StartCoroutine(TestRopeDetachFromProjectile());
                 ReleaseProjectileFromSling();
                 shootingCoroutine = null;
                 yield break;
@@ -75,6 +108,16 @@ public class Trebuchet : ProjectileLauncher
 
             yield return null;
         }
+    }
+
+    private void AttachRopeSlingToProjectile(Projectile projectile)
+    {
+        
+    }
+
+    private void DetachRopeSlingFromProjectile()
+    {
+
     }
 
     private void ReleaseCounterweight()
@@ -268,6 +311,9 @@ public class Trebuchet : ProjectileLauncher
 
         // Assign projectile
         this.projectile = projectile.gameObject;
+
+        // Attach rope to projectile
+        tetherCoroutine = StartCoroutine(TestRopeTetherToProjectile());
 
         yield break;
     }
