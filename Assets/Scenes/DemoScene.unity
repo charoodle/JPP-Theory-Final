@@ -122,6 +122,108 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &17411963
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2077832752}
+    m_Modifications:
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 3.4258
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0.6398
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -3.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 2.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5570859852746758265, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_Name
+      value: Gun Status Canvas
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+--- !u!224 &17411964 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+  m_PrefabInstance: {fileID: 17411963}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &139185255
 GameObject:
   m_ObjectHideFlags: 0
@@ -3816,6 +3918,17 @@ Transform:
   - {fileID: 1292369171}
   m_Father: {fileID: 2077832752}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1991552526 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1737096996290138843, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+  m_PrefabInstance: {fileID: 17411963}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2068690013
 GameObject:
   m_ObjectHideFlags: 0
@@ -3882,6 +3995,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 17411964}
   - {fileID: 1012611357}
   - {fileID: 260515771}
   - {fileID: 1989609240}
@@ -3901,19 +4015,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2077832751}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7ebe9fcce5ce2f4fa2b03ebd05fff97, type: 3}
+  m_Script: {fileID: 11500000, guid: fbabb2d96503d57489858a2a7fdd36ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 1289639807328802742, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
+  _projectilePrefab: {fileID: 0}
+  shootPoint: {fileID: 0}
+  reloadingText: {fileID: 1991552526}
+  launchForce: 0
+  ammoCount: 0
   projectile: {fileID: 1072789418}
-  projectileSpawnPoint: {fileID: 260515771}
-  reloadHingeArmAttachPoint: {fileID: 671885494}
   counterweightRb: {fileID: 1012611358}
-  slingArmRb: {fileID: 1471176005}
-  mainArmRb: {fileID: 935815949}
   mainArm: {fileID: 935815944}
-  postHingeJoint: {fileID: 1615654609}
-  armPctRotation: 0
 --- !u!1001 &766715241000146605
 PrefabInstance:
   m_ObjectHideFlags: 0

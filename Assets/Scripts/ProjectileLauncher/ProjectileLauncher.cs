@@ -116,19 +116,9 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
     public virtual void LaunchProjectile()
     {
-        // Out of ammo
-        if (ammoCount <= 0)
-        {
-            // Start reload instead
-            ReloadProjectile();
+        // Make sure can launch projectile
+        if (!LaunchProjectile_Validation())
             return;
-        }
-
-        // Is currently reloading
-        if (isReloading)
-        {
-            return;
-        }
 
         // Subtract 1 ammo
         ammoCount--;
@@ -138,6 +128,24 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
         // Launch projectile forward with force
         LaunchProjectile_Forwards(projectile, launchForce);
+    }
+
+    protected virtual bool LaunchProjectile_Validation()
+    {
+        // Out of ammo - start reload instead
+        if (ammoCount <= 0)
+        {
+            ReloadProjectile();
+            return false;
+        }
+
+        // Is currently reloading
+        if (isReloading)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     protected abstract void LaunchProjectile_Forwards(Projectile projectile, float launchForce);
