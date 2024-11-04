@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8043553468346446078}
   - component: {fileID: 2638847560883681204}
   - component: {fileID: 8549793355473524904}
+  - component: {fileID: 580725349402228375}
   m_Layer: 0
   m_Name: TrebuchetRock
   m_TagString: Untagged
@@ -173,3 +174,16 @@ HingeJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &580725349402228375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1289639807328802742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ae0090ecde3bb549b427f09d1f8201b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _destroyAfterSeconds: 600
