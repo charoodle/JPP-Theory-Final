@@ -53,9 +53,14 @@ public class PlayerController : MonoBehaviour
         // Get player move input
         moveInput = GetMoveInput();
 
+        // Sprinting
+        float moveSpeed = walkSpeed;
+        if (Input.GetKey(KeyCode.LeftShift))
+            moveSpeed *= 2f;
+
         // Move around
         Vector3 moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
-        controller.Move(moveDirection.normalized * Time.deltaTime * walkSpeed);
+        controller.Move(moveDirection.normalized * Time.deltaTime * moveSpeed);
 
         if(isGrounded)
         {
