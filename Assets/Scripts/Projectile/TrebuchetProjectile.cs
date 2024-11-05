@@ -6,8 +6,7 @@ public class TrebuchetProjectile : Projectile
 {
     protected override void Start()
     {
-        // Destroy after 10 minutes.
-        destroyAfterSeconds = 600f;
+        // Don't destroy the projectile after seconds.
     }
 
     protected void Update()
