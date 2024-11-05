@@ -8,8 +8,8 @@ public class Pistol : ProjectileLauncher
     {
         // Init - Shorter popup time after reload finished
         Init(doneReloadPopupTime: 0.5f, ammoToRefillPerReload: 7);
-
-        base.Start();
+        GunUICanvasEnabled(false);
+        ReloadProjectile();
     }
 
     protected override bool CheckForLaunchInput()
