@@ -18,6 +18,9 @@ public class Trebuchet : ProjectileLauncher
     protected Coroutine shootingCoroutine;
     protected Coroutine tetherCoroutine;
 
+    // Material set for the projectile after launch.
+    [SerializeField] protected PhysicMaterial rockMaterial;
+
     protected bool isLaunching
     {
         get
@@ -167,6 +170,13 @@ public class Trebuchet : ProjectileLauncher
         // Launch projectile
         HingeJoint projectileToArmHinge = projectile.GetComponent<HingeJoint>();
         Destroy(projectileToArmHinge);
+
+        // Change material so projectile collides with ground like a rock
+        Collider collider = projectile.GetComponent<Collider>();
+        if(collider)
+        {
+            collider.material = rockMaterial;
+        }
 
         // TODO: Add some slight left/right deviation
         // ...
