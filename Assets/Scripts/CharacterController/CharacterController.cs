@@ -19,80 +19,108 @@ namespace MyProject
         // Movement
         [SerializeField] Vector3 playerVelocity;
         [SerializeField] private float walkSpeed = 3.0f;
+        [SerializeField] private float sprintSpeedMultiplier = 2.0f;
 
         // Look-around
         [SerializeField] Transform characterLook_LeftRight;
         [SerializeField] Transform characterLook_UpDown;
         float lookXRotation = 0f;
         float lookYRotation = 0f;
+        [SerializeField] float lookXSens = 300f;
+        [SerializeField] float lookYSens = 300f;
 
         // Jump
         [SerializeField] float jumpHeight = 3f;
         Vector3 worldGravity = new Vector3(0f, -9.81f, 0f);
         [SerializeField] bool isGrounded;
 
-        // Layers
+        // Layers (for jumping)
         [SerializeField] LayerMask characterLayer;
         LayerMask groundCheckLayer;
 
 
-        protected void Start()
+        protected virtual void Start()
         {
-            // Ground = anything not the character
+            // Ground = anything not the character layer
             groundCheckLayer = ~characterLayer;
         }
 
-        protected void Update()
+        protected virtual void Update()
         {
-            MoveCharacter();
+            // Update input
+            bool jumpInput = false;
+            bool sprintInput = false;
+            UpdateInput(ref moveInput, ref lookInput, ref jumpInput, ref sprintInput);
+            
+            // Move character
+            MoveCharacter(moveInput, jumpInput, sprintInput, ref isGrounded);
         }
 
         protected void LateUpdate()
         {
-            LookPlayer();
+            // Look-around character
+            CharacterLookAround(lookInput, ref lookXRotation, ref lookYRotation);
         }
 
-        protected void MoveCharacter()
+        protected virtual void UpdateInput(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
         {
-            isGrounded = IsGrounded();
-
-            // Get player move input
+            // Movement
             moveInput = GetMoveInput();
+            jumpInput = GetJumpInput();
+            sprintInput = GetSprintInput();
 
-            // Sprinting
-            float moveSpeed = walkSpeed;
-            if (Input.GetKey(KeyCode.LeftShift))
-                moveSpeed *= 2f;
-
-            // Move around
-            Vector3 moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
-            controller.Move(moveDirection.normalized * Time.deltaTime * moveSpeed);
-
-            if (isGrounded)
-            {
-                // No gravity while touching ground.
-                playerVelocity = Vector3.zero;
-            }
-
-            // Jump
-            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            {
-                playerVelocity.y += Mathf.Sqrt(jumpHeight * -2.0f * worldGravity.y);
-            }
-
-            // Gravity
-            if (!isGrounded)
-                playerVelocity += worldGravity * Time.deltaTime;
-            controller.Move(playerVelocity * Time.deltaTime);
+            // Look
+            lookInput = GetLookInput();
+            lookInput = ProcessLookInput(lookInput);
         }
 
-        protected void LookPlayer()
+        protected virtual Vector2 ProcessLookInput(Vector2 lookInput)
         {
             // Get player look input
             lookInput = GetMouseInput();
             // Adjust by sensitivity
             lookInput.x *= Time.deltaTime * lookXSens;
             lookInput.y *= Time.deltaTime * lookYSens;
+            return lookInput;
+        }
+
+        protected void MoveCharacter(Vector3 moveInput, bool jumpInput, bool sprintInput, ref bool isGrounded)
+        {
+            // Update ground check
+            isGrounded = IsGrounded();
+
+            // Sprinting - modify final move speed
+            float moveSpeed = walkSpeed;
+            if (sprintInput)
+                moveSpeed *= sprintSpeedMultiplier;
+
+            // Move around (x and z values only)
+            Vector3 moveDirection = transform.forward * this.moveInput.y + transform.right * this.moveInput.x;
+            controller.Move(moveDirection.normalized * Time.deltaTime * moveSpeed);
+
+            // Reset player velocity while touching ground.
+            if (isGrounded)
+            {
+                playerVelocity = Vector3.zero;
+            }
+
+            // Jump if on ground
+            if (jumpInput && isGrounded)
+            {
+                playerVelocity.y += Mathf.Sqrt(jumpHeight * -2.0f * worldGravity.y);
+            }
+
+            // Apply gravity if not on ground
+            if (!isGrounded)
+                playerVelocity += worldGravity * Time.deltaTime;
+
+            // Move with gravity (y value affected only)
+            controller.Move(playerVelocity * Time.deltaTime);
+        }
+
+        protected void CharacterLookAround(Vector2 lookInput, ref float lookXRotation, ref float lookYRotation)
+        {
+            // Change x and y rotations by input
             lookXRotation += lookInput.x;
             lookYRotation -= lookInput.y;
             // Clamp up and down rotation
@@ -105,12 +133,27 @@ namespace MyProject
             characterLook_LeftRight.rotation = Quaternion.Euler(0f, lookXRotation, 0f);
         }
 
-        protected Vector2 GetMoveInput()
+        protected virtual Vector2 GetMoveInput()
         {
             Vector2 moveInput = Vector2.zero;
             moveInput.x = Input.GetAxis("Horizontal");
             moveInput.y = Input.GetAxis("Vertical");
             return moveInput;
+        }
+
+        protected virtual Vector2 GetLookInput()
+        {
+            return GetMouseInput();
+        }
+
+        protected virtual bool GetJumpInput()
+        {
+            return Input.GetKeyDown(KeyCode.Space);
+        }
+
+        protected virtual bool GetSprintInput()
+        {
+            return Input.GetKey(KeyCode.LeftShift);
         }
 
         protected Vector2 GetMouseInput()
