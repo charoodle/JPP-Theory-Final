@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 1216080}
   - component: {fileID: 1216081}
   - component: {fileID: 1216082}
+  - component: {fileID: 1216083}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -189,7 +190,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1216079}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1a9c91732eb8f447966e35382dedc54, type: 3}
   m_Name: 
@@ -209,6 +210,31 @@ MonoBehaviour:
   groundCheckLayer:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &1216083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1216079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d38004c7e380d454cb1e0c2218dd0ba6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 1216081}
+  playerVelocity: {x: 0, y: 0, z: 0}
+  walkSpeed: 3
+  sprintSpeedMultiplier: 2
+  characterLook_LeftRight: {fileID: 1216080}
+  characterLook_UpDown: {fileID: 1270070948}
+  lookXSens: 750
+  lookYSens: 750
+  jumpHeight: 2
+  isGrounded: 0
+  characterLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1001 &17411963
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2492,7 +2518,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &904648074
 Transform:
   m_ObjectHideFlags: 0
@@ -5960,7 +5986,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2077832752
 Transform:
   m_ObjectHideFlags: 0
