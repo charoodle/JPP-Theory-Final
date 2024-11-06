@@ -24,10 +24,10 @@ namespace MyProject
         // Look-around
         [SerializeField] Transform characterLook_LeftRight;
         [SerializeField] Transform characterLook_UpDown;
-        [SerializeField] float yawDegrees = 0f;
-        [SerializeField] float pitchDegrees = 0f;
-        [SerializeField] float maxPitchDegreesUp = 90f;         // how far character can look upwards
-        [SerializeField] float maxPitchDegreesDown = -90f;      // how far character can look downwards
+        [SerializeField] protected float yawDegrees = 0f;
+        [SerializeField] protected float pitchDegrees = 0f;
+        [SerializeField] protected float maxPitchDegreesUp = 90f;         // how far character can look upwards
+        [SerializeField] protected float maxPitchDegreesDown = -90f;      // how far character can look downwards
         
         // Jump
         [SerializeField] float jumpHeight = 3f;
