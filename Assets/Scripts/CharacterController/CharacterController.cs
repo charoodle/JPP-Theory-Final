@@ -24,8 +24,8 @@ namespace MyProject
         // Look-around
         [SerializeField] Transform characterLook_LeftRight;
         [SerializeField] Transform characterLook_UpDown;
-        float lookXRotation = 0f;
-        float lookYRotation = 0f;
+        [SerializeField] float yawDegrees = 0f;
+        [SerializeField] float pitchDegrees = 0f;
         [SerializeField] float lookXSens = 300f;
         [SerializeField] float lookYSens = 300f;
 
@@ -50,19 +50,22 @@ namespace MyProject
             // Update input
             bool jumpInput = false;
             bool sprintInput = false;
-            UpdateInput(ref moveInput, ref lookInput, ref jumpInput, ref sprintInput);
+            UpdateInputs(ref moveInput, ref lookInput, ref jumpInput, ref sprintInput);
             
             // Move character
             MoveCharacter(moveInput, jumpInput, sprintInput, ref isGrounded);
+
+            // Update rotation (values only)
+            UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
         }
 
         protected void LateUpdate()
         {
             // Look-around character
-            CharacterLookAround(lookInput, ref lookXRotation, ref lookYRotation);
+            CharacterLookAround(yawDegrees, pitchDegrees);
         }
 
-        protected virtual void UpdateInput(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
+        protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
         {
             // Movement
             moveInput = GetMoveInput();
@@ -118,19 +121,22 @@ namespace MyProject
             controller.Move(playerVelocity * Time.deltaTime);
         }
 
-        protected void CharacterLookAround(Vector2 lookInput, ref float lookXRotation, ref float lookYRotation)
+        protected void CharacterLookAround(float yawDegrees, float pitchDegrees)
+        {
+            // Rotate camera - assumes its on a separate object from character that follow's character's body
+            characterLook_UpDown.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
+
+            // Rotate player body to match camera view rotation
+            characterLook_LeftRight.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
+        }
+
+        protected void UpdateLookRotation(Vector2 lookInput, ref float lookXRotation, ref float lookYRotation)
         {
             // Change x and y rotations by input
             lookXRotation += lookInput.x;
             lookYRotation -= lookInput.y;
             // Clamp up and down rotation
             lookYRotation = Mathf.Clamp(lookYRotation, -90f, 90f);
-
-            // Look around
-            //  x horizontal movement should rotate the player model left and right around the y axis.
-            //  y vertical movement should rotate the camera around the x axis.
-            characterLook_UpDown.rotation = Quaternion.Euler(lookYRotation, lookXRotation, 0f);
-            characterLook_LeftRight.rotation = Quaternion.Euler(0f, lookXRotation, 0f);
         }
 
         protected virtual Vector2 GetMoveInput()
