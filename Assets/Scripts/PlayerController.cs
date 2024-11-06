@@ -40,7 +40,7 @@ public class PlayerController : MyProject.CharacterController
 
     protected override bool GetJumpInput()
     {
-        return Input.GetKeyDown(KeyCode.Space);
+        return Input.GetKey(KeyCode.Space);
     }
 
     protected override bool GetSprintInput()

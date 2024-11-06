@@ -198,8 +198,8 @@ MonoBehaviour:
   playerVelocity: {x: 0, y: 0, z: 0}
   walkSpeed: 3
   sprintSpeedMultiplier: 2
-  characterLook_LeftRight: {fileID: 1216080}
-  characterLook_UpDown: {fileID: 1270070948}
+  rotateBody: {fileID: 1216080}
+  rotateFreedHead: {fileID: 1270070948}
   yawDegrees: 0
   pitchDegrees: 0
   maxPitchDegreesUp: 90
@@ -2339,7 +2339,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!143 &788481090
 CharacterController:
   m_ObjectHideFlags: 0
@@ -2374,14 +2374,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 788481088}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.06028357, z: -0, w: 0.99818134}
-  m_LocalPosition: {x: -5.5, y: 0.1, z: 7.5}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1032292954}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 6.912, z: 0}
+  m_Father: {fileID: 1182289147}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &788481092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2398,8 +2398,8 @@ MonoBehaviour:
   playerVelocity: {x: 0, y: 0, z: 0}
   walkSpeed: 3
   sprintSpeedMultiplier: 2
-  characterLook_LeftRight: {fileID: 788481091}
-  characterLook_UpDown: {fileID: 2013449826}
+  rotateBody: {fileID: 788481091}
+  rotateFreedHead: {fileID: 2013449826}
   yawDegrees: 0
   pitchDegrees: 0
   maxPitchDegreesUp: 90
@@ -2566,14 +2566,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 838935871}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.06028357, z: -0, w: 0.99818134}
-  m_LocalPosition: {x: -5.5, y: 0.1, z: 7.5}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.4818294, y: 0.1, z: 0.300871}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 281769807}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 6.912, z: 0}
+  m_Father: {fileID: 1182289147}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &838935875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2590,8 +2590,8 @@ MonoBehaviour:
   playerVelocity: {x: 0, y: 0, z: 0}
   walkSpeed: 3
   sprintSpeedMultiplier: 2
-  characterLook_LeftRight: {fileID: 838935874}
-  characterLook_UpDown: {fileID: 1396993826}
+  rotateBody: {fileID: 838935874}
+  rotateFreedHead: {fileID: 1396993826}
   yawDegrees: 0
   pitchDegrees: 0
   maxPitchDegreesUp: 90
@@ -3454,6 +3454,39 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1115765934}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1182289146
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1182289147}
+  m_Layer: 0
+  m_Name: Enemies
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1182289147
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1182289146}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -6.5000772, y: 0, z: 22.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 788481091}
+  - {fileID: 838935874}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1187925277
 GameObject:
   m_ObjectHideFlags: 0
@@ -6958,7 +6991,6 @@ SceneRoots:
   - {fileID: 2077832752}
   - {fileID: 570929019}
   - {fileID: 1216080}
-  - {fileID: 788481091}
-  - {fileID: 838935874}
   - {fileID: 1270070948}
   - {fileID: 1505300961}
+  - {fileID: 1182289147}

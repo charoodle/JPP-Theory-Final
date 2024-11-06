@@ -22,8 +22,8 @@ namespace MyProject
         [SerializeField] private float sprintSpeedMultiplier = 2.0f;
 
         // Look-around
-        [SerializeField] Transform characterLook_LeftRight;
-        [SerializeField] Transform characterLook_UpDown;
+        [SerializeField] Transform rotateBody;
+        [SerializeField] Transform rotateFreedHead;
         [SerializeField] protected float yawDegrees = 0f;
         [SerializeField] protected float pitchDegrees = 0f;
         [SerializeField] protected float maxPitchDegreesUp = 90f;         // how far character can look upwards
@@ -62,7 +62,7 @@ namespace MyProject
         protected void LateUpdate()
         {
             // Look-around character
-            CharacterLookAround(yawDegrees, pitchDegrees);
+            CharacterLookAround(yawDegrees, pitchDegrees, rotateFreedHead, rotateBody);
         }
 
         protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
@@ -118,13 +118,20 @@ namespace MyProject
             controller.Move(playerVelocity * Time.deltaTime);
         }
 
-        protected void CharacterLookAround(float yawDegrees, float pitchDegrees)
+        /// <summary>
+        /// Make the character game object move around
+        /// </summary>
+        /// <param name="yawDegrees">Euler degrees to pitch the yaw around.</param>
+        /// <param name="pitchDegrees">Euler degrees to pitch the character around.</param>
+        /// <param name="detachedHead">Rotates around the y *and* x axis. So it should be on a separate gameobject than the body (ex camera).</param>
+        /// <param name="body">Rotates around the y axis.</param>
+        protected void CharacterLookAround(float yawDegrees, float pitchDegrees, Transform detachedHead, Transform body)
         {
             // Rotate camera - assumes its on a separate object from character that follow's character's body
-            characterLook_UpDown.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
+            detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
 
             // Rotate player body to match camera view rotation
-            characterLook_LeftRight.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
+            body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
         }
 
         protected void UpdateLookRotation(Vector2 lookInput, ref float lookXRotation, ref float lookYRotation)
