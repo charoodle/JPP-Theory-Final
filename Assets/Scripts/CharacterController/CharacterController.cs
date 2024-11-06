@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MyProject
 {
-    public class CharacterController : MonoBehaviour
+    public abstract class CharacterController : MonoBehaviour
     {
         [SerializeField] protected UnityEngine.CharacterController controller;
 
@@ -26,9 +26,9 @@ namespace MyProject
         [SerializeField] Transform characterLook_UpDown;
         [SerializeField] float yawDegrees = 0f;
         [SerializeField] float pitchDegrees = 0f;
-        [SerializeField] float lookXSens = 300f;
-        [SerializeField] float lookYSens = 300f;
-
+        [SerializeField] float maxPitchDegreesUp = 90f;         // how far character can look upwards
+        [SerializeField] float maxPitchDegreesDown = -90f;      // how far character can look downwards
+        
         // Jump
         [SerializeField] float jumpHeight = 3f;
         Vector3 worldGravity = new Vector3(0f, -9.81f, 0f);
@@ -77,15 +77,12 @@ namespace MyProject
             lookInput = ProcessLookInput(lookInput);
         }
 
-        protected virtual Vector2 ProcessLookInput(Vector2 lookInput)
-        {
-            // Get player look input
-            lookInput = GetMouseInput();
-            // Adjust by sensitivity
-            lookInput.x *= Time.deltaTime * lookXSens;
-            lookInput.y *= Time.deltaTime * lookYSens;
-            return lookInput;
-        }
+        /// <summary>
+        /// Process look input here after it's grabbed from some source. (ex: adjust by mouse sensitivity, invert directions, ...)
+        /// </summary>
+        /// <param name="lookInput"></param>
+        /// <returns></returns>
+        protected abstract Vector2 ProcessLookInput(Vector2 lookInput);
 
         protected void MoveCharacter(Vector3 moveInput, bool jumpInput, bool sprintInput, ref bool isGrounded)
         {
@@ -98,7 +95,7 @@ namespace MyProject
                 moveSpeed *= sprintSpeedMultiplier;
 
             // Move around (x and z values only)
-            Vector3 moveDirection = transform.forward * this.moveInput.y + transform.right * this.moveInput.x;
+            Vector3 moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
             controller.Move(moveDirection.normalized * Time.deltaTime * moveSpeed);
 
             // Reset player velocity while touching ground.
@@ -136,52 +133,41 @@ namespace MyProject
             lookXRotation += lookInput.x;
             lookYRotation -= lookInput.y;
             // Clamp up and down rotation
-            lookYRotation = Mathf.Clamp(lookYRotation, -90f, 90f);
+            lookYRotation = Mathf.Clamp(lookYRotation, maxPitchDegreesDown, maxPitchDegreesUp);
         }
 
-        protected virtual Vector2 GetMoveInput()
-        {
-            Vector2 moveInput = Vector2.zero;
-            moveInput.x = Input.GetAxis("Horizontal");
-            moveInput.y = Input.GetAxis("Vertical");
-            return moveInput;
-        }
+        /// <summary>
+        /// Get move input. X for horizontal character movement. Y for forward/backward movement.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract Vector2 GetMoveInput();
 
-        protected virtual Vector2 GetLookInput()
-        {
-            return GetMouseInput();
-        }
+        /// <summary>
+        /// Get look input. X for yaw (left/right). Y for pitch (up/down).
+        /// </summary>
+        /// <returns></returns>
+        protected abstract Vector2 GetLookInput();
 
-        protected virtual bool GetJumpInput()
-        {
-            return Input.GetKeyDown(KeyCode.Space);
-        }
+        /// <returns>True if character wants to jump this frame. False otherwise.</returns>
+        protected abstract bool GetJumpInput();
 
-        protected virtual bool GetSprintInput()
-        {
-            return Input.GetKey(KeyCode.LeftShift);
-        }
-
-        protected Vector2 GetMouseInput()
-        {
-            Vector2 lookInput = Vector2.zero;
-            lookInput.x = Input.GetAxis("Mouse X");
-            lookInput.y = Input.GetAxis("Mouse Y");
-            return lookInput;
-        }
-
+        /// <returns>True if character wants to sprint this frame. False otherwise.</returns>
+        protected abstract bool GetSprintInput();
+        
+        /// <returns>True if character is touching ground (depends on CharacterController.skinWidth).</returns>
         protected bool IsGrounded()
         {
             // Ground = anything not on the player layer
-            Vector3 playerFeet = transform.position;
+            LayerMask groundCheckLayer = this.groundCheckLayer;
 
             // Account for the controller's skin width in raycast
             float maxDistance = controller.skinWidth;
+            Vector3 characterFeet = transform.position;
 
             // Debug draw the raycast line
             //Debug.DrawLine(playerFeet, playerFeet + (Vector3.down * maxDistance), Color.red);
 
-            if (Physics.Raycast(playerFeet, Vector3.down, out RaycastHit hitInfo, maxDistance, groundCheckLayer))
+            if (Physics.Raycast(characterFeet, Vector3.down, out RaycastHit hitInfo, maxDistance, groundCheckLayer))
             {
                 //Debug.Log("Hit: " + hitInfo.collider.gameObject + " " + LayerMask.LayerToName(hitInfo.collider.gameObject.layer), hitInfo.collider.gameObject);
                 return true;
