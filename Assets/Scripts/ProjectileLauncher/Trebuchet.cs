@@ -5,6 +5,8 @@ using UnityEngine;
 public class Trebuchet : ProjectileLauncher
 {
     // TODO: Make these protected
+    public GameObject trebuchetLaunchPreventer;     // holds the long arm down to prevent it from launching
+    public GameObject trebuchetReloader;     // holds the long arm down to prevent it from launching
     public GameObject projectile;
     public Transform projectileSpawnPoint;
     public Transform reloadHingeArmAttachPoint;
@@ -103,6 +105,8 @@ public class Trebuchet : ProjectileLauncher
                 StartCoroutine(TestRopeDetachFromProjectile());
                 ReleaseProjectileFromSling();
                 shootingCoroutine = null;
+                // Enable reload button
+                trebuchetReloader.SetActive(true);
                 yield break;
             }
 
@@ -181,7 +185,8 @@ public class Trebuchet : ProjectileLauncher
 
     protected override bool CheckForLaunchInput()
     {
-        return Input.GetKeyDown(KeyCode.Space);
+        // Physical button in game that will launch it
+        return false;
     }
 
     protected override void LaunchProjectile_Forwards(Projectile projectile, float launchForce, ref bool targetFound, Vector3 crosshairTarget)
@@ -207,6 +212,23 @@ public class Trebuchet : ProjectileLauncher
 
         // Load another projectile into it
         yield return LoadProjectile();
+
+        // Hold down the long arm end from launching the projectile
+        yield return HoldDownArmFromLaunching();
+    }
+
+    private IEnumerator HoldDownArmFromLaunching()
+    {
+        // Let gravity take over counterweight
+        counterweightRb.isKinematic = false;
+
+        // Enable the thing holding the trebuchet
+        trebuchetLaunchPreventer.SetActive(true);
+
+        // Disable the reload button
+        trebuchetReloader.SetActive(false);
+
+        yield break;
     }
 
     /// <summary>

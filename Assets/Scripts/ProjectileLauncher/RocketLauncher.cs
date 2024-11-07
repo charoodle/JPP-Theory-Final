@@ -14,7 +14,7 @@ public class RocketLauncher : ProjectileLauncher
     protected override bool CheckForLaunchInput()
     {
         // Must use left and right mouse button to fire
-        return Input.GetMouseButton(0) && Input.GetMouseButton(1);
+        return Input.GetMouseButton(0);
     }
 
     protected override void LaunchProjectile_Forwards(Projectile projectile, float launchForce, ref bool targetFound, Vector3 crosshairTarget)

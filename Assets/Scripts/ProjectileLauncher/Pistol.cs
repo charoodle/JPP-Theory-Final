@@ -7,7 +7,7 @@ public class Pistol : ProjectileLauncher
     protected override void Start()
     {
         // Init - Shorter popup time after reload finished
-        Init(doneReloadPopupTime: 0.5f, ammoToRefillPerReload: 7);
+        Init(doneReloadPopupTime: 0.5f, ammoToRefillPerReload: 15);
         base.Start();
     }
 

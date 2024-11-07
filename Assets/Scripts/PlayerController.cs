@@ -9,6 +9,7 @@ public class PlayerController : MyProject.CharacterController
     [SerializeField] float lookYSens = 750f;
     [SerializeField] bool invertLookX = false;
     [SerializeField] bool invertLookY = false;
+    public const float interactRange = 3f;
 
     [SerializeField] protected ProjectileLauncher[] weapons;
     protected ProjectileLauncher currentWeapon;
@@ -36,6 +37,19 @@ public class PlayerController : MyProject.CharacterController
         // Switch Weapon
         if(switchWeapon)
             SwitchWeapon(switchToWeapon);
+
+        // Player interaction
+        bool interactButton = GetInteractButtonInput();
+        if (interactButton)
+        {
+            bool targetFound = false;
+            GameObject target = ProjectileLauncher.GetPlayersCenterCameraTarget_GameObject(ref targetFound, interactRange);
+            if(targetFound)
+            {
+                Interactable interactable = target.GetComponent<Interactable>();
+                interactable.InteractWith();
+            }
+        }
 
         base.Update();
     }
@@ -135,6 +149,11 @@ public class PlayerController : MyProject.CharacterController
     protected override bool GetSprintInput()
     {
         return Input.GetKey(KeyCode.LeftShift);
+    }
+
+    protected virtual bool GetInteractButtonInput()
+    {
+        return Input.GetKeyDown(KeyCode.E);
     }
 
     protected override Vector2 ProcessLookInput(Vector2 lookInput)

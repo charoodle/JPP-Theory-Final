@@ -204,16 +204,15 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
         // TEMP - Get player's crosshair target as a world position
         bool targetFound = false;
-        Vector3 target = GetPlayersCenterCameraTarget(ref targetFound);
+        Vector3 target = GetPlayersCenterCameraTarget_Position(ref targetFound);
 
         // Launch projectile forward with force
         LaunchProjectile_Forwards(projectile, launchForce, ref targetFound, target);
     }
 
-    protected Vector3 GetPlayersCenterCameraTarget(ref bool targetFound)
+    public static Vector3 GetPlayersCenterCameraTarget_Position(ref bool targetFound, float maxRange = 500f)
     {
         // TEMP - Get raycast forward from player view
-        float maxRange = 500f;
         GameObject playerCam = Camera.main.gameObject;
         if (Physics.Raycast(playerCam.transform.position, playerCam.transform.forward, out RaycastHit hit, maxRange))
         {
@@ -223,6 +222,20 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
         targetFound = false;
         return Vector3.zero;
+    }
+
+    public static GameObject GetPlayersCenterCameraTarget_GameObject(ref bool targetFound, float maxRange = 500f)
+    {
+        // TEMP - Get raycast forward from player view
+        GameObject playerCam = Camera.main.gameObject;
+        if (Physics.Raycast(playerCam.transform.position, playerCam.transform.forward, out RaycastHit hit, maxRange))
+        {
+            targetFound = true;
+            return hit.transform.gameObject;
+        }
+
+        targetFound = false;
+        return null;
     }
 
     protected virtual bool LaunchProjectile_Validation()
