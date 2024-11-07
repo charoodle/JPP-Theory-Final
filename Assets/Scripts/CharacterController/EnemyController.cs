@@ -26,7 +26,7 @@ public class EnemyController : MyProject.CharacterController
     protected override Vector2 GetMoveInput()
     {
         // Move forward
-        return new Vector2(0f, 1.0f);
+        return Vector2.zero;
     }
 
     protected override bool GetSprintInput()
