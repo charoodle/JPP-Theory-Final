@@ -8,7 +8,6 @@ public class RocketLauncher : ProjectileLauncher
     {
         // Init - Shorter popup time after reload finished
         Init(ammoToRefillPerReload: 1);
-
         base.Start();
     }
 
@@ -18,8 +17,10 @@ public class RocketLauncher : ProjectileLauncher
         return Input.GetMouseButton(0) && Input.GetMouseButton(1);
     }
 
-    protected override void LaunchProjectile_Forwards(Projectile projectile, float launchForce)
+    protected override void LaunchProjectile_Forwards(Projectile projectile, float launchForce, ref bool targetFound, Vector3 crosshairTarget)
     {
+        base.LaunchProjectile_Forwards(projectile, launchForce, ref targetFound, crosshairTarget);
+
         // Tell rocket how fast it should go
         RocketProjectile rocket = projectile as RocketProjectile;
         if (!rocket)

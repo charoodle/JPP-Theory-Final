@@ -33,10 +33,7 @@ public class Trebuchet : ProjectileLauncher
     {
         Init(doneReloadPopupTime: 5f, ammoToRefillPerReload: 1);
 
-        GunUICanvasEnabled(false);
-        
-        // TEMP
-        ammoCount = 1;
+        base.Start();
 
         // TEMP
         tetherCoroutine = StartCoroutine(TestRopeTetherToProjectile());
@@ -187,7 +184,7 @@ public class Trebuchet : ProjectileLauncher
         return Input.GetKeyDown(KeyCode.Space);
     }
 
-    protected override void LaunchProjectile_Forwards(Projectile projectile, float launchForce)
+    protected override void LaunchProjectile_Forwards(Projectile projectile, float launchForce, ref bool targetFound, Vector3 crosshairTarget)
     {
         // Make the arm rotate to launch the projectile
         // Not used?

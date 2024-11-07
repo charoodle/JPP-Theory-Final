@@ -71,6 +71,7 @@ public class PlayerController : MyProject.CharacterController
             }
         }
 
+        // No weapon found to equip with string name
         Debug.LogError("Cannot find and equip weapon with name: " + weaponName);
         return null;
     }

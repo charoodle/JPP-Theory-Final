@@ -173,9 +173,10 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
     protected virtual void Start()
     {
-        Init();
+        // Disable any gun UI
         GunUICanvasEnabled(false);
-        ReloadProjectile();
+        // Refill ammo to full
+        StartCoroutine(ReloadProjectileCoroutine_RefillAmmunitionCount(ammoToRefillPerReload));
     }
 
     protected void Update()
@@ -201,8 +202,27 @@ public abstract class ProjectileLauncher : MonoBehaviour
         // Spawn projectile at barrel, facing same forward dir as barrel
         Projectile projectile = SpawnProjectile(shootPoint);
 
+        // TEMP - Get player's crosshair target as a world position
+        bool targetFound = false;
+        Vector3 target = GetPlayersCenterCameraTarget(ref targetFound);
+
         // Launch projectile forward with force
-        LaunchProjectile_Forwards(projectile, launchForce);
+        LaunchProjectile_Forwards(projectile, launchForce, ref targetFound, target);
+    }
+
+    protected Vector3 GetPlayersCenterCameraTarget(ref bool targetFound)
+    {
+        // TEMP - Get raycast forward from player view
+        float maxRange = 500f;
+        GameObject playerCam = Camera.main.gameObject;
+        if (Physics.Raycast(playerCam.transform.position, playerCam.transform.forward, out RaycastHit hit, maxRange))
+        {
+            targetFound = true;
+            return hit.point;
+        }
+
+        targetFound = false;
+        return Vector3.zero;
     }
 
     protected virtual bool LaunchProjectile_Validation()
@@ -227,7 +247,18 @@ public abstract class ProjectileLauncher : MonoBehaviour
         return true;
     }
 
-    protected abstract void LaunchProjectile_Forwards(Projectile projectile, float launchForce);
+    protected virtual void LaunchProjectile_Forwards(Projectile projectile, float launchForce, ref bool targetFound, Vector3 crosshairTarget)
+    {
+        // Align the projectile with the player's crosshair
+        if(targetFound)
+            FaceProjectileToTarget(projectile, crosshairTarget);
+    }
+
+    protected virtual void FaceProjectileToTarget(Projectile projectile, Vector3 target)
+    {
+        Vector3 toTarget = target - gameObject.transform.position;
+        projectile.transform.forward = toTarget;
+    }
 
     public virtual void ReloadProjectile()
     {
