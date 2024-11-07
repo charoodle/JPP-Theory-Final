@@ -18,11 +18,6 @@ public class Pistol : ProjectileLauncher
         return Input.GetMouseButtonDown(0);
     }
 
-    protected override IEnumerator ReloadProjectileCoroutine_WaitForSeconds()
-    {
-        yield return new WaitForSeconds(3f);
-    }
-
     protected override IEnumerator ReloadProjectileCoroutine_RefillAmmunitionCount(int ammoToRefill)
     {
         this.ammoCount = ammoToRefill;

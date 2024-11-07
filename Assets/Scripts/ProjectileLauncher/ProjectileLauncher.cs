@@ -75,6 +75,11 @@ public abstract class ProjectileLauncher : MonoBehaviour
     [SerializeField] protected float launchForce;
 
     /// <summary>
+    /// How long it should take to reload the launcher.
+    /// </summary>
+    [SerializeField] protected float reloadSeconds = 3f;
+
+    /// <summary>
     /// How much ammo that is currently loaded in the magazine.
     /// </summary>
     protected int ammoCount
@@ -113,7 +118,52 @@ public abstract class ProjectileLauncher : MonoBehaviour
     /// Has the derived class initialized this launcher with appropriate values?
     /// </summary>
     protected bool isInit;
-    
+
+    protected MeshRenderer[] weaponModels;
+
+    /// <summary>
+    /// Show and hide the weapon from view. Monobehavior is enabled/disabled to allow coroutines to run in the background (ex reloading).
+    /// </summary>
+    public virtual void EquipWeapon(bool wantToEquip)
+    {
+        if(weaponModels == null)
+             weaponModels = GetComponentsInChildren<MeshRenderer>();
+
+        if (!gameObject.activeInHierarchy)
+            gameObject.SetActive(true);
+
+        ShowWeapon(wantToEquip);
+        this.enabled = wantToEquip;
+    }
+
+    /// <summary>
+    /// Enable/disable the weapon's mesh renderers.
+    /// </summary>
+    protected virtual void ShowWeapon(bool shown)
+    {
+        if(weaponModels == null)
+        {
+            Debug.LogError("No mesh renderers on weapon. Cannot show weapon.", gameObject);
+            return;
+        }
+
+        // Enable/disable all mesh renderers
+        if (weaponModels.Length >= 1)
+        {
+            foreach(MeshRenderer weaponModel in weaponModels)
+            {
+                weaponModel.enabled = shown;
+            }
+        }
+
+        // Enable/disable all canvases
+        Canvas[] canvases = GetComponentsInChildren<Canvas>();
+        foreach(Canvas canvas in canvases)
+        {
+            canvas.enabled = shown;
+        }
+    }
+
     protected virtual void Init(float doneReloadPopupTime = 0.5f, int ammoToRefillPerReload = 1)
     {
         this.doneReloadPopupTime = doneReloadPopupTime;
@@ -230,7 +280,10 @@ public abstract class ProjectileLauncher : MonoBehaviour
     /// <summary>
     /// Customize your own reload coroutine here (ex: delay wait for seconds, play a reload animation, ...)
     /// </summary>
-    protected abstract IEnumerator ReloadProjectileCoroutine_WaitForSeconds();
+    protected virtual IEnumerator ReloadProjectileCoroutine_WaitForSeconds()
+    {
+        yield return new WaitForSeconds(reloadSeconds);
+    }
 
     /// <summary>
     /// Customize how much ammo gets reloaded here per reload.

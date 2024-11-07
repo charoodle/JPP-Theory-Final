@@ -10,11 +10,99 @@ public class PlayerController : MyProject.CharacterController
     [SerializeField] bool invertLookX = false;
     [SerializeField] bool invertLookY = false;
 
+    [SerializeField] protected ProjectileLauncher[] weapons;
+    protected ProjectileLauncher currentWeapon;
+
+    protected enum Weapon
+    {
+        PISTOL = 1,
+        RL = 2,
+        DISARMED = 3
+    }
+
     protected override void Start()
     {
         // Hide player's mouse cursor.
         HideMouseCursor();
         base.Start();
+    }
+
+    protected override void Update()
+    {
+        // Additional weapon switch input
+        Weapon switchToWeapon = 0; 
+        bool switchWeapon = GetWeaponSwitchInput(ref switchToWeapon);
+
+        // Switch Weapon
+        if(switchWeapon)
+            SwitchWeapon(switchToWeapon);
+
+        base.Update();
+    }
+
+    protected virtual void SwitchWeapon(Weapon weaponToSwitchTo)
+    {
+        // Unequip current weapon
+        UnequipCurrentWeaponGameObject();
+
+        // Equip the correct weapon
+        if(weaponToSwitchTo == Weapon.PISTOL) {
+            currentWeapon = EquipWeaponGameObject("Pistol");
+        }
+        else if(weaponToSwitchTo == Weapon.RL) {
+            currentWeapon = EquipWeaponGameObject("RocketLauncher");
+        }
+        else if(weaponToSwitchTo == Weapon.DISARMED) {
+            UnequipCurrentWeaponGameObject();
+        }
+        else {
+            Debug.LogError("Weapon not supported: " + weaponToSwitchTo);
+        }
+    }
+
+    protected virtual ProjectileLauncher EquipWeaponGameObject(string weaponName)
+    {
+        foreach (ProjectileLauncher weapon in weapons)
+        {
+            if (weapon.name == weaponName)
+            {
+                weapon.EquipWeapon(true);
+                return weapon;
+            }
+        }
+
+        Debug.LogError("Cannot find and equip weapon with name: " + weaponName);
+        return null;
+    }
+
+    protected virtual void UnequipCurrentWeaponGameObject()
+    {
+        if(currentWeapon)
+        {
+            currentWeapon.EquipWeapon(false);
+            currentWeapon = null;
+        }
+    }
+
+    protected virtual bool GetWeaponSwitchInput(ref Weapon weaponKey)
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            weaponKey = Weapon.PISTOL;
+            return true;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            weaponKey = Weapon.RL;
+            return true;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            weaponKey = Weapon.DISARMED;
+            return true;
+        }
+
+        return false;
     }
 
     protected override Vector2 GetMoveInput()

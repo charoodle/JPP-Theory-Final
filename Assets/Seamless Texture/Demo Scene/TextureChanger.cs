@@ -6,8 +6,8 @@ public class TextureChanger : MonoBehaviour
 	public GameObject [] DiffuseTexture1;
 	public GameObject [] ParallaxTexture1;
 
-
-	void OnGUI()
+    [System.Obsolete]
+    void OnGUI()
 	{
 
 		GUI.Box(new Rect(-100,20,1000,20),"Press N or P to scroll horizontally between textures");

@@ -40,6 +40,6 @@ public class RocketLauncher : ProjectileLauncher
 
         // OK
 
-        yield return new WaitForSeconds(3f);
+        yield return base.ReloadProjectileCoroutine_WaitForSeconds();
     }
 }
