@@ -46,8 +46,12 @@ public abstract class Interactable : MonoBehaviour
     {
         if (mouseEnterCoroutine != null)
             StopCoroutine(mouseEnterCoroutine);
-        playerUI.EnableInteractText(false);
-        playerUI.SetInteractText("");
+
+        if(playerUI)
+        {
+            playerUI.EnableInteractText(false);
+            playerUI.SetInteractText("");
+        }
     }
 
     private IEnumerator ShowInteractTextIfInRange()

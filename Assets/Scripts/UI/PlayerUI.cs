@@ -6,6 +6,12 @@ using TMPro;
 public class PlayerUI : MonoBehaviour
 {
     public TextMeshProUGUI interactText;
+
+    private void Start()
+    {
+        EnableInteractText(false);
+    }
+
     public void SetInteractText(string text)
     {
         interactText.SetText(text);

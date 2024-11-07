@@ -9,7 +9,7 @@ public class PlayerController : MyProject.CharacterController
     [SerializeField] float lookYSens = 750f;
     [SerializeField] bool invertLookX = false;
     [SerializeField] bool invertLookY = false;
-    public const float interactRange = 3f;
+    public const float interactRange = 5f;
 
     [SerializeField] protected ProjectileLauncher[] weapons;
     protected ProjectileLauncher currentWeapon;
