@@ -481,7 +481,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.987
+      value: 1.335
       objectReference: {fileID: 0}
     - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -505,7 +505,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.589
+      value: 0.564
       objectReference: {fileID: 0}
     - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -518,6 +518,22 @@ PrefabInstance:
     - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737096996290138843, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_fontSize
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737096996290138843, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737096996290138843, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: d7bf817f55ebd4648aef97b01e9d2d4e, type: 2}
+    - target: {fileID: 4079751037395522731, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5570859852746758265, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_Name
@@ -3907,8 +3923,8 @@ MonoBehaviour:
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 482564d9f7129934fa8d78d728b6f369, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: d7bf817f55ebd4648aef97b01e9d2d4e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3932,8 +3948,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 58.73
+  m_fontSizeBase: 58.73
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4181,7 +4197,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.584
       objectReference: {fileID: 0}
     - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4218,6 +4234,22 @@ PrefabInstance:
     - target: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737096996290138843, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_fontSize
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737096996290138843, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737096996290138843, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: d7bf817f55ebd4648aef97b01e9d2d4e, type: 2}
+    - target: {fileID: 4079751037395522731, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5570859852746758265, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}
       propertyPath: m_Name
