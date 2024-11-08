@@ -4,19 +4,33 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] protected float startingHealth = 3f;
+    public delegate void HealthChangedAction(float health);
+    public event HealthChangedAction OnHealthSet;
+
+    [SerializeField] protected float _startingHealth = 3f;
+    [SerializeField] public float startingHealth
+    {
+        get { return _startingHealth; }
+        protected set
+        {
+            _startingHealth = value;
+        }
+    }
 
     [SerializeField] protected float _health;
-    protected float health
+    public float health
     {
         get { return _health; }
-        set
+        protected set
         {
             // Health cannot go into negatives
             if (value <= 0)
                 value = 0;
 
             _health = value;
+
+            if (OnHealthSet != null)
+                OnHealthSet(_health);
         }
     }
 
