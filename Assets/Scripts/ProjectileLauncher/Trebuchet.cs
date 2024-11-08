@@ -179,6 +179,8 @@ public class Trebuchet : ProjectileLauncher
             collider.material = rockMaterial;
         }
 
+        projectile.GetComponent<Projectile>().allowCollisions = true;
+
         // TODO: Add some slight left/right deviation
         // ...
     }

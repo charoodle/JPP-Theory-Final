@@ -4,6 +4,8 @@ using UnityEngine;
 
 public abstract class Projectile : MonoBehaviour
 {
+    public bool allowCollisions = true;
+
     [SerializeField] protected float _damage = 1f;
 
     /// <summary>
@@ -51,15 +53,25 @@ public abstract class Projectile : MonoBehaviour
 
     protected virtual void OnCollisionEnter(Collision collision)
     {
+        if (!allowCollisions)
+            return;
+
+        TakeHealthAwayFrom(collision);
+
+        DestroyProjectile();
+    }
+
+    protected virtual bool TakeHealthAwayFrom(Collision collision)
+    {
         // Take health away from object when hit with this projectile
         //  Colliders usually on child objects. Scripts on parent objects.
         Health health = collision.gameObject.GetComponentInParent<Health>();
-        if(health)
+        if (health)
         {
             health.TakeDamage(damage);
-            DestroyProjectile();
+            return true;
         }
-
+        return false;
     }
 
     protected virtual void DestroyProjectile()
