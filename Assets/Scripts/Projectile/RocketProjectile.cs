@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class RocketProjectile : Projectile
 {
+    /// <summary>
+    /// Spawned on collision with something.
+    /// </summary>
+    [SerializeField] GameObject rocketExplosionPrefab;
     [SerializeField] float _speed;
     float speed
     {
@@ -18,6 +22,7 @@ public class RocketProjectile : Projectile
             _speed = value;
         }
     }
+    protected bool alreadyExploded = false;
 
     private void FixedUpdate()
     {
@@ -38,5 +43,35 @@ public class RocketProjectile : Projectile
     {
         destroyAfterSeconds = 10f;
         base.DestroyInAFewSeconds();
+    }
+
+    protected override void OnCollisionEnter(Collision collision)
+    {
+        base.OnCollisionEnter(collision);
+
+        // Not an enemy
+        if(!Utils.IsEnemy(collision.gameObject))
+        {
+            // Spawn explosion prefab, with up direction facing collision's normal direction (if its not an enemy)
+            ContactPoint point = collision.GetContact(0);
+            CreateExplosion(point.point, point.normal);
+        }
+        else
+        {
+            // Spawn explosion prefab, with up direction facing world up
+            ContactPoint point = collision.GetContact(0);
+            CreateExplosion(point.point, Vector3.up);
+        }
+    }
+
+    protected void CreateExplosion(Vector3 position, Vector3 up)
+    {
+        // Only explode once
+        if (alreadyExploded)
+            return;
+
+        alreadyExploded = true;
+        GameObject explosion = Instantiate(rocketExplosionPrefab, position, rocketExplosionPrefab.transform.rotation);
+        explosion.transform.up = up;
     }
 }

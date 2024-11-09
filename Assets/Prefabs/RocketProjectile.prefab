@@ -519,7 +519,7 @@ Transform:
   m_GameObject: {fileID: 3111324948450727635}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 3.305}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -541,6 +541,7 @@ MonoBehaviour:
   allowCollisions: 1
   _damage: 10
   _destroyAfterSeconds: 5
+  rocketExplosionPrefab: {fileID: 5713613637717643651, guid: 2bc4e2a679c98de4bba3bd3c95aa8295, type: 3}
   _speed: 0
 --- !u!54 &5436385980853332803
 Rigidbody:
