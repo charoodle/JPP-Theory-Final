@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4769923191879764429}
   - component: {fileID: 7880955574884436162}
   m_Layer: 0
-  m_Name: RocketExplosion
+  m_Name: RocketExplosionParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -14,7 +14,7 @@ public class EnemyController : MyProject.CharacterController
             // Enemies cannot have speed <= 1
             if (value <= 1)
             {
-                Debug.LogError("Enemy cannot have walkspeed <= 1: " + value, gameObject);
+                Debug.LogWarning("Enemy cannot have walkspeed <= 1: " + value, gameObject);
                 value = 1;
             }
             _walkSpeed = value;
