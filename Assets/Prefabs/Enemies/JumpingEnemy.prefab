@@ -75,7 +75,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 220622393185770630}
   playerVelocity: {x: 0, y: 0, z: 0}
-  walkSpeed: 3
+  _walkSpeed: 3
   sprintSpeedMultiplier: 2
   rotateBody: {fileID: 6622066922929996405}
   rotateFreedHead: {fileID: 2278507912291983282}
@@ -450,11 +450,44 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6739278206153027705, guid: fff6da1c0401307459971c7adf630b77, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8529283975325433977, guid: fff6da1c0401307459971c7adf630b77, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6729880602072760008}
   m_SourcePrefab: {fileID: 100100000, guid: fff6da1c0401307459971c7adf630b77, type: 3}
+--- !u!1 &999668557395874526 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8529283975325433977, guid: fff6da1c0401307459971c7adf630b77, type: 3}
+  m_PrefabInstance: {fileID: 8899556878627967655}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6729880602072760008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999668557395874526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04005b078a558fe44a1c490a2cc1f5ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthText: {fileID: 2526427245273066241}
+--- !u!114 &2526427245273066241 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6381107978575002022, guid: fff6da1c0401307459971c7adf630b77, type: 3}
+  m_PrefabInstance: {fileID: 8899556878627967655}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &5003446034822943370 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4534663564861128749, guid: fff6da1c0401307459971c7adf630b77, type: 3}

@@ -10,7 +10,7 @@ public class Healthbar : MonoBehaviour
     protected Slider slider;
     [SerializeField] protected TextMeshProUGUI healthText;
 
-    protected void OnEnable()
+    protected virtual void OnEnable()
     {
         slider = GetComponent<Slider>();
         
@@ -34,7 +34,7 @@ public class Healthbar : MonoBehaviour
             objectHealth.OnHealthSet -= SetHealthbarValue;
     }
 
-    protected void SetHealthbarValue(float health)
+    protected virtual void SetHealthbarValue(float health)
     {
         // Find health of object as a percent
         float pct = health / objectHealth.startingHealth;
