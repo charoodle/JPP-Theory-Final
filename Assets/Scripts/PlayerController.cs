@@ -47,7 +47,8 @@ public class PlayerController : MyProject.CharacterController
             if(targetFound)
             {
                 Interactable interactable = target.GetComponent<Interactable>();
-                interactable.InteractWith();
+                if(interactable)
+                    interactable.InteractWith();
             }
         }
 
