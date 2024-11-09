@@ -196,7 +196,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 1216081}
   playerVelocity: {x: 0, y: 0, z: 0}
-  walkSpeed: 3
+  _walkSpeed: 3
   sprintSpeedMultiplier: 2
   rotateBody: {fileID: 1216080}
   rotateFreedHead: {fileID: 1270070948}
@@ -6509,6 +6509,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7541914307676894508, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+      propertyPath: _startingHealth
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 8147631271572983841, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
       propertyPath: m_Color.b
       value: 0
@@ -6564,7 +6568,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5857482965194778221, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1812623462}
   m_SourcePrefab: {fileID: 100100000, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
 --- !u!1 &1751523901
 GameObject:
@@ -7201,6 +7208,38 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1791805889}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1812623459 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5857482965194778221, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+  m_PrefabInstance: {fileID: 1749820395}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &1812623462
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812623459}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!224 &1838850923 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 85051207529591943, guid: 4a6a88ab5ffd538478514b5b7ced590e, type: 3}

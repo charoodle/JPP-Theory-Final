@@ -45,7 +45,8 @@ public class Healthbar : MonoBehaviour
         // Update healthbar
         slider.value = pct;
 
-        // Update healthbar text
+        // Update healthbar text as highest int (in case health is between 0-1)
+        health = Mathf.CeilToInt(health);
         healthText.SetText($"{health} / {objectHealth.startingHealth}");
     }
 }

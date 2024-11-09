@@ -18,8 +18,22 @@ namespace MyProject
 
         // Movement
         [SerializeField] Vector3 playerVelocity;
-        [SerializeField] private float walkSpeed = 3.0f;
-        [SerializeField] private float sprintSpeedMultiplier = 2.0f;
+        [SerializeField] protected float _walkSpeed = 3.0f;
+        protected virtual float walkSpeed
+        {
+            get { return _walkSpeed; }
+            set
+            {
+                // Cannot have negative speed
+                if (value <= 0)
+                {
+                    Debug.LogError("Cannot have negative walk speed: " + value, gameObject);
+                    value = 0;
+                }
+                _walkSpeed = value;
+            }
+        }
+        [SerializeField] protected float sprintSpeedMultiplier = 2.0f;
 
         // Look-around
         [SerializeField] Transform rotateBody;
