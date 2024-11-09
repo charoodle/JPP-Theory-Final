@@ -56,6 +56,9 @@ public abstract class Projectile : MonoBehaviour
         if (!allowCollisions)
             return;
 
+        // Only allow one collision to occur
+        allowCollisions = false;
+
         TakeHealthAwayFrom(collision);
 
         DestroyProjectile();
