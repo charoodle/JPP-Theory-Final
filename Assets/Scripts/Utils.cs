@@ -14,4 +14,17 @@ public static class Utils
     {
         return (obj.GetComponent<EnemyController>());
     }
+
+    /// <summary>
+    /// How long since a timestamp has passed?
+    /// </summary>
+    /// <param name="time"></param>
+    /// <returns></returns>
+    public static float SecondsSince(float time)
+    {
+        if (time <= 0)
+            time = 0f;
+
+        return Time.time - time;
+    }
 }

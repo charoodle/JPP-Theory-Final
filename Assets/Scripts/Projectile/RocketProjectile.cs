@@ -26,8 +26,16 @@ public class RocketProjectile : Projectile
 
     private void FixedUpdate()
     {
+        Vector3 velocity = (Vector3.forward * speed * Time.deltaTime) + (Vector3.down * 0.1f * Time.deltaTime);
+
         // Make it go forward
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
+
+        // Make it go down; less force than gravity
+        transform.Translate(Vector3.down * 0.1f * Time.deltaTime);
+
+        // Rocket points towards direction of velocity
+        transform.forward = transform.TransformDirection(velocity);
 
         // TODO: Make it go slow, lock onto target, then speed up and follow it
         //  TODO: Change direction?

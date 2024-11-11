@@ -208,6 +208,10 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
         // Launch projectile forward with force
         LaunchProjectile_Forwards(projectile, launchForce, ref targetFound, target);
+
+        // If out of ammo, start reload coroutine
+        if (ammoCount <= 0)
+            ReloadProjectile();
     }
 
     public static Vector3 GetPlayersCenterCameraTarget_Position(ref bool targetFound, float maxRange = 500f)

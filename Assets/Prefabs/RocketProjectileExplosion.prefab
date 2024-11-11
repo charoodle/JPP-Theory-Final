@@ -67,9 +67,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42f5f4b2983b4e7459182f4ea87b9476, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startRadius: -1
-  endRadius: 6
-  duration: 0.4
+  startRadius: 0
+  endRadius: 8
+  duration: 0.6
 --- !u!1001 &7559256714557918471
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -46,7 +46,12 @@ namespace MyProject
         // Jump
         [SerializeField] float jumpHeight = 3f;
         Vector3 worldGravity = new Vector3(0f, -9.81f, 0f);
-        [SerializeField] protected bool isGrounded;
+        [SerializeField] protected bool _isGrounded;
+        public bool isGrounded
+        {
+            get { return _isGrounded; }
+            protected set { _isGrounded = value; }
+        }
 
         // Layers (for jumping)
         [SerializeField] LayerMask characterLayer;
@@ -67,7 +72,7 @@ namespace MyProject
             UpdateInputs(ref moveInput, ref lookInput, ref jumpInput, ref sprintInput);
             
             // Move character
-            MoveCharacter(moveInput, jumpInput, sprintInput, ref isGrounded);
+            MoveCharacter(moveInput, jumpInput, sprintInput, ref _isGrounded);
 
             // Update rotation (values only)
             UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
