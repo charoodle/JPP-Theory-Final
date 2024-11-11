@@ -6,6 +6,7 @@ public class EnemySpawnManager : MonoBehaviour
 {
     [SerializeField] protected GameObject[] enemyPrefabs;
     [SerializeField] protected BoxCollider spawnBox;
+    [SerializeField] protected GameObject enemySpawnParticles;
 
     protected void Start()
     {
@@ -14,8 +15,39 @@ public class EnemySpawnManager : MonoBehaviour
 
     protected void SpawnEnemy()
     {
-        Vector3 randomPos = GetRandomPosInBox(spawnBox);
-        SpawnRandomEnemy(randomPos, spawnBox.transform.rotation);
+        StartCoroutine(SpawnEnemyCoroutine());
+    }
+
+    protected IEnumerator SpawnEnemyCoroutine()
+    {
+        Vector3 enemySpawnPos = GetRandomPosInBox(spawnBox);
+
+        // Spawn particles
+        SpawnParticles(enemySpawnPos);
+
+        // Let particle cloud cover enemy spawning
+        yield return new WaitForSeconds(0.35f);
+
+        // Spawn enemy
+        GameObject enemyGO = SpawnRandomEnemy(enemySpawnPos, spawnBox.transform.rotation);
+        EnemyController enemyCtrl = enemyGO.GetComponent<EnemyController>();
+        if(!enemyCtrl)
+            yield break;
+
+        // Disable enemy movement on spawn
+        enemyCtrl.canMove = false;
+
+        // Wait until enemy hits ground to allow movement
+        while(!enemyCtrl.isGrounded)
+        {
+            yield return new WaitForFixedUpdate();
+        }
+        enemyCtrl.canMove = true;
+    }
+
+    protected void SpawnParticles(Vector3 pos)
+    {
+        Instantiate(enemySpawnParticles, pos, enemySpawnParticles.transform.rotation);
     }
 
     protected GameObject SpawnRandomEnemy(Vector3 worldPos, Quaternion rotation)

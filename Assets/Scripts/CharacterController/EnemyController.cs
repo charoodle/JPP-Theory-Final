@@ -5,6 +5,7 @@ using UnityEngine;
 public class EnemyController : MyProject.CharacterController
 {
     protected bool isSprinting = false;
+    public bool canMove = true;
 
     protected override float walkSpeed
     { 
@@ -56,8 +57,13 @@ public class EnemyController : MyProject.CharacterController
 
     protected override Vector2 GetMoveInput()
     {
+        Vector2 moveInput = Vector2.zero;
+
         // Move forward
-        return new Vector2(0f, 1f);
+        if (canMove)
+            moveInput = new Vector2(0f, 1f);
+
+        return moveInput;
     }
 
     protected override bool GetSprintInput()
