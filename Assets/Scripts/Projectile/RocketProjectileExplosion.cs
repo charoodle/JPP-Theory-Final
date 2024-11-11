@@ -30,8 +30,8 @@ public class RocketProjectileExplosion : MonoBehaviour
         sphereCollider = GetComponent<SphereCollider>();
         StartCoroutine(IncreaseRadius(startRadius, endRadius, duration));
 
-        // Destroy after particles finished && player lands back on ground
-        //Destroy(this.gameObject, 1.15f);
+        // Destroy after particles finished
+        Destroy(this.gameObject, 1.15f);
     }
 
     protected IEnumerator IncreaseRadius(float start, float end, float duration)
@@ -62,11 +62,11 @@ public class RocketProjectileExplosion : MonoBehaviour
         }
 
         // Add explosion forces to any rigidbodies in explosion
-        Rigidbody rb = other.GetComponent<Rigidbody>();
-        if(rb)
-        {
-            StartCoroutine(HandleRigidbodyExplosion(rb));
-        }
+        //Rigidbody rb = other.GetComponent<Rigidbody>();
+        //if(rb)
+        //{
+        //    StartCoroutine(HandleRigidbodyExplosion(rb));
+        //}
     }
 
     IEnumerator HandleRigidbodyExplosion(Rigidbody rb)
