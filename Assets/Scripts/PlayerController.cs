@@ -14,6 +14,19 @@ public class PlayerController : MyProject.CharacterController
     [SerializeField] protected ProjectileLauncher[] weapons;
     protected ProjectileLauncher currentWeapon;
 
+    [SerializeField] protected bool _canInputMove = true;
+    public bool canInputMove
+    {
+        get { return _canInputMove; }
+        set { _canInputMove = value; }
+    }
+    [SerializeField] protected bool _canInputLook = true;
+    public bool canInputLook
+    {
+        get { return _canInputLook; }
+        set { _canInputMove = value; }
+    }
+
     protected enum Weapon
     {
         PISTOL = 1,
@@ -124,8 +137,11 @@ public class PlayerController : MyProject.CharacterController
     protected override Vector2 GetMoveInput()
     {
         Vector2 moveInput = Vector2.zero;
-        moveInput.x = Input.GetAxis("Horizontal");
-        moveInput.y = Input.GetAxis("Vertical");
+        if(canInputMove)
+        {
+            moveInput.x = Input.GetAxis("Horizontal");
+            moveInput.y = Input.GetAxis("Vertical");
+        }
         return moveInput;
     }
 
@@ -137,8 +153,11 @@ public class PlayerController : MyProject.CharacterController
     protected Vector2 GetMouseInput()
     {
         Vector2 lookInput = Vector2.zero;
-        lookInput.x = Input.GetAxis("Mouse X");
-        lookInput.y = Input.GetAxis("Mouse Y");
+        if (canInputLook)
+        {
+            lookInput.x = Input.GetAxis("Mouse X");
+            lookInput.y = Input.GetAxis("Mouse Y");
+        }
         return lookInput;
     }
 

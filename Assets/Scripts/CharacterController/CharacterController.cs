@@ -68,22 +68,60 @@ namespace MyProject
             // Original spawn position, in case ever fall out of map
             spawnPosition = transform.position;
 
+            // Check player from going out of bounds every couple secons
             StartCoroutine(PreventOutOfBoundsCoroutine());
+
+            // TODO: Make player look directly to front
+            LookAt(transform.position + transform.forward);
         }
 
         protected IEnumerator PreventOutOfBoundsCoroutine()
         {
+            float checkSeconds = 5f;
             while(true)
             {
                 if (transform.position.y < -30f)
                 {
+                    // Disable character controller to allow for movement
                     controller.enabled = false;
                     transform.position = spawnPosition;
                     controller.enabled = true;
                 }
 
-                yield return new WaitForSeconds(5f);
+                yield return new WaitForSeconds(checkSeconds);
             }
+        }
+
+        protected virtual void LookAt(Vector3 worldPosition)
+        {
+            Vector3 head = rotateFreedHead.transform.position;
+            Vector3 playerForward = rotateFreedHead.transform.forward;
+            Vector3 playerForwardYawOnly = new Vector3(playerForward.x, 0f, playerForward.z);
+
+            // Yaw only (x and z only)
+            Vector3 worldPositionYawOnly = new Vector3(worldPosition.x, 0f, worldPosition.z);
+            Vector3 playerPosYawOnly = new Vector3(head.x, 0f, head.z);
+            Vector3 playerToPosition = worldPositionYawOnly - playerPosYawOnly;
+            float yawAngle = Vector3.Angle(playerForwardYawOnly, playerToPosition);
+
+            // Pitch only (y only) - get player y pos and the world position on same plane so can calculate pitch
+            Vector3 playerForward_SamePlane = new Vector3(worldPosition.x, playerForward.y, worldPosition.z);
+            float pitchAngle = Vector3.Angle(playerForward_SamePlane, worldPosition);
+
+            // Red = player forward viewing vector. Green = target vector.
+            Debug.DrawRay(head, playerForward_SamePlane, Color.red, 100f);
+            Debug.DrawRay(head, worldPosition, Color.green, 100f);
+
+            Debug.Break();
+            
+            Debug.Log("[Expected: 0*] - Yaw Angle: " + yawAngle);
+            Debug.Log("[Expected: 45*] - Pitch Angle: " + pitchAngle);
+        }
+
+        protected IEnumerator LookAtCoroutine()
+        {
+            // Rotate character controller look rotation to look towards a worldPosition
+            yield break;
         }
 
         protected virtual void Update()
@@ -97,13 +135,13 @@ namespace MyProject
             MoveCharacter(moveInput, jumpInput, sprintInput, ref _isGrounded);
 
             // Update rotation (values only)
-            UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
+            //UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
         }
 
         protected void LateUpdate()
         {
             // Look-around character
-            CharacterLookAround(yawDegrees, pitchDegrees, rotateFreedHead, rotateBody);
+            //CharacterLookAround(yawDegrees, pitchDegrees, rotateFreedHead, rotateBody);
         }
 
         protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
