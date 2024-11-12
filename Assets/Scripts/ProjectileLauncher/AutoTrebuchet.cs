@@ -25,11 +25,7 @@ public class AutoTrebuchet : Trebuchet
             // Reload if reload button is active
             if (trebuchetReloader.activeInHierarchy)
             {
-                yield return new WaitForSeconds(5f);
-
-                Debug.Break();
-
-                Debug.Log("Reloading.");
+                yield return new WaitForSeconds(3f);
                 reloadButton.InteractWith();
                 break;
             }
@@ -48,11 +44,7 @@ public class AutoTrebuchet : Trebuchet
             // Launch if launch button is active
             if (trebuchetLaunchPreventer.activeInHierarchy)
             {
-                yield return new WaitForSeconds(5f);
-
-                Debug.Break();
-
-                Debug.Log("Launching.");
+                yield return new WaitForSeconds(3f);
                 launchButton.InteractWith();
                 break;
             }
@@ -62,5 +54,12 @@ public class AutoTrebuchet : Trebuchet
 
         StartCoroutine(HandleReloading());
         yield break;
+    }
+
+    protected override bool IsProjectileReadyToReleaseFromSling(float dotProductOfProjectileToWorldUp, float maxRandomDotProductOffset = 0.04f)
+    {
+        // Calculate a random point after 1 to release for some randomness
+        //float dotOffset = Random.Range(0, maxRandomDotProductOffset);
+        return dotProductOfProjectileToWorldUp < 1;
     }
 }

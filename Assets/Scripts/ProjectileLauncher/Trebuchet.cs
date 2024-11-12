@@ -156,7 +156,7 @@ public class Trebuchet : ProjectileLauncher
         return dotProductOfProjectileToWorldUp >= 0.95f;
     }
 
-    private bool IsProjectileReadyToReleaseFromSling(float dotProductOfProjectileToWorldUp, float maxRandomDotProductOffset = 0.04f)
+    protected virtual bool IsProjectileReadyToReleaseFromSling(float dotProductOfProjectileToWorldUp, float maxRandomDotProductOffset = 0.04f)
     {
         // Calculate a random point after 1 to release for some randomness
         float dotOffset = Random.Range(0, maxRandomDotProductOffset);
