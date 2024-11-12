@@ -1191,7 +1191,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &659177867
 Transform:
   m_ObjectHideFlags: 0
@@ -1930,6 +1930,88 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1216080}
   offset: {x: 0, y: 1.55, z: 0}
+--- !u!1001 &1322227818
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2146248295}
+    m_Modifications:
+    - target: {fileID: 1724121615066570522, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_Name
+      value: RocketExplosionParticles - Sphere (x2 emission)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1724121615066570522, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 44.999996
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.70710653
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.70710707
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4769923191879764429, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: ShapeModule.type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4769923191879764429, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: ShapeModule.arc.spread
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4769923191879764429, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: ShapeModule.radiusThickness
+      value: 1.0000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4769923191879764429, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.scalar
+      value: 140
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+--- !u!4 &1322227819 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+  m_PrefabInstance: {fileID: 1322227818}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1358435757
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2496,6 +2578,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1257332313314281782, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257332313314281782, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3850520278386344056, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_LocalPosition.x
       value: -27.77043
@@ -2539,6 +2629,18 @@ PrefabInstance:
     - target: {fileID: 5641964424972017301, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_Name
       value: AutoTrebuchet (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5641964424972017301, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5994774020627521904, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5994774020627521904, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3191,6 +3293,7 @@ Transform:
   - {fileID: 584147564}
   - {fileID: 321573913}
   - {fileID: 1089558164}
+  - {fileID: 1322227819}
   - {fileID: 1705475088}
   - {fileID: 2112569645}
   m_Father: {fileID: 659177867}
@@ -3264,6 +3367,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 589982377211548276, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: _startingHealth
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257332313314281782, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257332313314281782, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3850520278386344056, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_LocalPosition.x
       value: 27.770428
@@ -3307,6 +3422,14 @@ PrefabInstance:
     - target: {fileID: 5641964424972017301, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_Name
       value: AutoTrebuchet
+      objectReference: {fileID: 0}
+    - target: {fileID: 5994774020627521904, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5994774020627521904, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3397,7 +3520,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1724121615066570522, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
       propertyPath: m_Name
-      value: RocketExplosionParticles
+      value: RocketExplosionParticles - Hemisphere
       objectReference: {fileID: 0}
     - target: {fileID: 1724121615066570522, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
       propertyPath: m_IsActive
