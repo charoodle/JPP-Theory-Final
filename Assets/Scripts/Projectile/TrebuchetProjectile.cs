@@ -13,6 +13,11 @@ public class TrebuchetProjectile : Projectile
         base.Start();
     }
 
+    protected override void DestroyInAFewSeconds()
+    {
+        // Do not destroy in a few seconds. Wait for it to be launched instead.
+    }
+
     public void EnableParticles()
     {
         particles.Play();
