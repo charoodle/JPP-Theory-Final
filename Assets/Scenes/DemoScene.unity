@@ -3945,8 +3945,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000016212, y: -56.37}
-  m_SizeDelta: {x: 476.9075, y: 112.7391}
+  m_AnchoredPosition: {x: -0.000015259, y: -56.37}
+  m_SizeDelta: {x: 781.5417, y: 112.7391}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1086864586
 MonoBehaviour:
@@ -4784,7 +4784,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  interactText: Cut rope
+  interactText: Launch trebuchet
 --- !u!1 &1270070947
 GameObject:
   m_ObjectHideFlags: 0
