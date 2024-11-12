@@ -4,15 +4,29 @@ using UnityEngine;
 
 public class TrebuchetProjectile : Projectile
 {
+    [SerializeField] ParticleSystem particles;
+    Rigidbody rb;
+
+    protected override void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        base.Start();
+    }
+
+    public void EnableParticles()
+    {
+        particles.Play();
+    }
+
+    public void DisableParticles()
+    {
+        particles.Stop();
+    }
+
     protected void OnEnable()
     {
         // Don't allow projectile to be destroyed when its being reloaded
         allowCollisions = false;
-    }
-
-    protected override void Start()
-    {
-        // Don't destroy the projectile after seconds.
     }
 
     protected void Update()
@@ -27,8 +41,18 @@ public class TrebuchetProjectile : Projectile
         if (!allowCollisions)
             return;
 
+        // If touch ground, disable particles
+        if (collision.gameObject.CompareTag("Ground"))
+            DisableParticles();
+
         // Trebuchet projectile can roll and hit the castle
         if (TakeHealthAwayFrom(collision))
             DestroyProjectile();
+    }
+
+    protected override void StopProjectileMovement()
+    {
+        this.rb.isKinematic = true;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
     }
 }

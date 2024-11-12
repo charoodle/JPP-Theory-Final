@@ -92,33 +92,7 @@ public class RocketProjectile : Projectile
         explosion.transform.up = up;
     }
 
-    protected void DisableRocket()
-    {
-        // Stop it from moving
-        this.enabled = false;
-
-        // Disable any colliders
-        Collider[] colliders = GetComponentsInChildren<Collider>();
-        foreach (Collider col in colliders)
-            col.enabled = false;
-
-        // Disable any renderers (except particle system's)
-        Renderer[] renderers = GetComponentsInChildren<Renderer>();
-        foreach (Renderer rend in renderers)
-        {
-            if (rend as ParticleSystemRenderer)
-            {
-                // Disable particle system from emitting
-                ParticleSystem ps = rend.GetComponent<ParticleSystem>();
-                ps.Stop();
-
-                // Do not disable the particle system renderer; let the rocket trail render still
-                continue;
-            }
-
-            rend.enabled = false;
-        }
-    }
+    
 
     protected override void DestroyProjectile()
     {
@@ -129,7 +103,7 @@ public class RocketProjectile : Projectile
     protected IEnumerator LetRocketTrailParticlesFadeBeforeDestroy()
     {
         // Disable the rocket
-        DisableRocket();
+        DisableProjectileCollidersAndRenderers_ExceptParticles();
 
         // Wait for seconds
         yield return new WaitForSeconds(5f);
@@ -139,5 +113,8 @@ public class RocketProjectile : Projectile
         yield break;
     }
 
-    
+    protected override void StopProjectileMovement()
+    {
+        this.enabled = false;
+    }
 }

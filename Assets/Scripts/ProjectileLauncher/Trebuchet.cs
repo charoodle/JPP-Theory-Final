@@ -105,6 +105,9 @@ public class Trebuchet : ProjectileLauncher
                 StartCoroutine(TestRopeDetachFromProjectile());
                 ReleaseProjectileFromSling();
                 shootingCoroutine = null;
+                // Start particle system of projectile
+                TrebuchetProjectile trebuchetProj = projectile.GetComponent<TrebuchetProjectile>();
+                trebuchetProj.EnableParticles();
                 // Enable reload button
                 trebuchetReloader.SetActive(true);
                 yield break;

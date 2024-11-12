@@ -41,9 +41,23 @@ public abstract class Projectile : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Assumes only 1 particle system attached to projectile as child.
+    /// </summary>
+    protected float particleSystemLifetime = 0f;
+
     protected virtual void Start()
     {
         DestroyInAFewSeconds();
+
+        // Assumes particle system has constant lifetime
+        ParticleSystem ps = GetComponentInChildren<ParticleSystem>();
+        if(ps)
+        {
+            particleSystemLifetime = ps.main.startLifetime.constant;
+        }
+        else
+            Debug.Log("No particle system on: " + gameObject.name, this.gameObject);
     }
 
     protected virtual void DestroyInAFewSeconds()
@@ -79,6 +93,54 @@ public abstract class Projectile : MonoBehaviour
 
     protected virtual void DestroyProjectile()
     {
-        Destroy(gameObject);
+        // Wait for the particle trails to finish their lifetime before destroying (if it has any).
+        StartCoroutine(LetParticleTrailFadeBeforeDestroy());
     }
+
+    protected virtual IEnumerator LetParticleTrailFadeBeforeDestroy()
+    {
+        // If there are particles, disable the projectile colliders and renderers (except particles)
+        if(particleSystemLifetime > 0)
+        {
+            DisableProjectileCollidersAndRenderers_ExceptParticles();
+
+            // Wait for particle system lifetime to finish
+            yield return new WaitForSeconds(particleSystemLifetime);
+        }
+        
+        // Destroy the particles
+        Destroy(gameObject);
+
+        yield break;
+    }
+
+    protected virtual void DisableProjectileCollidersAndRenderers_ExceptParticles()
+    {
+        // Stop it from moving
+        StopProjectileMovement();
+
+        // Disable any colliders
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (Collider col in colliders)
+            col.enabled = false;
+
+        // Disable any renderers (except particle system's)
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer rend in renderers)
+        {
+            if (rend as ParticleSystemRenderer)
+            {
+                // Disable particle system from emitting
+                ParticleSystem ps = rend.GetComponent<ParticleSystem>();
+                ps.Stop();
+
+                // Do not disable the particle system renderer; let the rocket trail render still
+                continue;
+            }
+
+            rend.enabled = false;
+        }
+    }
+
+    protected abstract void StopProjectileMovement();
 }
