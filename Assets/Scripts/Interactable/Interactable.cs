@@ -14,7 +14,7 @@ public abstract class Interactable : MonoBehaviour
     protected Camera playerCam;
     protected Coroutine mouseEnterCoroutine;
 
-    private void Start()
+    protected virtual void Start()
     {
         playerCam = Camera.main;
         playerUI = FindObjectOfType<PlayerUI>();
