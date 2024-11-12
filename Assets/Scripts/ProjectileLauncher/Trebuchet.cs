@@ -308,7 +308,8 @@ public class Trebuchet : ProjectileLauncher
             yield return ReduceRigidbodyToZeroVelocity(counterweightRb, armPctRotation);
 
             // Rotate arm around hinge post
-            mainArm.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
+            //mainArm.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
+            mainArm.transform.Rotate(hingeJointWorld, angleSpeed);
 
             yield return new WaitForFixedUpdate();
         }
