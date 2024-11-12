@@ -289,7 +289,7 @@ public class Trebuchet : ProjectileLauncher
         // Convert from local hinge joint anchor to point in world
         Vector3 hingeJointLocal = postHingeJoint.anchor;
         Vector3 hingeJointWorld = postHingeJoint.transform.TransformPoint(hingeJointLocal);
-        Vector3 axis = Vector3.right;   //x axis
+        Vector3 axis = postHingeJoint.transform.right;
         float angleSpeed = -1f;  // rotate backwards
 
         // Rotate around the position for x seconds
@@ -307,9 +307,8 @@ public class Trebuchet : ProjectileLauncher
             // Make the weight go towards 0 velocity anyways, even with wonky percent numbers
             yield return ReduceRigidbodyToZeroVelocity(counterweightRb, armPctRotation);
 
-            // Rotate arm around hinge post
-            //mainArm.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
-            mainArm.transform.Rotate(hingeJointWorld, angleSpeed);
+            // Rotate arm around hinge post (ASSUMES FORWARD MATCHES Z-AXIS FORWARD)
+            mainArm.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
 
             yield return new WaitForFixedUpdate();
         }
