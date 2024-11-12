@@ -70,6 +70,7 @@ MonoBehaviour:
   startRadius: 0
   endRadius: 8
   duration: 0.6
+  durationUntilDestroyed: 1.15
 --- !u!1001 &7559256714557918471
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -121,6 +122,18 @@ PrefabInstance:
     - target: {fileID: 1950330012936256987, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4769923191879764429, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: ShapeModule.type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4769923191879764429, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: ShapeModule.radiusThickness
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4769923191879764429, guid: 8f1ca9288e9315f45817a7d24f3e907a, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.scalar
+      value: 140
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
