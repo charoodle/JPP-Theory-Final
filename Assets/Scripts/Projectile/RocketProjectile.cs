@@ -22,20 +22,29 @@ public class RocketProjectile : Projectile
             _speed = value;
         }
     }
+    float gravityForce = 0.3f;
     protected bool alreadyExploded = false;
+
 
     private void FixedUpdate()
     {
-        Vector3 velocity = (Vector3.forward * speed * Time.deltaTime) + (Vector3.down * 0.1f * Time.deltaTime);
+        if (!enabled)
+            return;
 
         // Make it go forward
-        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        Vector3 forward = (Vector3.forward * speed * Time.deltaTime);
+        if (forward.magnitude > 0)
+            transform.Translate(forward);
 
         // Make it go down; less force than gravity
-        transform.Translate(Vector3.down * 0.1f * Time.deltaTime);
+        Vector3 down = (Vector3.down * gravityForce * Time.deltaTime);
+        if (down.magnitude > 0)
+            transform.Translate(down);
 
         // Rocket points towards direction of velocity
-        transform.forward = transform.TransformDirection(velocity);
+        Vector3 velocity = forward + down;
+        if(velocity.magnitude > 0)
+            transform.forward = transform.TransformDirection(velocity);
 
         // TODO: Make it go slow, lock onto target, then speed up and follow it
         //  TODO: Change direction?
@@ -82,4 +91,53 @@ public class RocketProjectile : Projectile
         GameObject explosion = Instantiate(rocketExplosionPrefab, position, rocketExplosionPrefab.transform.rotation);
         explosion.transform.up = up;
     }
+
+    protected void DisableRocket()
+    {
+        // Stop it from moving
+        this.enabled = false;
+
+        // Disable any colliders
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (Collider col in colliders)
+            col.enabled = false;
+
+        // Disable any renderers (except particle system's)
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer rend in renderers)
+        {
+            if (rend as ParticleSystemRenderer)
+            {
+                // Disable particle system from emitting
+                ParticleSystem ps = rend.GetComponent<ParticleSystem>();
+                ps.Stop();
+
+                // Do not disable the particle system renderer; let the rocket trail render still
+                continue;
+            }
+
+            rend.enabled = false;
+        }
+    }
+
+    protected override void DestroyProjectile()
+    {
+        // After explosion, wait until particle system lifetime and then destroy object
+        StartCoroutine(LetRocketTrailParticlesFadeBeforeDestroy());
+    }
+
+    protected IEnumerator LetRocketTrailParticlesFadeBeforeDestroy()
+    {
+        // Disable the rocket
+        DisableRocket();
+
+        // Wait for seconds
+        yield return new WaitForSeconds(5f);
+
+        base.DestroyProjectile();
+
+        yield break;
+    }
+
+    
 }
