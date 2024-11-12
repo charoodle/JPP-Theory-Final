@@ -53,11 +53,7 @@ public abstract class Projectile : MonoBehaviour
         // Assumes particle system has constant lifetime
         ParticleSystem ps = GetComponentInChildren<ParticleSystem>();
         if(ps)
-        {
             particleSystemLifetime = ps.main.startLifetime.constant;
-        }
-        else
-            Debug.Log("No particle system on: " + gameObject.name, this.gameObject);
     }
 
     protected virtual void DestroyInAFewSeconds()
