@@ -57,11 +57,33 @@ namespace MyProject
         [SerializeField] LayerMask characterLayer;
         LayerMask groundCheckLayer;
 
+        // Spawn position
+        Vector3 spawnPosition;
 
         protected virtual void Start()
         {
             // Ground = anything not the character layer
             groundCheckLayer = ~characterLayer;
+
+            // Original spawn position, in case ever fall out of map
+            spawnPosition = transform.position;
+
+            StartCoroutine(PreventOutOfBoundsCoroutine());
+        }
+
+        protected IEnumerator PreventOutOfBoundsCoroutine()
+        {
+            while(true)
+            {
+                if (transform.position.y < -30f)
+                {
+                    controller.enabled = false;
+                    transform.position = spawnPosition;
+                    controller.enabled = true;
+                }
+
+                yield return new WaitForSeconds(5f);
+            }
         }
 
         protected virtual void Update()
