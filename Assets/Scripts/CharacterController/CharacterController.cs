@@ -127,6 +127,9 @@ namespace MyProject
 
         protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
+            // BUG: Pitch seems to be indirectly affected by yaw
+            // Pitch doesn't work if rotate around. Only if block is in front.
+
             Vector3 head = rotateFreedHead.transform.position;
             Vector3 playerForward = rotateFreedHead.transform.forward;
             Vector3 playerForwardYawOnly = Vector3.forward;             //yaw is based off z-forward = 0*
@@ -141,7 +144,7 @@ namespace MyProject
                 yaw = -yaw;
 
             // Pitch only (y only) - get player camera forward y pos and the world position on same plane so can calculate pitch
-            Vector3 playerCamForwardDir_SamePlaneAsWorldPosition = head + new Vector3(worldPosition.x, playerForward.y, worldPosition.z);
+            Vector3 playerCamForwardDir_SamePlaneAsWorldPosition = new Vector3(worldPosition.x, head.y + playerForward.y, worldPosition.z);
             Vector3 playerForwardPitch = playerCamForwardDir_SamePlaneAsWorldPosition - head;
             Vector3 playerToWorldPosition = worldPosition - head;
             pitch = Vector3.Angle(playerForwardPitch, playerToWorldPosition);
@@ -151,7 +154,8 @@ namespace MyProject
 
             // Red = player forward viewing vector.
             // Pitch
-            //Debug.DrawLine(head, playerCamForwardDir_SamePlaneAsWorldPosition, Color.yellow);
+            Debug.DrawRay(head, playerToWorldPosition, Color.red);
+            Debug.DrawLine(head, playerCamForwardDir_SamePlaneAsWorldPosition, Color.yellow);
             //Debug.DrawLine(head, worldPosition, Color.green);
         }
 
@@ -166,7 +170,7 @@ namespace MyProject
             MoveCharacter(moveInput, jumpInput, sprintInput, ref _isGrounded);
 
             // Update rotation (values only)
-            UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
+            //UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
         }
 
         protected void LateUpdate()
