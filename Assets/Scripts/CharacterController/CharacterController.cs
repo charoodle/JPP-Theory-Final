@@ -112,7 +112,7 @@ namespace MyProject
                 GetTargetPitchAndYawFrom(tfm.position, out yaw, out pitch);
 
                 this.yawDegrees = yaw;
-                //this.pitchDegrees = pitch;
+                this.pitchDegrees = pitch;
 
                 // Clamp
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
@@ -127,29 +127,31 @@ namespace MyProject
         protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
             Vector3 head = rotateFreedHead.transform.position;
-            Vector3 playerForward = Vector3.forward;
-            Vector3 playerForwardYawOnly = new Vector3(playerForward.x, 0f, playerForward.z);
-
+            
             // Yaw only (x and z only)
-            Vector3 worldPositionYawOnly = new Vector3(worldPosition.x, 0f, worldPosition.z);
-            Vector3 playerPosYawOnly = new Vector3(head.x, 0f, head.z);
-            Vector3 playerToPosition = worldPositionYawOnly - playerPosYawOnly;
-            yaw = Vector3.Angle(playerForwardYawOnly, playerToPosition);
-            Vector3 cross = Vector3.Cross(playerForwardYawOnly, playerToPosition);
-            if (cross.y < 0)
-                yaw = -yaw;
+            {
+                Vector3 yawForward = Vector3.forward;
+                Vector3 playerForwardYawOnly = new Vector3(yawForward.x, 0f, yawForward.z);
+                Vector3 worldPositionYawOnly = new Vector3(worldPosition.x, 0f, worldPosition.z);
+                Vector3 playerPosYawOnly = new Vector3(head.x, 0f, head.z);
+                Vector3 playerToPosition = worldPositionYawOnly - playerPosYawOnly;
+                yaw = Vector3.Angle(playerForwardYawOnly, playerToPosition);
+                Vector3 cross = Vector3.Cross(playerForwardYawOnly, playerToPosition);
+                if (cross.y < 0)
+                    yaw = -yaw;
+            }
 
-            pitch = 0f;
-            /*
             // Pitch only (y only) - get player camera forward y pos and the world position on same plane so can calculate pitch
-            Vector3 playerCamForwardDir_SamePlaneAsWorldPosition = new Vector3(worldPosition.x, head.y + rotateFreedHead.transform.forward.y, worldPosition.z);
-            Vector3 playerForwardPitch = playerCamForwardDir_SamePlaneAsWorldPosition - head;
-            Vector3 playerToWorldPosition = worldPosition - head;
-            pitch = Vector3.Angle(playerForwardPitch, playerToWorldPosition);
-            Vector3 cross = Vector3.Cross(playerForwardPitch, playerToWorldPosition);
-            if (cross.x < 0)
-                pitch = -pitch;
-            */
+            //  TODO: Fix pitch being slightly offset
+            {
+                Vector3 playerCamForwardDir_SamePlaneAsWorldPosition = new Vector3(head.x + worldPosition.x, head.y + rotateFreedHead.transform.forward.y, head.z + worldPosition.z);
+                Vector3 playerForwardPitch = playerCamForwardDir_SamePlaneAsWorldPosition - head;
+                Vector3 playerToWorldPosition = worldPosition - head;
+                pitch = -Vector3.Angle(playerForwardPitch, playerToWorldPosition);
+                //cross = Vector3.Cross(playerForwardPitch, playerToWorldPosition);
+                //if (cross.x < 0)
+                //    pitch = -pitch;
+            }
 
             // Red = player forward viewing vector.
             //Debug.DrawLine(head, playerCamForwardDir_SamePlaneAsWorldPosition, Color.yellow);
