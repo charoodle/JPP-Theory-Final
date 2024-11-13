@@ -101,8 +101,6 @@ namespace MyProject
             StartCoroutine(LookAtCoroutine(lookAtTfm));
         }
 
-        public float yawAngle;
-        public float pitchAngle;
         protected IEnumerator LookAtCoroutine(Transform tfm)
         {
             while (true)
@@ -119,42 +117,23 @@ namespace MyProject
 
                 yield return null;
             }
-
-            // Rotate character controller look rotation to look towards a worldPosition
-            //yield break;
         }
 
         protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
-            Vector3 head = rotateFreedHead.transform.position;
-            
-            // Yaw only (x and z only) (works)
-            {
-                Vector3 yawForward = Vector3.forward;
-                Vector3 playerForwardYawOnly = new Vector3(yawForward.x, 0f, yawForward.z);
-                Vector3 worldPositionYawOnly = new Vector3(worldPosition.x, 0f, worldPosition.z);
-                Vector3 playerPosYawOnly = new Vector3(head.x, 0f, head.z);
-                Vector3 playerToPosition = worldPositionYawOnly - playerPosYawOnly;
-                yaw = Vector3.Angle(playerForwardYawOnly, playerToPosition);
-                Vector3 cross = Vector3.Cross(playerForwardYawOnly, playerToPosition);
-                if (cross.y < 0)
-                    yaw = -yaw;
-            }
+            // Yaw and pitch degrees are relative to the world forward direction
+            Vector3 worldForward = Vector3.forward;
+            Vector3 headPosition = rotateFreedHead.transform.position;
+            Vector3 toDirection = worldPosition - headPosition;
+            Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
 
-            // Pitch only (y only) - get player camera forward y pos and the world position on same plane so can calculate pitch
-            {
-                Vector3 camDir = new Vector3(head.x + worldPosition.x, head.y + rotateFreedHead.transform.forward.y, head.z + worldPosition.z);
-                Vector3 camDirAtOrigin = camDir - head;
-                Vector3 camToPositionDir = worldPosition - head;
-                pitch = Vector3.Angle(camDirAtOrigin, camToPositionDir);
-                Vector3 cross = Vector3.Cross(camDirAtOrigin, camToPositionDir);
-                if (cross.x < 0)
-                    pitch = -pitch;
-            }
+            // Assign eulers out
+            yaw = quat.eulerAngles.y;
+            pitch = quat.eulerAngles.x;
 
-            // Red = player forward viewing vector.
-            //Debug.DrawLine(head, playerCamForwardDir_SamePlaneAsWorldPosition, Color.yellow);
-            //Debug.DrawLine(head, worldPosition, Color.green);
+            // If look object goes above head object, euler X will wrap around from 1* to 360*.
+            if(quat.eulerAngles.x > 180f)
+                pitch = quat.eulerAngles.x - 360f;
         }
 
         protected virtual void Update()
