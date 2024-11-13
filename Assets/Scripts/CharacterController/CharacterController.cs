@@ -103,14 +103,17 @@ namespace MyProject
 
         protected IEnumerator LookAtCoroutine(Transform tfm)
         {
+            float lookSpeed = 0.5f;
             while (true)
             {
-                float yaw = 0f;
-                float pitch = 0f;
-                GetTargetPitchAndYawFrom(tfm.position, out yaw, out pitch);
+                // Get target pitch and yaw from a world position for char to look at
+                float targetYaw = 0f;
+                float targetPitch = 0f;
+                GetTargetPitchAndYawFrom(tfm.position, out targetYaw, out targetPitch);
 
-                this.yawDegrees = yaw;
-                this.pitchDegrees = pitch;
+                // Lerp current yaw and pitch towards target yaw/pitch
+                this.yawDegrees = Mathf.Lerp(yawDegrees, targetYaw, Time.deltaTime * lookSpeed);
+                this.pitchDegrees = Mathf.Lerp(pitchDegrees, targetPitch, Time.deltaTime * lookSpeed);
 
                 // Clamp
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
@@ -130,6 +133,11 @@ namespace MyProject
             // Assign eulers out
             yaw = quat.eulerAngles.y;
             pitch = quat.eulerAngles.x;
+            // Left = negative
+            // Right = positive
+            // It will jump when x = negative
+            //if (quat.eulerAngles.y < 0f)
+            //    yaw = quat.eulerAngles.y - 360f;
 
             // If look object goes above head object, euler X will wrap around from 1* to 360*.
             if(quat.eulerAngles.x > 180f)
