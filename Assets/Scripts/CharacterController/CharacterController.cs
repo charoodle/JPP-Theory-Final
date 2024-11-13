@@ -107,30 +107,52 @@ namespace MyProject
         {
             while (true)
             {
-                Vector3 worldPosition = tfm.position;
+                float yaw = 0f;
+                float pitch = 0f;
+                GetTargetPitchAndYawFrom(tfm.position, out yaw, out pitch);
 
-                Vector3 head = rotateFreedHead.transform.position;
-                Vector3 playerForward = rotateFreedHead.transform.forward;
-                Vector3 playerForwardYawOnly = new Vector3(playerForward.x, 0f, playerForward.z);
+                //this.yawDegrees = yaw;
+                this.pitchDegrees = pitch;
 
-                // Yaw only (x and z only)
-                Vector3 worldPositionYawOnly = new Vector3(worldPosition.x, 0f, worldPosition.z);
-                Vector3 playerPosYawOnly = new Vector3(head.x, 0f, head.z);
-                Vector3 playerToPosition = worldPositionYawOnly - playerPosYawOnly;
-                yawAngle = Vector3.Angle(playerForwardYawOnly, playerToPosition);
+                // Clamp
+                pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
 
-                // Pitch only (y only) - get player camera forward y pos and the world position on same plane so can calculate pitch
-                Vector3 playerCamForwardDir_SamePlaneAsWorldPosition = new Vector3(worldPosition.x, head.y + playerForward.y, worldPosition.z);
-                pitchAngle = Vector3.Angle(playerCamForwardDir_SamePlaneAsWorldPosition - new Vector3(head.x, head.y, head.z), worldPosition - head);
 
-                // Red = player forward viewing vector.
-                Debug.DrawLine(head, playerCamForwardDir_SamePlaneAsWorldPosition, Color.yellow);
-                Debug.DrawLine(head, worldPosition, Color.green);
                 yield return null;
             }
 
             // Rotate character controller look rotation to look towards a worldPosition
             //yield break;
+        }
+
+        protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
+        {
+            Vector3 head = rotateFreedHead.transform.position;
+            Vector3 playerForward = rotateFreedHead.transform.forward;
+            Vector3 playerForwardYawOnly = Vector3.forward;             //yaw is based off z-forward = 0*
+
+            // Yaw only (x and z only)
+            Vector3 worldPositionYawOnly = new Vector3(worldPosition.x, 0f, worldPosition.z);
+            Vector3 playerPosYawOnly = new Vector3(head.x, 0f, head.z);
+            Vector3 playerToPosition = worldPositionYawOnly - playerPosYawOnly;
+            yaw = Vector3.Angle(playerForwardYawOnly, playerToPosition);
+            Vector3 cross = Vector3.Cross(playerForwardYawOnly, playerToPosition);
+            if (cross.y < 0)
+                yaw = -yaw;
+
+            // Pitch only (y only) - get player camera forward y pos and the world position on same plane so can calculate pitch
+            Vector3 playerCamForwardDir_SamePlaneAsWorldPosition = head + new Vector3(worldPosition.x, playerForward.y, worldPosition.z);
+            Vector3 playerForwardPitch = playerCamForwardDir_SamePlaneAsWorldPosition - head;
+            Vector3 playerToWorldPosition = worldPosition - head;
+            pitch = Vector3.Angle(playerForwardPitch, playerToWorldPosition);
+            cross = Vector3.Cross(playerForwardPitch, playerToWorldPosition);
+            if (cross.x < 0)
+                pitch = -pitch;
+
+            // Red = player forward viewing vector.
+            // Pitch
+            //Debug.DrawLine(head, playerCamForwardDir_SamePlaneAsWorldPosition, Color.yellow);
+            //Debug.DrawLine(head, worldPosition, Color.green);
         }
 
         protected virtual void Update()
@@ -144,13 +166,13 @@ namespace MyProject
             MoveCharacter(moveInput, jumpInput, sprintInput, ref _isGrounded);
 
             // Update rotation (values only)
-            //UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
+            UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
         }
 
         protected void LateUpdate()
         {
             // Look-around character
-            //CharacterLookAround(yawDegrees, pitchDegrees, rotateFreedHead, rotateBody);
+            CharacterLookAround(yawDegrees, pitchDegrees, rotateFreedHead, rotateBody);
         }
 
         protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
