@@ -60,9 +60,6 @@ namespace MyProject
         // Spawn position
         Vector3 spawnPosition;
 
-        // Temporary - LookAt debugging
-        public Transform lookAtTfm;
-
         protected virtual void Start()
         {
             // Ground = anything not the character layer
@@ -73,9 +70,6 @@ namespace MyProject
 
             // Check player from going out of bounds every couple secons
             StartCoroutine(PreventOutOfBoundsCoroutine());
-
-            // DEBUG: Make player look at a point in space
-            //LookAt()
         }
 
         protected IEnumerator PreventOutOfBoundsCoroutine()
@@ -96,9 +90,46 @@ namespace MyProject
         }
 
         #region Look At Functions
-        protected virtual void LookAt(Transform position, float rotateSpeed = 5f)
+        protected const float LOOKTIME = 0.5f;
+        protected const float INITIAL_LOOKVEL = 0.5f;
+
+        /// <summary>
+        /// Make the character controller permanently look towards a target, until you manually stop it.
+        /// </summary>
+        /// <param name="target"></param>
+        protected virtual Coroutine LookAt(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
-            StartCoroutine(LookAtCoroutine(lookAtTfm, rotateSpeed));
+            StopAllCoroutines();
+            return StartCoroutine(LookAtCoroutine(target, lookTime, initialLookVel));
+        }
+
+        /// <summary>
+        /// Make the character controller look towards a target for x seconds, and then optionally return to its previous look rotation.
+        /// </summary>
+        /// <param name="target">Target transform to look at.</param>
+        /// <param name="duration">How many seconds to maintain look at target.</param>
+        /// <param name="returnToPrevLookRotation">(Optionally) return to previous character's look direction.</param>
+        /// <param name="lookTime">Roughly how many seconds until character's look direction matches to target direction.</param>
+        /// <param name="initialLookVel">How fast the character look speed initially is.</param>
+        protected virtual void LookAtForDuration(Transform target, float duration, bool returnToPrevLookRotation = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            StopAllCoroutines();
+            StartCoroutine(LookAtTargetAndThenBack(target, duration, returnToPrevLookRotation, lookTime, initialLookVel));
+        }
+
+        protected virtual IEnumerator LookAtTargetAndThenBack(Transform target, float duration, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            float savedPitch = pitchDegrees;
+            float savedYaw = yawDegrees;
+            // Look at the castle in distance
+            yield return LookAtCoroutine(target.position, lookTime, initialLookVel);
+            // Hold look there for a time period
+            yield return new WaitForSeconds(duration);
+            if(returnBackToPrevLookDir)
+            {
+                // Return to previous rotation
+                yield return LookAtCoroutine(savedPitch, savedYaw, lookTime, initialLookVel);
+            }
         }
 
         protected virtual IEnumerator LookAtCastleAndThenBackToPrevious()
@@ -120,7 +151,7 @@ namespace MyProject
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(Transform target, float lookSpeed, float lookTime = 0.5f, float initialLookVel = 0f)
+        protected virtual IEnumerator LookAtCoroutine(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             float yawVel = initialLookVel;
             float pitchVel = initialLookVel;
@@ -151,6 +182,13 @@ namespace MyProject
             }
         }
 
+        protected virtual IEnumerator LookAtCoroutine(Transform target, float holdForDuration, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            // TODO - Same as above, but once it reaches the target, start a timer for x seconds to lock view onto that target (even if target is moving). Once seconds are up, the character is not locked onto that target anymore.
+
+            yield break;
+        }
+
         /// <summary>
         /// Make the character controller rotate to look at a target pitch and yaw roughly within <paramref name="lookTime"/> seconds.
         /// </summary>
@@ -159,7 +197,7 @@ namespace MyProject
         /// <param name="lookTime">Roughly how many seconds until is fully looking at target pitch/yaw.</param>
         /// <param name="initialLookVel">Higher number = faster initial look velocity.</param>
         /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(float targetPitch, float targetYaw, float lookTime = 0.5f, float initialLookVel = 0f)
+        protected virtual IEnumerator LookAtCoroutine(float targetPitch, float targetYaw, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             /*
              * Use cases:
@@ -245,7 +283,7 @@ namespace MyProject
         /// <param name="worldPos">Position to look at.</param>
         /// <param name="lookTime">Roughly how many seconds until head looks at that direction from current direction.</param>
         /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float lookTime = 0.5f, float initialLookVel = 0f)
+        protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             
             GetTargetPitchAndYawFrom(worldPos, out float yaw, out float pitch);
@@ -312,8 +350,12 @@ namespace MyProject
         {
             if (Input.GetKeyDown(KeyCode.L))
             {
+                Transform castle = GameObject.Find("EnemyCastle").transform;
+                LookAtForDuration(castle, 3f);
+            }
+            else if(Input.GetKeyDown(KeyCode.K))
+            {
                 StopAllCoroutines();
-                StartCoroutine(LookAtCastleAndThenBackToPrevious());
             }
 
             // Update input
