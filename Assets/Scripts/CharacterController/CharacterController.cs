@@ -76,7 +76,7 @@ namespace MyProject
 
             // TODO: Make player look at a point in space
             //Debug.DrawRay(rotateFreedHead.position, lookAtTfm.position-rotateFreedHead.position, Color.white, 100f);
-            LookAt(lookAtTfm);
+            //LookAt(lookAtTfm);
         }
 
         protected IEnumerator PreventOutOfBoundsCoroutine()
@@ -101,6 +101,9 @@ namespace MyProject
             StartCoroutine(LookAtCoroutine(lookAtTfm));
         }
 
+        public Vector3 quaternionEulers;
+        public float yawDegreesRaw;
+        public float yawDegreesTarget;
         protected IEnumerator LookAtCoroutine(Transform tfm)
         {
             float lookSpeed = 0.5f;
@@ -111,37 +114,97 @@ namespace MyProject
                 float targetPitch = 0f;
                 GetTargetPitchAndYawFrom(tfm.position, out targetYaw, out targetPitch);
 
+                // Instantly look at it
+                //this.yawDegrees = targetYaw;
+                //this.pitchDegrees = targetPitch;
+
+                yawDegreesRaw = yawDegrees;
+                yawDegreesTarget = targetYaw;
+
+                // If targetYaw has a different sign than current one, make yawDegrees into equivalent negative version
+                // Since it would cause it to lerp from 179.999 to -179.999 (making char spin all the way around)
+                //if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
+                //{
+                //    if (Mathf.Sign(targetYaw) == -1)
+                //        yawDegrees -= 360f;
+                //}
+
+                // If the difference of targetYaw - yawDegrees is > 359*
+                if (yawDegrees - targetYaw < -350f)
+                {
+                    yawDegrees += 360f;
+                }
+                else if(yawDegrees - targetYaw > 350f)
+                {
+                    yawDegrees -= 360f;
+                }
+
+
                 // Lerp current yaw and pitch towards target yaw/pitch
-                this.yawDegrees = Mathf.Lerp(yawDegrees, targetYaw, Time.deltaTime * lookSpeed);
-                this.pitchDegrees = Mathf.Lerp(pitchDegrees, targetPitch, Time.deltaTime * lookSpeed);
+                //this.yawDegrees = Mathf.Lerp(yawDegrees, targetYaw, Time.deltaTime * lookSpeed);
+                //this.pitchDegrees = Mathf.Lerp(pitchDegrees, targetPitch, Time.deltaTime * lookSpeed);
+
+                // Instantly assign it
+                this.yawDegrees = targetYaw;
+                this.pitchDegrees = targetPitch;
 
                 // Clamp
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
+                yawDegrees = yawDegrees % 360f;
 
                 yield return null;
             }
         }
 
+        public Transform lookAtTargetRotation;
         protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
-            // Yaw and pitch degrees are relative to the world forward direction
-            Vector3 worldForward = Vector3.forward;
-            Vector3 headPosition = rotateFreedHead.transform.position;
-            Vector3 toDirection = worldPosition - headPosition;
-            Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
+            //{
+            //    lookAtTargetRotation.LookAt(worldPosition);
+            //    yaw = lookAtTargetRotation.eulerAngles.y;
+            //    pitch = lookAtTargetRotation.eulerAngles.x;
 
-            // Assign eulers out
-            yaw = quat.eulerAngles.y;
-            pitch = quat.eulerAngles.x;
-            // Left = negative
-            // Right = positive
-            // It will jump when x = negative
-            //if (quat.eulerAngles.y < 0f)
-            //    yaw = quat.eulerAngles.y - 360f;
+            //    // If look object goes above head object, euler X will wrap around from 1* to 360*.
+            //    if (pitch > 180f)
+            //        pitch -= 360f;
+            //    // If look object goes to left, euler Y will wrap from 1* to 360*
+            //    //if (yaw > 180f)
+            //    //    yaw -= 360f;
+            //    return;
+            //}
 
-            // If look object goes above head object, euler X will wrap around from 1* to 360*.
-            if(quat.eulerAngles.x > 180f)
-                pitch = quat.eulerAngles.x - 360f;
+            //{
+            //    // Prevent camera roll on slerp by setting z to 0
+            //    Quaternion camForward = Quaternion.Euler(rotateFreedHead.rotation.eulerAngles.x, rotateFreedHead.rotation.eulerAngles.y, 0f);
+            //    Vector3 toTargetDir = worldPosition - rotateFreedHead.position;
+            //    Quaternion toTarget = Quaternion.LookRotation(toTargetDir.normalized);
+            //    Quaternion rotation = Quaternion.Slerp(camForward, toTarget, 1f);
+
+            //    pitch = rotation.eulerAngles.x;
+            //    yaw = rotation.eulerAngles.y;
+            //    return;
+            //}
+
+            { 
+                // Yaw and pitch degrees are relative to the world forward direction
+                Vector3 worldForward = Vector3.forward;
+                Vector3 headPosition = rotateFreedHead.transform.position;
+                Vector3 toDirection = worldPosition - headPosition;
+                Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
+
+                // Assign eulers out
+                yaw = quat.eulerAngles.y;
+                pitch = quat.eulerAngles.x;
+
+                // DEBUG - ignore pitch, focus only on yaw
+                pitch = 0f;
+
+                // If look object goes above head object, euler X will wrap around from 1* to 360*.
+                if (quat.eulerAngles.x > 180f)
+                    pitch = quat.eulerAngles.x - 360f;
+                //if (yaw > 180f)
+                //    yaw = quat.eulerAngles.y - 360f;
+            }
         }
 
         protected virtual void Update()
@@ -155,13 +218,13 @@ namespace MyProject
             MoveCharacter(moveInput, jumpInput, sprintInput, ref _isGrounded);
 
             // Update rotation (values only)
-            //UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
+            UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
         }
 
         protected void LateUpdate()
         {
             // Look-around character
-            CharacterLookAround(yawDegrees, pitchDegrees, rotateFreedHead, rotateBody);
+            CharacterLookAround(ref yawDegrees, ref pitchDegrees, rotateFreedHead, rotateBody);
         }
 
         protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
@@ -224,8 +287,17 @@ namespace MyProject
         /// <param name="pitchDegrees">Euler degrees to pitch the character around.</param>
         /// <param name="detachedHead">Rotates around the y *and* x axis. So it should be on a separate gameobject than the body (ex camera).</param>
         /// <param name="body">Rotates around the y axis.</param>
-        protected void CharacterLookAround(float yawDegrees, float pitchDegrees, Transform detachedHead, Transform body)
+        protected void CharacterLookAround(ref float yawDegrees, ref float pitchDegrees, Transform detachedHead, Transform body)
         {
+            // Clamp up and down rotation
+            pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
+
+            // Keep look rotation within -180 to +180. If goes over 180 or less than -180, wrap it by 360* and change the sign.
+            if (yawDegrees > 180f)
+                yawDegrees -= 360f; // get the equivalent negative version
+            else if (yawDegrees < -180f)
+                yawDegrees += 360f; // get the equivalent positive version
+
             // Rotate camera - assumes its on a separate object from character that follow's character's body
             detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
 
@@ -238,8 +310,6 @@ namespace MyProject
             // Change x and y rotations by input
             lookXRotation += lookInput.x;
             lookYRotation -= lookInput.y;
-            // Clamp up and down rotation
-            lookYRotation = Mathf.Clamp(lookYRotation, maxPitchDegreesDown, maxPitchDegreesUp);
         }
 
         /// <summary>
