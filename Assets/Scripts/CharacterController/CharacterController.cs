@@ -157,29 +157,32 @@ namespace MyProject
             float pitchVel = initialLookVel;
             while (true)
             {
-                float currentYaw = yawDegrees;
-                float currentPitch = pitchDegrees;
-
                 // Get target pitch and yaw from a world position for char to look at
                 GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
-
-                // Make sure the target angle has same system as this cc's yaw system.
-                KeepYawBetween180(ref targetYaw);
-
-                // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
-                currentYaw = DetectIfYawPassesOver180(currentYaw, targetYaw);
-
-                // SmoothDamp current yaw and pitch towards target yaw/pitch
-                this.yawDegrees = Mathf.SmoothDamp(currentYaw, targetYaw, ref yawVel, lookTime);
-                this.pitchDegrees = Mathf.SmoothDamp(currentPitch, targetPitch, ref pitchVel, lookTime);
-
-                // Yaw - Convert final angle to -180 to 180
-                KeepYawBetween180(ref yawDegrees);
-                // Pitch - Clamp final angle from -90 to 90
-                pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
-
+                SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
                 yield return null;
             }
+        }
+
+        /// <summary>
+        /// Make the character controller look towards a moving transform. Stops when it looks close enough towards the moving transform.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="lookTime"></param>
+        /// <param name="initialLookVel"></param>
+        /// <returns></returns>
+        protected IEnumerator LookAtMovingTransform(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            float yawVel = initialLookVel;
+            float pitchVel = initialLookVel;
+            while(true)
+            {
+                // Get target pitch and yaw from a world position for char to look at
+                GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+                SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
+                yield return null;
+            }
+
         }
 
         protected virtual IEnumerator LookAtCoroutine(Transform target, float holdForDuration, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
@@ -238,43 +241,56 @@ namespace MyProject
                 this.yawDegrees = targetYaw;
                 yield break;
             }
-
-            bool IsCloseEnough(float degrees, float targetDegrees)
-            {
-                return Mathf.Abs(targetDegrees - degrees) <= 0.1f;
-            }
                 
             float yawVel = initialLookVel;
             float pitchVel = initialLookVel;
 
-            // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen).
-
-            while (!IsCloseEnough(yawDegrees, targetYaw) || !IsCloseEnough(pitchDegrees, targetPitch))
+            // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+            while (!LookDegreesIsCloseEnough(yawDegrees, targetYaw) || !LookDegreesIsCloseEnough(pitchDegrees, targetPitch))
             {
-                float currentYaw = yawDegrees;
-                float currentPitch = pitchDegrees;
-
-                // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
-                currentYaw = DetectIfYawPassesOver180(currentYaw, targetYaw);
-
-                // Make sure the target angle has same system as this cc's yaw system.
-                KeepYawBetween180(ref targetYaw);
-
-                // SmoothDamp current yaw and pitch towards target yaw/pitch
-                this.yawDegrees = Mathf.SmoothDamp(currentYaw, targetYaw, ref yawVel, lookTime);
-                this.pitchDegrees = Mathf.SmoothDamp(currentPitch, targetPitch, ref pitchVel, lookTime);
-
-                // Convert to -180 to 180 for pitch system
-                KeepYawBetween180(ref yawDegrees);
-                // Pitch - Clamp from -90 to 90
-                pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
-
+                SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
                 yield return null;
             }
 
             // Make sure pitch/yaw values = target.
             pitchDegrees = targetPitch;
             yawDegrees = targetYaw;
+        }
+
+        /// <summary>
+        /// Meant to be used in a while loop. SmoothDamps yawDegrees and pitchDegrees towards targetYaw and targetPitch.
+        /// </summary>
+        /// <param name="yawDegrees">Character's current yaw rotation.</param>
+        /// <param name="pitchDegrees">Character's current pitch rotation.</param>
+        /// <param name="targetYaw">Target yaw for the character to look at.</param>
+        /// <param name="targetPitch">Target pitch for the character to look at.</param>
+        /// <param name="yawVel">Initial yaw velocity for Mathf.SmoothDamp.</param>
+        /// <param name="pitchVel">Initial pitch velocity for Mathf.SmoothDamp.</param>
+        /// <param name="lookTime">SmoothTime for Mathf.SmoothDamp.</param>
+        protected void SmoothDampYawAndPitchToTarget(ref float yawDegrees, ref float pitchDegrees, float targetYaw, float targetPitch, ref float yawVel, ref float pitchVel, float lookTime)
+        {
+            float currentYaw = yawDegrees;
+            float currentPitch = pitchDegrees;
+
+            // Make sure the target angle has same system as this cc's yaw system.
+            KeepYawBetween180(ref targetYaw);
+
+            // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
+            currentYaw = DetectIfYawPassesOver180(currentYaw, targetYaw);
+
+            // SmoothDamp current yaw and pitch towards target yaw/pitch
+            this.yawDegrees = Mathf.SmoothDamp(currentYaw, targetYaw, ref yawVel, lookTime);
+            this.pitchDegrees = Mathf.SmoothDamp(currentPitch, targetPitch, ref pitchVel, lookTime);
+
+            // Convert to -180 to 180 for pitch system
+            KeepYawBetween180(ref yawDegrees);
+            // Pitch - Clamp from -90 to 90
+            pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
+        }
+
+        protected bool LookDegreesIsCloseEnough(float yawDegrees, float targetYawDegrees, float degreesGap = 0.1f)
+        {
+            return Mathf.Abs(targetYawDegrees - yawDegrees) <= degreesGap;
         }
 
         /// <summary>
