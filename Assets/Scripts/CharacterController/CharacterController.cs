@@ -75,7 +75,7 @@ namespace MyProject
             StartCoroutine(PreventOutOfBoundsCoroutine());
 
             // DEBUG: Make player look at a point in space
-            //LookAt(lookAtTfm);
+            StartCoroutine(LookAtCoroutine(0, 90f));
         }
 
         protected IEnumerator PreventOutOfBoundsCoroutine()
@@ -100,7 +100,7 @@ namespace MyProject
             //StartCoroutine(LookAtCoroutine_LockedIn(lookAtTfm, rotateSpeed));
 
             // Look right and slightly up over 10 seconds
-            StartCoroutine(LookAtCoroutine(0, 270f, 3f));
+            //StartCoroutine(LookAtCoroutine(0, 90f, 3f));
         }
 
         protected virtual IEnumerator LookAtCastleAndThenBackToPrevious()
@@ -109,11 +109,11 @@ namespace MyProject
             float pitch = pitchDegrees;
             float yaw = yawDegrees;
             // Look at the castle in distance
-            yield return LookAtCoroutine(castle.position, 3f);
+            yield return LookAtCoroutine(castle.position);
             // Hold look there for a second
             yield return new WaitForSeconds(1f);
             // Return to previous rotation
-            yield return LookAtCoroutine(pitch, yaw, 3f);
+            yield return LookAtCoroutine(pitch, yaw);
         }
 
         /// <summary>
@@ -169,18 +169,15 @@ namespace MyProject
             }
         }
 
-
-        public float lookAtTimer = 0f;
-        public float lookAtLerpPct = 0f;
         /// <summary>
-        /// Make the character controller rotate to look at a target within <paramref name="durationUntilLookAtTarget"/> seconds, holds lock for  
+        /// Make the character controller rotate to look at a target pitch and yaw roughly within <paramref name="lookTime"/> seconds.
         /// </summary>
-        /// <param name="target"></param>
-        /// <param name="durationUntilLookAtTarget"></param>
-        /// <param name="durationToHoldOntoTarget"></param>
-        /// <param name="returnToPreviousRotation"></param>
+        /// <param name="targetPitch">Target pitch degrees to look at.</param>
+        /// <param name="targetYaw">Target yaw degrees to look at.</param>
+        /// <param name="lookTime">Roughly how many seconds until is fully looking at target pitch/yaw.</param>
+        /// <param name="initialLookVel">Higher number = faster initial look velocity.</param>
         /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(float targetPitch, float targetYaw, float overTime)
+        protected virtual IEnumerator LookAtCoroutine(float targetPitch, float targetYaw, float lookTime = 0.5f, float initialLookVel = 0f)
         {
             /*
              * Use cases:
@@ -218,67 +215,64 @@ namespace MyProject
             //  Return to previous look rotation within x seconds
 
             float timer = 0f;
-            float totalTime = overTime;
 
             // Cannot have negative time.
-            if(totalTime < 0)
+            if(lookTime < 0)
             {
                 Debug.LogWarning("LookAtCoroutine: Total time cannot be negative.");
                 yield break;
             }
 
             // Cannot divide by 0 in lerp function. Skips loop.
-            if(totalTime == 0)
+            if(lookTime == 0)
             {
                 this.pitchDegrees = targetPitch;
                 this.yawDegrees = targetYaw;
                 yield break;
             }
 
-            float startPitch = pitchDegrees;
-            float startYaw = yawDegrees;
-
-            // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
-            float yawDegreesLerpAngle = startYaw;
-            // If targetYaw has a different sign than current one, make yawDegrees into equivalent negative version
-            // Since it would cause it to lerp from 179.999 to -179.999 (making char spin all the way around)
-            if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
+            bool IsCloseEnough(float degrees, float targetDegrees)
             {
-                // Yaw for this character controller follows euler angles and goes from -180 to 180 (where 0 = z-forward, and 180/-180 = z-back).
-                // Breaking point between -180 and 180; must use opposite angles if crossing over the 180 mark from either direction.
-                // Crossing over the 0 mark is perfectly fine.
-                if (Mathf.Abs(yawDegrees) + Mathf.Abs(targetYaw) > 180f)
+                return targetDegrees - degrees <= 0.1f;
+            }
+                
+            float yawVel = initialLookVel;
+            float pitchVel = initialLookVel;
+            while (!IsCloseEnough(yawDegrees, targetYaw) || !IsCloseEnough(pitchDegrees, targetPitch))
+            {
+                // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
+                float yawDegreesLerpAngle = yawDegrees;
+                // If targetYaw has a different sign than current one, make yawDegrees into equivalent negative version
+                // Since it would cause it to lerp from 179.999 to -179.999 (making char spin all the way around)
+                if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
                 {
-                    // Substitute yawDegrees with its opposite positive/negative equivalent.
-                    if (yawDegreesLerpAngle < 0f)
+                    // Yaw for this character controller follows euler angles and goes from -180 to 180 (where 0 = z-forward, and 180/-180 = z-back).
+                    // Breaking point between -180 and 180; must use opposite angles if crossing over the 180 mark from either direction.
+                    // Crossing over the 0 mark is perfectly fine.
+                    if (Mathf.Abs(yawDegrees) + Mathf.Abs(targetYaw) > 180f)
                     {
-                        yawDegreesLerpAngle = 360f + yawDegreesLerpAngle;
-                    }
-                    else if (yawDegreesLerpAngle >= 0)
-                    {
-                        yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * -1f;
+                        // Substitute yawDegrees with its opposite positive/negative equivalent.
+                        if (yawDegreesLerpAngle < 0f)
+                        {
+                            yawDegreesLerpAngle = 360f + yawDegreesLerpAngle;
+                        }
+                        else if (yawDegreesLerpAngle >= 0)
+                        {
+                            yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * -1f;
+                        }
                     }
                 }
-            }
-            // Make sure the target angle has same system as this cc's yaw system.
-            KeepYawBetween180(ref targetYaw);
-
-            while (timer < totalTime)
-            {
-                // How much lerp pct already elapsed
-                float lerpPct = timer / totalTime;
+                // Make sure the target angle has same system as this cc's yaw system.
+                KeepYawBetween180(ref targetYaw);
 
                 // Yaw - Lerp current yaw and pitch towards target yaw/pitch
-                this.yawDegrees = Mathf.Lerp(yawDegreesLerpAngle, targetYaw, lerpPct);
+                this.yawDegrees = Mathf.SmoothDamp(yawDegreesLerpAngle, targetYaw, ref yawVel, lookTime);
                 // Convert to -180 to 180 for pitch system
                 KeepYawBetween180(ref yawDegrees);
 
                 // Pitch - Clamp from -90 to 90
-                this.pitchDegrees = Mathf.Lerp(startPitch, targetPitch, lerpPct);
+                this.pitchDegrees = Mathf.SmoothDamp(pitchDegrees, targetPitch, ref pitchVel, lookTime);
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
-
-                lookAtTimer = timer;
-                lookAtLerpPct = lerpPct;
 
                 timer += Time.deltaTime;
 
@@ -294,12 +288,12 @@ namespace MyProject
         /// Makes character's head look at a world position over time.
         /// </summary>
         /// <param name="worldPos">Position to look at.</param>
-        /// <param name="overTime">How many seconds until head looks at that direction from current direction.</param>
+        /// <param name="lookTime">Roughly how many seconds until head looks at that direction from current direction.</param>
         /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float overTime)
+        protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float lookTime = 0.5f, float initialLookVel = 0f)
         {
             GetTargetPitchAndYawFrom(worldPos, out float yaw, out float pitch);
-            yield return LookAtCoroutine(pitch, yaw, overTime);
+            yield return LookAtCoroutine(pitch, yaw, lookTime, initialLookVel);
         }
 
         //protected virtual IEnumerator LookAt(Transform tfm, float lookSpeed)
@@ -336,12 +330,6 @@ namespace MyProject
 
         protected virtual void Update()
         {
-            // Debug
-            if(Input.GetKeyDown(KeyCode.L))
-            {
-                StartCoroutine(LookAtCastleAndThenBackToPrevious());
-            }
-
             // Update input
             bool jumpInput = false;
             bool sprintInput = false;
