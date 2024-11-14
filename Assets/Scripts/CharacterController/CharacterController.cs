@@ -42,7 +42,7 @@ namespace MyProject
         [SerializeField] protected float pitchDegrees = 0f;
         [SerializeField] protected float maxPitchDegreesUp = 90f;         // how far character can look upwards
         [SerializeField] protected float maxPitchDegreesDown = -90f;      // how far character can look downwards
-        
+
         // Jump
         [SerializeField] float jumpHeight = 3f;
         Vector3 worldGravity = new Vector3(0f, -9.81f, 0f);
@@ -81,7 +81,7 @@ namespace MyProject
         protected IEnumerator PreventOutOfBoundsCoroutine()
         {
             float checkSeconds = 5f;
-            while(true)
+            while (true)
             {
                 if (transform.position.y < -30f)
                 {
@@ -95,6 +95,7 @@ namespace MyProject
             }
         }
 
+        #region Look At Functions
         protected virtual void LookAt(Transform position, float rotateSpeed = 5f)
         {
             //StartCoroutine(LookAtCoroutine_LockedIn(lookAtTfm, rotateSpeed));
@@ -122,7 +123,7 @@ namespace MyProject
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine_LockedIn(Transform target, float lookSpeed)
+        protected virtual IEnumerator LookAtCoroutine(Transform target, float lookSpeed)
         {
             while (true)
             {
@@ -133,28 +134,7 @@ namespace MyProject
                 KeepYawBetween180(ref targetYaw);
 
                 // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
-                float yawDegreesLerpAngle = yawDegrees;
-
-                // If targetYaw has a different sign than current one, make yawDegrees into equivalent negative version
-                // Since it would cause it to lerp from 179.999 to -179.999 (making char spin all the way around)
-                if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
-                {
-                    // Yaw for this character controller follows euler angles and goes from -180 to 180 (where 0 = z-forward, and 180/-180 = z-back).
-                    // Breaking point between -180 and 180; must use opposite angles if crossing over the 180 mark from either direction.
-                    // Crossing over the 0 mark is perfectly fine.
-                    if(Mathf.Abs(yawDegrees) + Mathf.Abs(targetYaw) > 180f)
-                    {
-                        // Substitute yawDegrees with its opposite positive/negative equivalent.
-                        if (yawDegreesLerpAngle < 0f)
-                        {
-                            yawDegreesLerpAngle = 360f + yawDegreesLerpAngle;
-                        }
-                        else if (yawDegreesLerpAngle >= 0)
-                        {
-                            yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * -1f;
-                        }
-                    }
-                }
+                float yawDegreesLerpAngle = DetectIfYawPassesOver180(yawDegrees, targetYaw);
 
                 // Yaw - Lerp current yaw and pitch towards target yaw/pitch
                 this.yawDegrees = Mathf.Lerp(yawDegreesLerpAngle, targetYaw, Time.deltaTime * lookSpeed);
@@ -185,15 +165,8 @@ namespace MyProject
              * Enemy looks towards castle door to march towards it
              *  yield return LookAt(castleTfm, lookSpeed)
              * 
-             * Enemy looks towards player to shoot at them
-             *  yield return LookAt(playerTfm, lookSpeed)
-             * 
-             * Player attention should be directed at a landmark, and then brought back
-             *  float prevPitch = pitch;
-             *  float prevYaw = yaw;
-             *  yield return LookAt(landmarkPos, overTime)
-             *  yield return new WaitForSeconds()
-             *  yield return LookAt(prevPitch, prevYaw, overTime)
+             * Enemy looks towards player to shoot at them and locks onto them for a duration of time (and then next step makes them look at something else)
+             *  yield return LookAt(playerTfm, forDuration, lookSpeed)
              */
 
             /*
@@ -210,8 +183,6 @@ namespace MyProject
 
             // Lerp and hold lock on that target tfm for seconds
             //  Look at target with instantaneous speed for x seconds
-
-            float timer = 0f;
 
             // Cannot have negative time.
             if(lookTime < 0)
@@ -239,27 +210,7 @@ namespace MyProject
             while (!IsCloseEnough(yawDegrees, targetYaw) || !IsCloseEnough(pitchDegrees, targetPitch))
             {
                 // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
-                float yawDegreesLerpAngle = yawDegrees;
-                // If targetYaw has a different sign than current one, make yawDegrees into equivalent negative version
-                // Since it would cause it to lerp from 179.999 to -179.999 (making char spin all the way around)
-                if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
-                {
-                    // Yaw for this character controller follows euler angles and goes from -180 to 180 (where 0 = z-forward, and 180/-180 = z-back).
-                    // Breaking point between -180 and 180; must use opposite angles if crossing over the 180 mark from either direction.
-                    // Crossing over the 0 mark is perfectly fine.
-                    if (Mathf.Abs(yawDegrees) + Mathf.Abs(targetYaw) > 180f)
-                    {
-                        // Substitute yawDegrees with its opposite positive/negative equivalent.
-                        if (yawDegreesLerpAngle < 0f)
-                        {
-                            yawDegreesLerpAngle = 360f + yawDegreesLerpAngle;
-                        }
-                        else if (yawDegreesLerpAngle >= 0)
-                        {
-                            yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * -1f;
-                        }
-                    }
-                }
+                float yawDegreesLerpAngle = DetectIfYawPassesOver180(yawDegrees, targetYaw);
                 // Make sure the target angle has same system as this cc's yaw system.
                 KeepYawBetween180(ref targetYaw);
 
@@ -271,8 +222,6 @@ namespace MyProject
                 // Pitch - Clamp from -90 to 90
                 this.pitchDegrees = Mathf.SmoothDamp(pitchDegrees, targetPitch, ref pitchVel, lookTime);
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
-
-                timer += Time.deltaTime;
 
                 yield return null;
             }
@@ -290,16 +239,17 @@ namespace MyProject
         /// <returns></returns>
         protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float lookTime = 0.5f, float initialLookVel = 0f)
         {
-            // Convert the world position into a target yaw and pitch relative to character's head.
+            
             GetTargetPitchAndYawFrom(worldPos, out float yaw, out float pitch);
             yield return LookAtCoroutine(pitch, yaw, lookTime, initialLookVel);
         }
 
-        //protected virtual IEnumerator LookAt(Transform tfm, float lookSpeed)
-        //{
-
-        //}
-
+        /// <summary>
+        /// Converts the world position into a target yaw and pitch relative to character's head.
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <param name="yaw"></param>
+        /// <param name="pitch"></param>
         protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
             // Yaw and pitch degrees are relative to the world forward direction
@@ -316,6 +266,39 @@ namespace MyProject
             if (quat.eulerAngles.x > 180f)
                 pitch = quat.eulerAngles.x - 360f;
         }
+
+        /// <summary>
+        /// If yawDegrees and targetYaw are across 180/-180 degrees from each other, returns yawDegrees but as the same-sign version, so things like Mathf.Lerp/SmoothDamp don't suddenly jump values.
+        /// </summary>
+        /// <param name="yawDegrees">Current character's yaw degrees.</param>
+        /// <param name="targetYaw">Target yaw degrees value.</param>
+        /// <returns></returns>
+        protected float DetectIfYawPassesOver180(float yawDegrees, float targetYaw)
+        {
+            // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
+            // If targetYaw has a different sign than current one, make yawDegrees into equivalent negative version
+            // Since it would cause it to lerp from 179.999 to -179.999 (making char spin all the way around)
+            if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
+            {
+                // Yaw for this character controller follows euler angles and goes from -180 to 180 (where 0 = z-forward, and 180/-180 = z-back).
+                // Breaking point between -180 and 180; must use opposite angles if crossing over the 180 mark from either direction.
+                // Crossing over the 0 mark is perfectly fine.
+                if (Mathf.Abs(yawDegrees) + Mathf.Abs(targetYaw) > 180f)
+                {
+                    // Substitute yawDegrees with its opposite positive/negative equivalent.
+                    if (yawDegrees < 0f)
+                    {
+                        yawDegrees = 360f + yawDegrees;
+                    }
+                    else if (yawDegrees >= 0)
+                    {
+                        yawDegrees = (360f - yawDegrees) * -1f;
+                    }
+                }
+            }
+            return yawDegrees;
+        }
+        #endregion
 
         protected virtual void Update()
         {
