@@ -75,7 +75,6 @@ namespace MyProject
             StartCoroutine(PreventOutOfBoundsCoroutine());
 
             // TODO: Make player look at a point in space
-            //Debug.DrawRay(rotateFreedHead.position, lookAtTfm.position-rotateFreedHead.position, Color.white, 100f);
             LookAt(lookAtTfm);
         }
 
@@ -101,28 +100,17 @@ namespace MyProject
             StartCoroutine(LookAtCoroutine(lookAtTfm));
         }
 
-        public Vector3 quaternionEulers;
-        public float yawDegreesRaw;
-        public float yawDegreesTarget;
         protected IEnumerator LookAtCoroutine(Transform tfm)
         {
             float lookSpeed = 0.5f;
             while (true)
             {
                 // Get target pitch and yaw from a world position for char to look at
-                float targetYaw = 0f;
-                float targetPitch = 0f;
-                GetTargetPitchAndYawFrom(tfm.position, out targetYaw, out targetPitch);
+                GetTargetPitchAndYawFrom(tfm.position, out float targetYaw, out float targetPitch);
 
-                // Instantly look at it
-                //this.yawDegrees = targetYaw;
-                //this.pitchDegrees = targetPitch;
-
+                // Make sure the target angle has same system as this cc's yaw system.
                 KeepYawBetween180(ref yawDegrees);
                 KeepYawBetween180(ref targetYaw);
-
-                yawDegreesRaw = yawDegrees;
-                yawDegreesTarget = targetYaw;
 
                 // Modify in lerp
                 float yawDegreesLerpAngle = yawDegrees;
@@ -131,18 +119,11 @@ namespace MyProject
                 // Since it would cause it to lerp from 179.999 to -179.999 (making char spin all the way around)
                 if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
                 {
-                    // Use opposite version if wrong sign
-                    //if(yawDegrees >= 0)
-                    //{
-                    //    yawDegreesLerp = yawDegrees - 360f;
-                    //}
-
-                    // Pitch in this game follows euler angles and goes from -180 to 180 (where 0 = z-forward, and 180/-180 = z-back).
+                    // Yaw for this character controller follows euler angles and goes from -180 to 180 (where 0 = z-forward, and 180/-180 = z-back).
                     // Breaking point between -180 and 180; must use opposite angles if crossing over the 180 mark from either direction.
                     // Crossing over the 0 mark is perfectly fine.
                     if(Mathf.Abs(yawDegrees) + Mathf.Abs(targetYaw) > 180f)
                     {
-                        
                         // Substitute yawDegrees with its opposite positive/negative equivalent.
                         //yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * (-1f * Mathf.Sign(yawDegreesLerpAngle));
                         if (yawDegreesLerpAngle < 0f)
@@ -153,92 +134,40 @@ namespace MyProject
                         {
                             yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * -1f;
                         }
-
-                        //Debug.Log("YawDegreesLerpAngle: " + yawDegreesLerpAngle);
-
-                        //Debug.Break();
                     }
-
-                    //yawDegreesLerp = yawDegrees
-                    //Debug.Break();
-                //    if (Mathf.Sign(targetYaw) == -1)
-                //        yawDegrees -= 360f;
                 }
 
-                // If the difference of targetYaw - yawDegrees is > 359*
-                //if (yawDegrees - targetYaw < -350f)
-                //{
-                //    yawDegrees += 360f;
-                //}
-                //else if(yawDegrees - targetYaw > 350f)
-                //{
-                //    yawDegrees -= 360f;
-                //}
-
-
-                // Lerp current yaw and pitch towards target yaw/pitch
+                // Yaw - Lerp current yaw and pitch towards target yaw/pitch
                 this.yawDegrees = Mathf.Lerp(yawDegreesLerpAngle, targetYaw, Time.deltaTime * lookSpeed);
                 // Convert to -180 to 180 for pitch system
                 KeepYawBetween180(ref yawDegrees);
 
+                // Pitch - Clamp from -90 to 90
                 this.pitchDegrees = Mathf.Lerp(pitchDegrees, targetPitch, Time.deltaTime * lookSpeed);
-
-                // Clamp
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
 
                 yield return null;
             }
         }
 
-        public Transform lookAtTargetRotation;
         protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
-            //{
-            //    lookAtTargetRotation.LookAt(worldPosition);
-            //    yaw = lookAtTargetRotation.eulerAngles.y;
-            //    pitch = lookAtTargetRotation.eulerAngles.x;
+            // Yaw and pitch degrees are relative to the world forward direction
+            Vector3 worldForward = Vector3.forward;
+            Vector3 headPosition = rotateFreedHead.transform.position;
+            Vector3 toDirection = worldPosition - headPosition;
+            Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
 
-            //    // If look object goes above head object, euler X will wrap around from 1* to 360*.
-            //    if (pitch > 180f)
-            //        pitch -= 360f;
-            //    // If look object goes to left, euler Y will wrap from 1* to 360*
-            //    //if (yaw > 180f)
-            //    //    yaw -= 360f;
-            //    return;
-            //}
+            // Assign eulers out
+            yaw = quat.eulerAngles.y;
+            pitch = quat.eulerAngles.x;
 
-            //{
-            //    // Prevent camera roll on slerp by setting z to 0
-            //    Quaternion camForward = Quaternion.Euler(rotateFreedHead.rotation.eulerAngles.x, rotateFreedHead.rotation.eulerAngles.y, 0f);
-            //    Vector3 toTargetDir = worldPosition - rotateFreedHead.position;
-            //    Quaternion toTarget = Quaternion.LookRotation(toTargetDir.normalized);
-            //    Quaternion rotation = Quaternion.Slerp(camForward, toTarget, 1f);
+            // DEBUG - ignore pitch, focus only on yaw
+            pitch = 0f;
 
-            //    pitch = rotation.eulerAngles.x;
-            //    yaw = rotation.eulerAngles.y;
-            //    return;
-            //}
-
-            { 
-                // Yaw and pitch degrees are relative to the world forward direction
-                Vector3 worldForward = Vector3.forward;
-                Vector3 headPosition = rotateFreedHead.transform.position;
-                Vector3 toDirection = worldPosition - headPosition;
-                Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
-
-                // Assign eulers out
-                yaw = quat.eulerAngles.y;
-                pitch = quat.eulerAngles.x;
-
-                // DEBUG - ignore pitch, focus only on yaw
-                pitch = 0f;
-
-                // If look object goes above head object, euler X will wrap around from 1* to 360*.
-                if (quat.eulerAngles.x > 180f)
-                    pitch = quat.eulerAngles.x - 360f;
-                //if (yaw > 180f)
-                //    yaw = quat.eulerAngles.y - 360f;
-            }
+            // If look object goes above head object, euler X will wrap around from 1* to 360*.
+            if (quat.eulerAngles.x > 180f)
+                pitch = quat.eulerAngles.x - 360f;
         }
 
         protected virtual void Update()
@@ -336,6 +265,10 @@ namespace MyProject
             body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
         }
 
+        /// <summary>
+        /// Since using Vector3.Euler seems to put the character's Y rotation (yaw) from [-180, 180]. This character controller's yaw system constrains itself to that.
+        /// </summary>
+        /// <param name="yaw">Any angle to convert to between [-180,180].</param>
         protected void KeepYawBetween180(ref float yaw)
         {
             if (yaw > 180f)
