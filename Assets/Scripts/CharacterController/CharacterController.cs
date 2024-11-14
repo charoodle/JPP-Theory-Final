@@ -76,7 +76,7 @@ namespace MyProject
 
             // TODO: Make player look at a point in space
             //Debug.DrawRay(rotateFreedHead.position, lookAtTfm.position-rotateFreedHead.position, Color.white, 100f);
-            //LookAt(lookAtTfm);
+            LookAt(lookAtTfm);
         }
 
         protected IEnumerator PreventOutOfBoundsCoroutine()
@@ -118,39 +118,73 @@ namespace MyProject
                 //this.yawDegrees = targetYaw;
                 //this.pitchDegrees = targetPitch;
 
+                KeepYawBetween180(ref yawDegrees);
+                KeepYawBetween180(ref targetYaw);
+
                 yawDegreesRaw = yawDegrees;
                 yawDegreesTarget = targetYaw;
 
+                // Modify in lerp
+                float yawDegreesLerpAngle = yawDegrees;
+
                 // If targetYaw has a different sign than current one, make yawDegrees into equivalent negative version
                 // Since it would cause it to lerp from 179.999 to -179.999 (making char spin all the way around)
-                //if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
-                //{
+                if (Mathf.Sign(targetYaw) != Mathf.Sign(yawDegrees))
+                {
+                    // Use opposite version if wrong sign
+                    //if(yawDegrees >= 0)
+                    //{
+                    //    yawDegreesLerp = yawDegrees - 360f;
+                    //}
+
+                    // Pitch in this game follows euler angles and goes from -180 to 180 (where 0 = z-forward, and 180/-180 = z-back).
+                    // Breaking point between -180 and 180; must use opposite angles if crossing over the 180 mark from either direction.
+                    // Crossing over the 0 mark is perfectly fine.
+                    if(Mathf.Abs(yawDegrees) + Mathf.Abs(targetYaw) > 180f)
+                    {
+                        
+                        // Substitute yawDegrees with its opposite positive/negative equivalent.
+                        //yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * (-1f * Mathf.Sign(yawDegreesLerpAngle));
+                        if (yawDegreesLerpAngle < 0f)
+                        {
+                            yawDegreesLerpAngle = 360f + yawDegreesLerpAngle;
+                        }
+                        else if (yawDegreesLerpAngle >= 0)
+                        {
+                            yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * -1f;
+                        }
+
+                        //Debug.Log("YawDegreesLerpAngle: " + yawDegreesLerpAngle);
+
+                        //Debug.Break();
+                    }
+
+                    //yawDegreesLerp = yawDegrees
+                    //Debug.Break();
                 //    if (Mathf.Sign(targetYaw) == -1)
                 //        yawDegrees -= 360f;
-                //}
+                }
 
                 // If the difference of targetYaw - yawDegrees is > 359*
-                if (yawDegrees - targetYaw < -350f)
-                {
-                    yawDegrees += 360f;
-                }
-                else if(yawDegrees - targetYaw > 350f)
-                {
-                    yawDegrees -= 360f;
-                }
+                //if (yawDegrees - targetYaw < -350f)
+                //{
+                //    yawDegrees += 360f;
+                //}
+                //else if(yawDegrees - targetYaw > 350f)
+                //{
+                //    yawDegrees -= 360f;
+                //}
 
 
                 // Lerp current yaw and pitch towards target yaw/pitch
-                //this.yawDegrees = Mathf.Lerp(yawDegrees, targetYaw, Time.deltaTime * lookSpeed);
-                //this.pitchDegrees = Mathf.Lerp(pitchDegrees, targetPitch, Time.deltaTime * lookSpeed);
+                this.yawDegrees = Mathf.Lerp(yawDegreesLerpAngle, targetYaw, Time.deltaTime * lookSpeed);
+                // Convert to -180 to 180 for pitch system
+                KeepYawBetween180(ref yawDegrees);
 
-                // Instantly assign it
-                this.yawDegrees = targetYaw;
-                this.pitchDegrees = targetPitch;
+                this.pitchDegrees = Mathf.Lerp(pitchDegrees, targetPitch, Time.deltaTime * lookSpeed);
 
                 // Clamp
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
-                yawDegrees = yawDegrees % 360f;
 
                 yield return null;
             }
@@ -293,16 +327,21 @@ namespace MyProject
             pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
 
             // Keep look rotation within -180 to +180. If goes over 180 or less than -180, wrap it by 360* and change the sign.
-            if (yawDegrees > 180f)
-                yawDegrees -= 360f; // get the equivalent negative version
-            else if (yawDegrees < -180f)
-                yawDegrees += 360f; // get the equivalent positive version
+            KeepYawBetween180(ref yawDegrees);
 
             // Rotate camera - assumes its on a separate object from character that follow's character's body
             detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
 
             // Rotate player body to match camera view rotation
             body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
+        }
+
+        protected void KeepYawBetween180(ref float yaw)
+        {
+            if (yaw > 180f)
+                yaw -= 360f; // get the equivalent negative version
+            else if (yaw < -180f)
+                yaw += 360f; // get the equivalent positive version
         }
 
         protected void UpdateLookRotation(Vector2 lookInput, ref float lookXRotation, ref float lookYRotation)
