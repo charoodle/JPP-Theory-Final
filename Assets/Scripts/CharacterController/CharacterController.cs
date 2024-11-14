@@ -75,7 +75,7 @@ namespace MyProject
             StartCoroutine(PreventOutOfBoundsCoroutine());
 
             // DEBUG: Make player look at a point in space
-            StartCoroutine(LookAtCoroutine(0, 90f));
+            //StartCoroutine(LookAtCoroutine(0, 90f));
         }
 
         protected IEnumerator PreventOutOfBoundsCoroutine()
@@ -211,9 +211,6 @@ namespace MyProject
             // Lerp and hold lock on that target tfm for seconds
             //  Look at target with instantaneous speed for x seconds
 
-            // Lerp to previous rotation pitch/yaw over seconds
-            //  Return to previous look rotation within x seconds
-
             float timer = 0f;
 
             // Cannot have negative time.
@@ -233,11 +230,12 @@ namespace MyProject
 
             bool IsCloseEnough(float degrees, float targetDegrees)
             {
-                return targetDegrees - degrees <= 0.1f;
+                return Mathf.Abs(targetDegrees - degrees) <= 0.1f;
             }
                 
             float yawVel = initialLookVel;
             float pitchVel = initialLookVel;
+
             while (!IsCloseEnough(yawDegrees, targetYaw) || !IsCloseEnough(pitchDegrees, targetPitch))
             {
                 // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
@@ -292,21 +290,12 @@ namespace MyProject
         /// <returns></returns>
         protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float lookTime = 0.5f, float initialLookVel = 0f)
         {
+            // Convert the world position into a target yaw and pitch relative to character's head.
             GetTargetPitchAndYawFrom(worldPos, out float yaw, out float pitch);
             yield return LookAtCoroutine(pitch, yaw, lookTime, initialLookVel);
         }
 
         //protected virtual IEnumerator LookAt(Transform tfm, float lookSpeed)
-        //{
-
-        //}
-
-        //protected virtual IEnumerator LookAt(Vector3 worldPos, float overTime)
-        //{
-
-        //}
-
-        //protected virtual IEnumerator LookAt(float pitch, float yaw, float overTime)
         //{
 
         //}
@@ -330,6 +319,12 @@ namespace MyProject
 
         protected virtual void Update()
         {
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                StopAllCoroutines();
+                StartCoroutine(LookAtCastleAndThenBackToPrevious());
+            }
+
             // Update input
             bool jumpInput = false;
             bool sprintInput = false;

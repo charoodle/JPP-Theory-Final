@@ -887,8 +887,8 @@ MonoBehaviour:
   weapons:
   - {fileID: 914650133}
   - {fileID: 669424564}
-  _canInputMove: 0
-  _canInputLook: 0
+  _canInputMove: 1
+  _canInputLook: 1
 --- !u!143 &176022277
 CharacterController:
   m_ObjectHideFlags: 0
