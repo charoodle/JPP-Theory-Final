@@ -74,7 +74,7 @@ namespace MyProject
             // Check player from going out of bounds every couple secons
             StartCoroutine(PreventOutOfBoundsCoroutine());
 
-            // TODO: Make player look at a point in space
+            // DEBUG: Make player look at a point in space
             LookAt(lookAtTfm);
         }
 
@@ -97,22 +97,26 @@ namespace MyProject
 
         protected virtual void LookAt(Transform position)
         {
-            StartCoroutine(LookAtCoroutine(lookAtTfm));
+            StartCoroutine(LookAtCoroutine_LockedIn(lookAtTfm));
         }
 
-        protected IEnumerator LookAtCoroutine(Transform tfm)
+        /// <summary>
+        /// Make the character controller permanently look at a transform (until stopped).
+        /// Uses the look rotation's pitch and yaw system to get a target pitch/yaw to smoothly rotate towards the target transform.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        protected IEnumerator LookAtCoroutine_LockedIn(Transform target, float lookSpeed = 2f)
         {
-            float lookSpeed = 0.5f;
             while (true)
             {
                 // Get target pitch and yaw from a world position for char to look at
-                GetTargetPitchAndYawFrom(tfm.position, out float targetYaw, out float targetPitch);
+                GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
 
                 // Make sure the target angle has same system as this cc's yaw system.
-                KeepYawBetween180(ref yawDegrees);
                 KeepYawBetween180(ref targetYaw);
 
-                // Modify in lerp
+                // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
                 float yawDegreesLerpAngle = yawDegrees;
 
                 // If targetYaw has a different sign than current one, make yawDegrees into equivalent negative version
@@ -125,7 +129,6 @@ namespace MyProject
                     if(Mathf.Abs(yawDegrees) + Mathf.Abs(targetYaw) > 180f)
                     {
                         // Substitute yawDegrees with its opposite positive/negative equivalent.
-                        //yawDegreesLerpAngle = (360f - yawDegreesLerpAngle) * (-1f * Mathf.Sign(yawDegreesLerpAngle));
                         if (yawDegreesLerpAngle < 0f)
                         {
                             yawDegreesLerpAngle = 360f + yawDegreesLerpAngle;
@@ -150,6 +153,8 @@ namespace MyProject
             }
         }
 
+
+
         protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
             // Yaw and pitch degrees are relative to the world forward direction
@@ -161,9 +166,6 @@ namespace MyProject
             // Assign eulers out
             yaw = quat.eulerAngles.y;
             pitch = quat.eulerAngles.x;
-
-            // DEBUG - ignore pitch, focus only on yaw
-            pitch = 0f;
 
             // If look object goes above head object, euler X will wrap around from 1* to 360*.
             if (quat.eulerAngles.x > 180f)
