@@ -75,7 +75,7 @@ namespace MyProject
             StartCoroutine(PreventOutOfBoundsCoroutine());
 
             // DEBUG: Make player look at a point in space
-            //StartCoroutine(LookAtCoroutine(0, 90f));
+            //LookAt()
         }
 
         protected IEnumerator PreventOutOfBoundsCoroutine()
@@ -136,13 +136,13 @@ namespace MyProject
                 // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
                 float yawDegreesLerpAngle = DetectIfYawPassesOver180(yawDegrees, targetYaw);
 
-                // Yaw - Lerp current yaw and pitch towards target yaw/pitch
+                // Lerp current yaw and pitch towards target yaw/pitch
                 this.yawDegrees = Mathf.Lerp(yawDegreesLerpAngle, targetYaw, Time.deltaTime * lookSpeed);
-                // Convert to -180 to 180 for pitch system
-                KeepYawBetween180(ref yawDegrees);
-
-                // Pitch - Clamp from -90 to 90
                 this.pitchDegrees = Mathf.Lerp(pitchDegrees, targetPitch, Time.deltaTime * lookSpeed);
+
+                // Yaw - Convert final angle to -180 to 180
+                KeepYawBetween180(ref yawDegrees);
+                // Pitch - Clamp final angle from -90 to 90
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
 
                 yield return null;
@@ -184,10 +184,10 @@ namespace MyProject
             // Lerp and hold lock on that target tfm for seconds
             //  Look at target with instantaneous speed for x seconds
 
-            // Cannot have negative time.
+            // Cannot have negative look time.
             if(lookTime < 0)
             {
-                Debug.LogWarning("LookAtCoroutine: Total time cannot be negative.");
+                Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
                 yield break;
             }
 
@@ -207,6 +207,8 @@ namespace MyProject
             float yawVel = initialLookVel;
             float pitchVel = initialLookVel;
 
+            // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen).
+
             while (!IsCloseEnough(yawDegrees, targetYaw) || !IsCloseEnough(pitchDegrees, targetPitch))
             {
                 // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
@@ -214,13 +216,13 @@ namespace MyProject
                 // Make sure the target angle has same system as this cc's yaw system.
                 KeepYawBetween180(ref targetYaw);
 
-                // Yaw - Lerp current yaw and pitch towards target yaw/pitch
+                // SmoothDamp current yaw and pitch towards target yaw/pitch
                 this.yawDegrees = Mathf.SmoothDamp(yawDegreesLerpAngle, targetYaw, ref yawVel, lookTime);
+                this.pitchDegrees = Mathf.SmoothDamp(pitchDegrees, targetPitch, ref pitchVel, lookTime);
+
                 // Convert to -180 to 180 for pitch system
                 KeepYawBetween180(ref yawDegrees);
-
                 // Pitch - Clamp from -90 to 90
-                this.pitchDegrees = Mathf.SmoothDamp(pitchDegrees, targetPitch, ref pitchVel, lookTime);
                 pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
 
                 yield return null;
