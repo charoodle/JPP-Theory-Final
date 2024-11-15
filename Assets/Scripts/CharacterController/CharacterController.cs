@@ -84,12 +84,18 @@ namespace MyProject
         protected const float INITIAL_LOOKVEL = 0.5f;
 
         /*
-         * =============== NEW TODO ===============
+         * =============== LookAt TODO ===============
          *  TODO: Pass a predicate in to lookat functions?
          *      Ex: Do look until...
          *          Within angle degrees
          *          Amount of time passes
          *          Player clicks button to exit dialogue or something
+         *          
+         *              Duplicate functions:
+         *                  LookAtUntilWithinDegrees
+         *                  LookAtPermanently
+         *              Not (?) duplicate functions:
+         *                  LookAtForTimePeriod (can branch to use previous yaw/pitch)
          */
 
         /// <summary>
@@ -371,20 +377,6 @@ namespace MyProject
         #region Character Control
         protected virtual void Update()
         {
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-                Transform castle = GameObject.Find("EnemyCastle").transform;
-                //StartCoroutine(LookAtUntilWithinDegrees(castle, 10f));
-                //StartCoroutine(LookAtForTimePeriod(castle, 5f));
-                //StartCoroutine(LookAtPermanently(castle));
-                //StartCoroutine(LookAtTargetPitchYaw(45f, 90f));
-                StartCoroutine(LookAtTargetForSecondsAndThenBack(castle, 5f));
-            }
-            else if(Input.GetKeyDown(KeyCode.K))
-            {
-                StopAllCoroutines();
-            }
-
             // Update input
             bool jumpInput = false;
             bool sprintInput = false;
