@@ -7,6 +7,7 @@ public class AutoTrebuchet : Trebuchet
     Interactable launchButton;
     Interactable reloadButton;
     [SerializeField] EnemyController enemyUser;
+    bool enemyUserAlive = false;
 
     protected override void Start()
     {
@@ -14,6 +15,8 @@ public class AutoTrebuchet : Trebuchet
 
         launchButton = trebuchetLaunchPreventer.GetComponent<Interactable>();
         reloadButton = trebuchetReloader.GetComponent<Interactable>();
+
+        enemyUserAlive = (enemyUser != null);
 
         // Assumes in launch state
         StartCoroutine(HandleLaunching());
@@ -26,6 +29,9 @@ public class AutoTrebuchet : Trebuchet
     {
         while(true)
         {
+            if (!enemyUserAlive)
+                yield break;
+
             // Reload if reload button is active
             if (trebuchetReloader.activeInHierarchy)
             {
@@ -37,6 +43,7 @@ public class AutoTrebuchet : Trebuchet
             yield return new WaitForSeconds(1f);
         }
 
+        
         StartCoroutine(HandleLaunching());
         yield break;
     }
@@ -45,6 +52,9 @@ public class AutoTrebuchet : Trebuchet
     {
         while (true)
         {
+            if (!enemyUserAlive)
+                yield break;
+
             // Launch if launch button is active
             if (trebuchetLaunchPreventer.activeInHierarchy)
             {
@@ -68,7 +78,8 @@ public class AutoTrebuchet : Trebuchet
             if(!enemyUser)
             {
                 // Stop all firing and launching coroutines
-                StopAllCoroutines();
+                enemyUserAlive = false;
+                yield break;
             }
             yield return new WaitForFixedUpdate();
         }
