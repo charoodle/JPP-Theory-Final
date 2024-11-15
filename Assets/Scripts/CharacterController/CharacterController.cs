@@ -78,57 +78,10 @@ namespace MyProject
         protected const float LOOKTIME = 0.5f;
         protected const float INITIAL_LOOKVEL = 0.5f;
 
-        #region Old LookAt
-        /// <summary>
-        /// Make the character controller permanently look at a transform (until stopped).
-        /// Uses the look rotation's pitch and yaw system to get a target pitch/yaw to smoothly rotate towards the target transform.
-        /// </summary>
-        /// <param name="target"></param>
-        /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-        {
-            float yawVel = initialLookVel;
-            float pitchVel = initialLookVel;
-            while (true)
-            {
-                // Get target pitch and yaw from a world position for char to look at
-                GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
-                SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
-                yield return null;
-            }
-        }
-
-        /// <summary>
-        /// Makes character's head look at a world position 
-        /// </summary>
-        /// <param name="worldPos">Position to look at.</param>
-        /// <param name="lookTime">Roughly how many seconds until head looks at that direction from current direction.</param>
-        /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, float closeEnoughDegrees = 3f)
-        {
-            GetTargetPitchAndYawFrom(worldPos, out float yaw, out float pitch);
-            yield return LookAtTargetPitchYaw(pitch, yaw, closeEnoughDegrees, lookTime, initialLookVel);
-        }
-        #endregion
-
         /*
          * =============== NEW TODO ===============
-         * 
-         * Want it to look at target
-         *  Stop when within degrees
-         * 
-         * Want it to follow target for x seconds (no matter the angle)
-         * 
-         * Want it to return to previous yaw/pitch rotation
-         * 
-         * Three transform functions:
-         *  void LookAtUntilWithinDegrees(castle, 3degrees)
-         *  void LookAtForTimePeriod(castle, 5seconds)
-         *  Coroutine LookAtPermanently(castle)               // (must be stopped by StopAllCoroutines or manually)
-         *  
-         *  
-         *  TODO: Pass a predicate in?
-         *      Do look until:
+         *  TODO: Pass a predicate in to lookat functions?
+         *      Ex: Do look until...
          *          Within angle degrees
          *          Amount of time passes
          *          Player clicks button to exit dialogue or something
@@ -138,28 +91,33 @@ namespace MyProject
         /// Make the character controller look towards a target for x seconds, and then optionally return to its previous look rotation.
         /// </summary>
         /// <param name="target">Target transform to look at.</param>
-        /// <param name="duration">How many seconds to maintain look at target.</param>
+        /// <param name="timePeriod">How many seconds to maintain look at target.</param>
+        /// <param name="withinDegrees">The minimum degree difference where it is considered acceptable enough to be "looking" at the target (SmoothDamp can take a long time to reach exact degrees).</param>
         /// <param name="returnBackToPrevLookDir">(Optionally) return to previous character's look direction.</param>
         /// <param name="lookTime">Roughly how many seconds until character's look direction matches to target direction.</param>
         /// <param name="initialLookVel">How fast the character look speed initially is.</param>
-        protected virtual IEnumerator LookAtTargetAndThenBack(Transform target, float duration, float degreesCloseEnough = 3f, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        protected virtual IEnumerator LookAtTargetAndThenBack(Transform target, float timePeriod, float withinDegrees = 3f, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             float savedPitch = pitchDegrees;
             float savedYaw = yawDegrees;
+
             // Look at the object
-            yield return LookAtCoroutine(target.position, lookTime, initialLookVel);
+            yield return LookAtUntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel);
 
             // Hold look there for a time period
-            yield return LookAtCoroutine(target.position, lookTime, initialLookVel);
+            yield return LookAtForTimePeriod(target, 3f, lookTime, initialLookVel);
 
-
+            // Return to previous rotation if desired.
             if (returnBackToPrevLookDir)
             {
-                // Return to previous rotation
-                yield return LookAtTargetPitchYaw(savedPitch, savedYaw, lookTime, initialLookVel);
+                yield return LookAtTargetPitchYaw(savedPitch, savedYaw, withinDegrees, lookTime, initialLookVel);
             }
         }
 
+        /// <summary>
+        /// Make the character controller's view move towards a target for a time period (in seconds).
+        /// </summary>
+        /// <inheritdoc cref="LookAtTargetAndThenBack(Transform, float, float, bool, float, float)"/>
         protected IEnumerator LookAtUntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             // Degrees should be positive
@@ -189,6 +147,11 @@ namespace MyProject
             }
         }
 
+        /// <summary>
+        /// Make the character controller's view move towards a target for a time period (in seconds).
+        /// </summary>
+        /// <param name="timePeriod">How many seconds to move view towards target, no matter the current view yaw/pitch.</param>
+        /// <inheritdoc cref="LookAtTargetAndThenBack(Transform, float, float, bool, float, float)"/>
         protected IEnumerator LookAtForTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             // Cannot have negative look time.
@@ -217,6 +180,11 @@ namespace MyProject
             }
         }
 
+        /// <summary>
+        /// Make the character controller permanently look at a target (until manually stopped).
+        /// Uses the look rotation's pitch and yaw system to get a target pitch/yaw to smoothly rotate towards the target transform.
+        /// </summary>
+        /// <inheritdoc cref="LookAtTargetAndThenBack(Transform, float, float, bool, float, float)"/>
         protected IEnumerator LookAtPermanently(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             // Cannot have negative look time.
@@ -248,10 +216,7 @@ namespace MyProject
         /// </summary>
         /// <param name="targetPitch">Target pitch degrees to look at.</param>
         /// <param name="targetYaw">Target yaw degrees to look at.</param>
-        /// <param name="withinDegrees">How many degrees difference (yaw/pitch) is acceptable for looking distance (SmoothDamp can take a long time to reach exact target yaw/pitch).</param>
-        /// <param name="lookTime">Roughly how many seconds until is fully looking at target pitch/yaw.</param>
-        /// <param name="initialLookVel">Higher number = faster initial look velocity.</param>
-        /// <returns></returns>
+        /// <inheritdoc cref="LookAtTargetAndThenBack(Transform, float, float, bool, float, float)"/>
         protected virtual IEnumerator LookAtTargetPitchYaw(float targetPitch, float targetYaw, float withinDegrees = 1.5f, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             // Cannot have negative look time.
@@ -315,9 +280,6 @@ namespace MyProject
         /// <summary>
         /// Converts the world position into a target yaw and pitch relative to character's head.
         /// </summary>
-        /// <param name="worldPosition"></param>
-        /// <param name="yaw"></param>
-        /// <param name="pitch"></param>
         protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
             // Yaw and pitch degrees are relative to the world forward direction
@@ -370,9 +332,10 @@ namespace MyProject
             return yawDegrees;
         }
 
+        /// <returns>True if the degree difference between yaw and targetYaw is within the degree gap. False if too big.</returns>
         protected bool LookDegreesIsCloseEnough(float yawDegrees, float targetYawDegrees, float degreesGap = 0.1f)
         {
-            return Mathf.Abs(targetYawDegrees - yawDegrees) <= degreesGap;
+            return Mathf.Abs(targetYawDegrees - yawDegrees) <= Mathf.Abs(degreesGap);
         }
         #endregion
 
@@ -387,7 +350,8 @@ namespace MyProject
                 //StartCoroutine(LookAtUntilWithinDegrees(castle, 10f));
                 //StartCoroutine(LookAtForTimePeriod(castle, 5f));
                 //StartCoroutine(LookAtPermanently(castle));
-                StartCoroutine(LookAtTargetPitchYaw(45f, 90f));
+                //StartCoroutine(LookAtTargetPitchYaw(45f, 90f));
+                StartCoroutine(LookAtTargetAndThenBack(castle, 5f));
             }
             else if(Input.GetKeyDown(KeyCode.K))
             {
