@@ -72,27 +72,13 @@ namespace MyProject
             StartCoroutine(PreventOutOfBoundsCoroutine());
         }
 
-        protected IEnumerator PreventOutOfBoundsCoroutine()
-        {
-            float checkSeconds = 5f;
-            while (true)
-            {
-                if (transform.position.y < -30f)
-                {
-                    // Disable character controller to allow for movement
-                    controller.enabled = false;
-                    transform.position = spawnPosition;
-                    controller.enabled = true;
-                }
 
-                yield return new WaitForSeconds(checkSeconds);
-            }
-        }
 
         #region Look At Functions
         protected const float LOOKTIME = 0.5f;
         protected const float INITIAL_LOOKVEL = 0.5f;
 
+        #region Old LookAt
         /// <summary>
         /// Make the character controller permanently look towards a target, until you manually stop it.
         /// </summary>
@@ -239,6 +225,7 @@ namespace MyProject
             GetTargetPitchAndYawFrom(worldPos, out float yaw, out float pitch);
             yield return LookAtCoroutine(pitch, yaw, closeEnoughDegrees, lookTime, initialLookVel);
         }
+        #endregion
 
         /*
          * =============== NEW TODO ===============
@@ -367,6 +354,9 @@ namespace MyProject
             // If look object goes above head object, euler X will wrap around from 1* to 360*.
             if (quat.eulerAngles.x > 180f)
                 pitch = quat.eulerAngles.x - 360f;
+
+            // Make sure target yaw is within yaw system's degrees.
+            KeepYawBetween180(ref yaw);
         }
 
         /// <summary>
@@ -402,12 +392,15 @@ namespace MyProject
         }
         #endregion
 
+
+
+        #region Character Control
         protected virtual void Update()
         {
             if (Input.GetKeyDown(KeyCode.L))
             {
                 Transform castle = GameObject.Find("EnemyCastle").transform;
-                LookAtForDuration(castle, 3f);
+                StartCoroutine(LookAtUntilWithinDegrees(castle, 10f));
             }
             else if(Input.GetKeyDown(KeyCode.K))
             {
@@ -565,5 +558,23 @@ namespace MyProject
 
             return false;
         }
+
+        protected IEnumerator PreventOutOfBoundsCoroutine()
+        {
+            float checkSeconds = 5f;
+            while (true)
+            {
+                if (transform.position.y < -30f)
+                {
+                    // Disable character controller to allow for movement
+                    controller.enabled = false;
+                    transform.position = spawnPosition;
+                    controller.enabled = true;
+                }
+
+                yield return new WaitForSeconds(checkSeconds);
+            }
+        }
+        #endregion
     }
 }
