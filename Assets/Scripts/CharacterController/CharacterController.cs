@@ -111,38 +111,28 @@ namespace MyProject
         /// <param name="returnToPrevLookRotation">(Optionally) return to previous character's look direction.</param>
         /// <param name="lookTime">Roughly how many seconds until character's look direction matches to target direction.</param>
         /// <param name="initialLookVel">How fast the character look speed initially is.</param>
-        protected virtual void LookAtForDuration(Transform target, float duration, bool returnToPrevLookRotation = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        protected virtual void LookAtForDuration(Transform target, float duration, bool returnToPrevLookRotation = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, float closeEnoughDegrees = 3f)
         {
             StopAllCoroutines();
-            StartCoroutine(LookAtTargetAndThenBack(target, duration, returnToPrevLookRotation, lookTime, initialLookVel));
+            StartCoroutine(LookAtTargetAndThenBack(target, duration, closeEnoughDegrees, returnToPrevLookRotation, lookTime, initialLookVel));
         }
 
-        protected virtual IEnumerator LookAtTargetAndThenBack(Transform target, float duration, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        protected virtual IEnumerator LookAtTargetAndThenBack(Transform target, float duration, float degreesCloseEnough = 3f, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             float savedPitch = pitchDegrees;
             float savedYaw = yawDegrees;
             // Look at the castle in distance
             yield return LookAtCoroutine(target.position, lookTime, initialLookVel);
+
             // Hold look there for a time period
-            yield return new WaitForSeconds(duration);
-            if(returnBackToPrevLookDir)
+            yield return LookAtCoroutine(target.position, lookTime, initialLookVel);
+
+
+            if (returnBackToPrevLookDir)
             {
                 // Return to previous rotation
                 yield return LookAtCoroutine(savedPitch, savedYaw, lookTime, initialLookVel);
             }
-        }
-
-        protected virtual IEnumerator LookAtCastleAndThenBackToPrevious()
-        {
-            Transform castle = GameObject.Find("EnemyCastle").transform;
-            float pitch = pitchDegrees;
-            float yaw = yawDegrees;
-            // Look at the castle in distance
-            yield return LookAtCoroutine(castle.position);
-            // Hold look there for a second
-            yield return new WaitForSeconds(1f);
-            // Return to previous rotation
-            yield return LookAtCoroutine(pitch, yaw);
         }
 
         /// <summary>
@@ -165,96 +155,41 @@ namespace MyProject
         }
 
         /// <summary>
-        /// Make the character controller look towards a moving transform. Stops when it looks close enough towards the moving transform.
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="lookTime"></param>
-        /// <param name="initialLookVel"></param>
-        /// <returns></returns>
-        protected IEnumerator LookAtMovingTransform(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-        {
-            float yawVel = initialLookVel;
-            float pitchVel = initialLookVel;
-            while(true)
-            {
-                // Get target pitch and yaw from a world position for char to look at
-                GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
-                SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
-                yield return null;
-            }
-
-        }
-
-        protected virtual IEnumerator LookAtCoroutine(Transform target, float holdForDuration, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-        {
-            // TODO - Same as above, but once it reaches the target, start a timer for x seconds to lock view onto that target (even if target is moving). Once seconds are up, the character is not locked onto that target anymore.
-
-            yield break;
-        }
-
-        /// <summary>
         /// Make the character controller rotate to look at a target pitch and yaw roughly within <paramref name="lookTime"/> seconds.
         /// </summary>
         /// <param name="targetPitch">Target pitch degrees to look at.</param>
         /// <param name="targetYaw">Target yaw degrees to look at.</param>
+        /// <param name="closeEnoughDegrees">How many degrees difference (yaw/pitch) is acceptable for looking distance (SmoothDamp can take a long time to reach exact target yaw/pitch).</param>
         /// <param name="lookTime">Roughly how many seconds until is fully looking at target pitch/yaw.</param>
         /// <param name="initialLookVel">Higher number = faster initial look velocity.</param>
         /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(float targetPitch, float targetYaw, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        protected virtual IEnumerator LookAtCoroutine(float targetPitch, float targetYaw, float closeEnoughDegrees = 3f, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
-            /*
-             * Use cases:
-             * 
-             * Enemy looks towards castle door to march towards it
-             *  yield return LookAt(castleTfm, lookSpeed)
-             * 
-             * Enemy looks towards player to shoot at them and locks onto them for a duration of time (and then next step makes them look at something else)
-             *  yield return LookAt(playerTfm, forDuration, lookSpeed)
-             */
-
-            /*
-             * Function declarations:
-             * protected virtual IEnumerator LookAt(Transform tfm, float lookSpeed)
-             * 
-             * protected virtual IEnumerator LookAt(Vector3 worldPos, float overTime)
-             * protected virtual IEnumerator LookAt(float pitch, float yaw, float overTime)
-             */
-
-            // TODO:
-            // Lerp to look at the target tfm within seconds
-            //  Look at target within x seconds
-
-            // Lerp and hold lock on that target tfm for seconds
-            //  Look at target with instantaneous speed for x seconds
-
             // Cannot have negative look time.
-            if(lookTime < 0)
+            if (lookTime < 0)
             {
                 Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
                 yield break;
             }
 
             // Cannot divide by 0 in lerp function. Skips loop.
-            if(lookTime == 0)
+            if (lookTime == 0)
             {
                 this.pitchDegrees = targetPitch;
                 this.yawDegrees = targetYaw;
                 yield break;
             }
-                
+
             float yawVel = initialLookVel;
             float pitchVel = initialLookVel;
 
             // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
-            while (!LookDegreesIsCloseEnough(yawDegrees, targetYaw) || !LookDegreesIsCloseEnough(pitchDegrees, targetPitch))
+
+            while (!LookDegreesIsCloseEnough(yawDegrees, targetYaw, closeEnoughDegrees) || !LookDegreesIsCloseEnough(pitchDegrees, targetPitch, closeEnoughDegrees))
             {
                 SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
                 yield return null;
             }
-
-            // Make sure pitch/yaw values = target.
-            pitchDegrees = targetPitch;
-            yawDegrees = targetYaw;
         }
 
         /// <summary>
@@ -294,16 +229,121 @@ namespace MyProject
         }
 
         /// <summary>
-        /// Makes character's head look at a world position over time.
+        /// Makes character's head look at a world position 
         /// </summary>
         /// <param name="worldPos">Position to look at.</param>
         /// <param name="lookTime">Roughly how many seconds until head looks at that direction from current direction.</param>
         /// <returns></returns>
-        protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        protected virtual IEnumerator LookAtCoroutine(Vector3 worldPos, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, float closeEnoughDegrees = 3f)
         {
-            
             GetTargetPitchAndYawFrom(worldPos, out float yaw, out float pitch);
-            yield return LookAtCoroutine(pitch, yaw, lookTime, initialLookVel);
+            yield return LookAtCoroutine(pitch, yaw, closeEnoughDegrees, lookTime, initialLookVel);
+        }
+
+        /*
+         * =============== NEW TODO ===============
+         * 
+         * Want it to look at target
+         *  Stop when within degrees
+         * 
+         * Want it to follow target for x seconds (no matter the angle)
+         * 
+         * Want it to return to previous yaw/pitch rotation
+         * 
+         * Three transform functions:
+         *  void LookAtUntilWithinDegrees(castle, 3degrees)
+         *  void LookAtForTimePeriod(castle, 5seconds)
+         *  Coroutine LookAtPermanently(castle)               // (must be stopped by StopAllCoroutines or manually)
+         *  
+         *  
+         *  TODO: Pass a predicate in?
+         *      Do look until:
+         *          Within angle degrees
+         *          Amount of time passes
+         *          Player clicks button to exit dialogue or somthing
+         */
+
+        protected IEnumerator LookAtUntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            // Degrees should be positive
+            withinDegrees = Mathf.Abs(withinDegrees);
+
+            // Cannot have negative look time.
+            if (lookTime < 0)
+            {
+                Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
+                yield break;
+            }
+
+            float yawVel = initialLookVel;
+            float pitchVel = initialLookVel;
+
+            // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+
+            // Get target pitch and yaw from a world position for char to look at
+            GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+
+            while (!LookDegreesIsCloseEnough(yawDegrees, targetYaw, withinDegrees) || !LookDegreesIsCloseEnough(pitchDegrees, targetPitch, withinDegrees))
+            {
+                // Update target pitch and yaw, since target can be moving
+                GetTargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
+                SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
+                yield return null;
+            }
+        }
+
+        protected IEnumerator LookAtForTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            // Cannot have negative look time.
+            if (lookTime < 0)
+            {
+                Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
+                yield break;
+            }
+
+            float yawVel = initialLookVel;
+            float pitchVel = initialLookVel;
+
+            // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+
+            // Get target pitch and yaw from a world position for char to look at
+            GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+
+            float timer = 0f;
+            while (timer < timePeriod)
+            {
+                // Update target pitch and yaw, since target can be moving
+                GetTargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
+                SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
+                timer += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        protected IEnumerator LookAtPermanently(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            // Cannot have negative look time.
+            if (lookTime < 0)
+            {
+                Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
+                yield break;
+            }
+
+            float yawVel = initialLookVel;
+            float pitchVel = initialLookVel;
+
+            // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+
+            // Get target pitch and yaw from a world position for char to look at
+            GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+
+            while (true)
+            {
+                // Update target pitch and yaw, since target can be moving
+                GetTargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
+                SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
+                yield return null;
+            }
         }
 
         /// <summary>
