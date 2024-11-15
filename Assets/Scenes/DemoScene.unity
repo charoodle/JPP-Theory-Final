@@ -799,7 +799,7 @@ GameObject:
   m_Component:
   - component: {fileID: 176022274}
   - component: {fileID: 176022277}
-  - component: {fileID: 176022276}
+  - component: {fileID: 176022278}
   - component: {fileID: 176022275}
   m_Layer: 6
   m_Name: Player
@@ -851,42 +851,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &176022276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 176022273}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1a9c91732eb8f447966e35382dedc54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  controller: {fileID: 176022277}
-  playerVelocity: {x: 0, y: 0, z: 0}
-  _walkSpeed: 3
-  sprintSpeedMultiplier: 2
-  rotateBody: {fileID: 176022274}
-  rotateFreedHead: {fileID: 551680712}
-  yawDegrees: 0
-  pitchDegrees: 0
-  maxPitchDegreesUp: 90
-  maxPitchDegreesDown: -90
-  jumpHeight: 3
-  _isGrounded: 0
-  characterLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  lookXSens: 750
-  lookYSens: 750
-  invertLookX: 0
-  invertLookY: 0
-  weapons:
-  - {fileID: 914650133}
-  - {fileID: 669424564}
-  _canInputMove: 1
-  _canInputLook: 1
 --- !u!143 &176022277
 CharacterController:
   m_ObjectHideFlags: 0
@@ -913,6 +877,42 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &176022278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 176022273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2330a5c068de774491361cac127f4d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 176022277}
+  playerVelocity: {x: 0, y: 0, z: 0}
+  _walkSpeed: 3
+  sprintSpeedMultiplier: 2
+  rotateBody: {fileID: 176022274}
+  rotateFreedHead: {fileID: 551680712}
+  yawDegrees: 0
+  pitchDegrees: 0
+  maxPitchDegreesUp: 90
+  maxPitchDegreesDown: -90
+  jumpHeight: 3
+  _isGrounded: 0
+  characterLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  lookXSens: 750
+  lookYSens: 750
+  invertLookX: 0
+  invertLookY: 0
+  weapons:
+  - {fileID: 914650133}
+  - {fileID: 669424564}
+  _canInputMove: 1
+  _canInputLook: 1
 --- !u!1 &246718941
 GameObject:
   m_ObjectHideFlags: 0
@@ -3795,7 +3795,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1703108056
 Transform:
   m_ObjectHideFlags: 0
@@ -4771,11 +4771,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 961760027543693659, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 961760027543693659, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3850520278386344056, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4823,11 +4823,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5994774020627521904, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5994774020627521904, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
