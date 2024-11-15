@@ -6,6 +6,7 @@ public class AutoTrebuchet : Trebuchet
 {
     Interactable launchButton;
     Interactable reloadButton;
+    [SerializeField] EnemyController enemyUser;
 
     protected override void Start()
     {
@@ -16,6 +17,9 @@ public class AutoTrebuchet : Trebuchet
 
         // Assumes in launch state
         StartCoroutine(HandleLaunching());
+
+        // If enemy dies, trebuchet stops shooting
+        StartCoroutine(CheckIfTrebuchetUserIsDead());
     }
 
     IEnumerator HandleReloading()
@@ -54,6 +58,20 @@ public class AutoTrebuchet : Trebuchet
 
         StartCoroutine(HandleReloading());
         yield break;
+    }
+
+    IEnumerator CheckIfTrebuchetUserIsDead()
+    {
+        // If trebuchet user is dead, stop firing
+        while(true)
+        {
+            if(!enemyUser)
+            {
+                // Stop all firing and launching coroutines
+                StopAllCoroutines();
+            }
+            yield return new WaitForFixedUpdate();
+        }
     }
 
     protected override bool IsProjectileReadyToReleaseFromSling(float dotProductOfProjectileToWorldUp, float maxRandomDotProductOffset = 0.04f)

@@ -334,6 +334,9 @@ public class Trebuchet : ProjectileLauncher
         // Spawn another projectile at its spawn point
         Projectile projectile = SpawnProjectile(projectileSpawnPoint);
 
+        // Parent projectile to this trebuchet (in case trebuchet gets destroyed)
+        projectile.transform.SetParent(gameObject.transform);
+
         // Move hinge joint anchor (local) of ball to reloadHingeArmAttachPoint's position (world)
         //  -- get world position as local position relative to the ball
         HingeJoint hingejoint = projectile.gameObject.GetComponent<HingeJoint>();
