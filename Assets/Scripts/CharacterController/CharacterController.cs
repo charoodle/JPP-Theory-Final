@@ -151,6 +151,10 @@ namespace MyProject
 
             while (!LookDegreesIsCloseEnough(yawDegrees, targetYaw, withinDegrees) || !LookDegreesIsCloseEnough(pitchDegrees, targetPitch, withinDegrees))
             {
+                // Target doesn't exist anymore; break out.
+                if (!target)
+                    yield break;
+
                 // Update target pitch and yaw, since target can be moving
                 GetTargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
                 SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
@@ -196,6 +200,10 @@ namespace MyProject
             float timer = 0f;
             while (timer < timePeriod)
             {
+                // Target doesn't exist anymore; break out.
+                if (!target)
+                    yield break;
+
                 // Update target pitch and yaw, since target can be moving
                 GetTargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
                 SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
@@ -228,6 +236,10 @@ namespace MyProject
 
             while (true)
             {
+                // Target doesn't exist anymore; break out.
+                if (!target)
+                    yield break;
+
                 // Update target pitch and yaw, since target can be moving
                 GetTargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
                 SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);

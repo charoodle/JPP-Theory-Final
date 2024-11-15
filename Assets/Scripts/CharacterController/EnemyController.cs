@@ -30,6 +30,10 @@ public class EnemyController : MyProject.CharacterController
         // Vary move speed for each enemy
         RandomizeBaseWalkSpeed(1f);
 
+        // Make them look at player castle
+        Transform playerCastle = GameObject.Find("PlayerCastle").transform;
+        StartCoroutine(LookAtPermanently(playerCastle));
+
         base.Start();
     }
 
@@ -98,7 +102,7 @@ public class EnemyController : MyProject.CharacterController
         Health health = collision.gameObject.GetComponentInParent<Health>();
         if (health)
         {
-            health.TakeDamage(10.0005f);
+            health.TakeDamage(10f);
             return true;
         }
         return false;
