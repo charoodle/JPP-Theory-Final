@@ -38,7 +38,7 @@ public class TrebuchetProjectile : Projectile
     {
         // Destroy if projectile infinite falls into void.
         if (transform.position.y < -30f)
-            Destroy(gameObject);
+            DestroyProjectile();
     }
 
     protected override void OnCollisionEnter(Collision collision)
