@@ -66,9 +66,6 @@ public abstract class Projectile : MonoBehaviour
         if (!allowCollisions)
             return;
 
-        // Only allow one collision to occur
-        allowCollisions = false;
-
         TakeHealthAwayFrom(collision);
 
         DestroyProjectile();
@@ -89,6 +86,9 @@ public abstract class Projectile : MonoBehaviour
 
     protected virtual void DestroyProjectile()
     {
+        // Disable collisions once marked for destruction
+        allowCollisions = false;
+
         // Wait for the particle trails to finish their lifetime before destroying (if it has any).
         StartCoroutine(LetParticleTrailFadeBeforeDestroy());
     }

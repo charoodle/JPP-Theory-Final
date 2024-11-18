@@ -52,7 +52,9 @@ public class TrebuchetProjectile : Projectile
 
         // Trebuchet projectile can roll and hit the castle
         if (TakeHealthAwayFrom(collision))
+        {
             DestroyProjectile();
+        }
     }
 
     protected override void StopProjectileMovement()

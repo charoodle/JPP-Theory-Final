@@ -90,7 +90,9 @@ public class Trebuchet : ProjectileLauncher
 
         /// Wait for ball to be about 90* (or slightly less) to launch
         bool readyToRelease = false;
-        while (true)
+        float time = 0f;
+        float maxTimeUntilForceRelease = 5f;
+        while (time < maxTimeUntilForceRelease)
         {
             float dot = GetProjectileDotProduct(projectile.transform, mainArm.transform);
             if (IsProjectileReadyToRelease(dot) && !readyToRelease)
@@ -102,18 +104,29 @@ public class Trebuchet : ProjectileLauncher
             //  - dot product is at least at .95, so it should release before dot product hits 1 (90*)
             if (readyToRelease && IsProjectileReadyToReleaseFromSling(dot))
             {
-                StartCoroutine(TestRopeDetachFromProjectile());
-                ReleaseProjectileFromSling();
-                shootingCoroutine = null;
-                // Start particle system of projectile
-                TrebuchetProjectile trebuchetProj = projectile.GetComponent<TrebuchetProjectile>();
-                trebuchetProj.EnableParticles();
-                // Enable reload button
-                trebuchetReloader.SetActive(true);
+                yield return DetachBall();
                 yield break;
             }
 
+            time += Time.deltaTime;
             yield return null;
+        }
+
+        // If hasn't reached max height, probably bad launch from something getting in way of ball. Force detach.
+        yield return DetachBall();
+        yield break;
+
+        IEnumerator DetachBall()
+        {
+            StartCoroutine(TestRopeDetachFromProjectile());
+            ReleaseProjectileFromSling();
+            shootingCoroutine = null;
+            // Start particle system of projectile
+            TrebuchetProjectile trebuchetProj = projectile.GetComponent<TrebuchetProjectile>();
+            trebuchetProj.EnableParticles();
+            // Enable reload button
+            trebuchetReloader.SetActive(true);
+            yield break;
         }
     }
 
