@@ -525,20 +525,25 @@ namespace MyProject
             // Ground = anything not on the player layer
             LayerMask groundCheckLayer = this.groundCheckLayer;
 
-            // Account for the controller's skin width in raycast
-            float maxDistance = controller.skinWidth;
+            // Account for the controller's skin width in raycast + a little more
+            float maxDistance = controller.skinWidth + 0.02f;
             Vector3 characterFeet = transform.position;
 
-            // Debug draw the raycast line
-            //Debug.DrawLine(playerFeet, playerFeet + (Vector3.down * maxDistance), Color.red);
-
+            bool hitGround = false;
             if (Physics.Raycast(characterFeet, Vector3.down, out RaycastHit hitInfo, maxDistance, groundCheckLayer))
             {
-                //Debug.Log("Hit: " + hitInfo.collider.gameObject + " " + LayerMask.LayerToName(hitInfo.collider.gameObject.layer), hitInfo.collider.gameObject);
-                return true;
+                Debug.Log("Hit: " + hitInfo.collider.gameObject + " " + LayerMask.LayerToName(hitInfo.collider.gameObject.layer), hitInfo.collider.gameObject);
+                hitGround = true;
             }
 
-            return false;
+            // Green = is grounded, red = not grounded.
+            //Color lineColor = hit ? Color.green : Color.red;
+
+            // Debug draw the raycast line
+            //Vector3 playerFeet = transform.position;
+            //Debug.DrawLine(playerFeet, playerFeet + (Vector3.down * maxDistance), lineColor);
+
+            return hitGround;
         }
 
         protected IEnumerator PreventOutOfBoundsCoroutine()
