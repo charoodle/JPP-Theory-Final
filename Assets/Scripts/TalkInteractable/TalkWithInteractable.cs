@@ -31,4 +31,54 @@ public abstract class TalkWithInteractable : Interactable
     }
 
     protected abstract IEnumerator TalkWithCoroutine();
+
+    protected IEnumerator TextBox(string text)
+    {
+        // TODO: Create and show a text box on screen with name, contents, ...
+        // ...
+
+        // Yield wait until player wants to progress to next dialogue box
+        yield return new WaitUntil(PlayerWantToProgressToNextTextbox);
+
+        // TODO: Turn off the text box
+        // ...
+
+        // Done
+        yield break;
+    }
+
+    protected IEnumerator ExampleFlow_TalkWithCoroutine()
+    {
+        yield return TextBox("The character says something here.");
+
+        yield return TextBox("The character says another thing here.");
+
+        yield break;
+    }
+
+    
+
+    public bool PlayerWantToProgressToNextTextbox()
+    {
+        // TODO: Figure out when the player wants to progress to next text box. Bool that can check for on and then flip off here?
+        return false;
+    }
+
+    protected IEnumerator EnableCutsceneBlackBars(bool enabled)
+    {
+        // 
+
+        yield break;
+    }
+
+    protected void EnablePlayerCharacterControl(bool enabled)
+    {
+        // Turn off movement, look input from controlling character
+
+        // Turn off crosshair
+    }
+
+    protected void CharacterLookAt(MyProject.CharacterController character, Transform target)
+    {
+    }
 }
