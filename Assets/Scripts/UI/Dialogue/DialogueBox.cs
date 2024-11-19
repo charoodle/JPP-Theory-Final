@@ -17,6 +17,12 @@ public class DialogueBox : MonoBehaviour
 
     public void SetDialogue(string dialogue)
     {
+        if (string.IsNullOrWhiteSpace(characterName))
+        {
+            Debug.LogError("Dialogue: Character name not set.", this.gameObject);
+            return;
+        }
+
         this.dialogue = dialogue;
         UpdateBox();
     }

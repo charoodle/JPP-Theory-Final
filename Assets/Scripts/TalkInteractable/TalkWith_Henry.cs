@@ -6,6 +6,12 @@ public class TalkWith_Henry : TalkWithInteractable
 {
     protected override IEnumerator TalkWithCoroutine()
     {
-        throw new System.NotImplementedException();
+        yield return TextBox("Henry", "Hello dear traveler!");
+
+        yield return TextBox("My name is Henry.");
+
+        yield return TextBox("Welcome to my kingdom.");
+
+        yield break;
     }
 }

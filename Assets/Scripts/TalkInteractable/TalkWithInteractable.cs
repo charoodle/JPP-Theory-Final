@@ -19,6 +19,20 @@ public abstract class TalkWithInteractable : Interactable
         }
     }
 
+    protected DialogueManager dialogue;
+
+    protected override void Start()
+    {
+        dialogue = FindObjectOfType<DialogueManager>();
+        if(!dialogue)
+        {
+            Debug.LogError("No dialogue manager found in scene.");
+        }
+
+
+        base.Start();
+    }
+
     public override void InteractWith()
     {
         TalkWith();
@@ -34,14 +48,31 @@ public abstract class TalkWithInteractable : Interactable
 
     protected IEnumerator TextBox(string text)
     {
-        // TODO: Create and show a text box on screen with name, contents, ...
-        // ...
+        // Reuse name from previous text box.
+        yield return TextBox(null, text);
+    }
+
+    protected IEnumerator TextBox(string name, string text)
+    {
+        // No name passed in = set just the text box.
+        if(string.IsNullOrEmpty(name))
+        {
+            dialogue.NextDialogue(text);
+        }
+        else
+        {
+            // Set text box with a name.
+            dialogue.CreateTextBox(npcName, text);
+        }
 
         // Yield wait until player wants to progress to next dialogue box
-        yield return new WaitUntil(PlayerWantToProgressToNextTextbox);
+        yield return WaitForPlayerContinue();
 
-        // TODO: Turn off the text box
-        // ...
+        // Turn off the text box
+        dialogue.DisappearTextBox();
+
+        // Gap between text boxes
+        yield return new WaitForSeconds(0.25f);
 
         // Done
         yield break;
@@ -56,12 +87,15 @@ public abstract class TalkWithInteractable : Interactable
         yield break;
     }
 
-    
+    protected IEnumerator WaitForPlayerContinue()
+    {
+        yield return new WaitUntil(PlayerWantToProgressToNextTextbox);
+    }
 
     public bool PlayerWantToProgressToNextTextbox()
     {
         // TODO: Figure out when the player wants to progress to next text box. Bool that can check for on and then flip off here?
-        return false;
+        return Input.GetMouseButtonDown(0);
     }
 
     protected IEnumerator EnableCutsceneBlackBars(bool enabled)
