@@ -60,6 +60,14 @@ namespace MyProject
         // Spawn position
         Vector3 spawnPosition;
 
+        /// <summary>
+        /// The look at head of the character. Useful for aim target during dialogue.
+        /// </summary>
+        public Transform head
+        {
+            get { return rotateFreedHead; }
+        }
+
         protected virtual void Start()
         {
             // Ground = anything not the character layer

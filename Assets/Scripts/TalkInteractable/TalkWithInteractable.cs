@@ -5,6 +5,8 @@ using CharacterController = MyProject.CharacterController;
 
 public abstract class TalkWithInteractable : Interactable
 {
+    [SerializeField] protected Transform headLookAt;
+
     [SerializeField] protected string _npcName;
     protected string npcName
     {
@@ -46,12 +48,11 @@ public abstract class TalkWithInteractable : Interactable
 
     protected abstract IEnumerator TalkWithCoroutine();
 
-    protected IEnumerator TextBox(string text)
-    {
-        // Reuse name from previous text box.
-        yield return TextBox(null, text);
-    }
-
+    /// <summary>
+    /// Summon a text box on screen and waits for the player before continuing.
+    /// </summary>
+    /// <param name="name">Name of the person talking.</param>
+    /// <param name="text">What the person is saying.</param>
     protected IEnumerator TextBox(string name, string text)
     {
         // No name passed in = set just the text box.
@@ -61,8 +62,8 @@ public abstract class TalkWithInteractable : Interactable
         }
         else
         {
-            // Set text box with a name.
-            dialogue.CreateTextBox(npcName, text);
+            // Set text box with the name passed in.
+            dialogue.CreateTextBox(name, text);
         }
 
         // Yield wait until player wants to progress to next dialogue box
@@ -78,10 +79,17 @@ public abstract class TalkWithInteractable : Interactable
         yield break;
     }
 
+    /// <summary>Summon a text box, reusing the same name as the immediate previous text box.</summary>
+    /// <inheritdoc cref="TextBox(string, string)"/>
+    protected IEnumerator TextBox(string text)
+    {
+        // Reuse name from previous text box.
+        yield return TextBox(null, text);
+    }
+
     /// <summary>
     /// Wait for some input during dialogue before progressing to next dialogue box.
     /// </summary>
-    /// <returns></returns>
     protected IEnumerator WaitForPlayerContinue()
     {
         yield return new WaitUntil(PlayerWantToProgressToNextTextbox);
@@ -112,18 +120,24 @@ public abstract class TalkWithInteractable : Interactable
     bool endTalk = false;
     protected IEnumerator CharacterLookAtUntilEndOfTalk(MyProject.CharacterController character, Transform target)
     {
-        StartCoroutine(character.LookAtTargetAndThenBackUntil(() => endTalk, this.transform));
+        StartCoroutine(character.LookAtTargetAndThenBackUntil(() => endTalk, target, 0.3f));
         yield break;
     }
 
-    protected IEnumerator StartTalk(Transform target)
+    protected IEnumerator StartTalk()
     {
         // Make player look at target until end of talk
-        StartCoroutine(CharacterLookAtUntilEndOfTalk(dialogue.Player, target));
+        StartCoroutine(CharacterLookAtUntilEndOfTalk(dialogue.Player, headLookAt));
         EnablePlayerCharacterControl(false);
         endTalk = false;
 
-        // Disable interaction / interact text
+        // Make character controller look at initiater until end of talk
+        Transform playerHead = dialogue.Player.head;
+        CharacterController npc = GetComponent<CharacterController>();
+        StartCoroutine(CharacterLookAtUntilEndOfTalk(npc, playerHead));
+
+        // Disable interaction / interact text for player
+        Interactable.showInteractTextOnScreen = false;
 
         yield break;
     }
@@ -132,8 +146,12 @@ public abstract class TalkWithInteractable : Interactable
     {
         endTalk = true;
         EnablePlayerCharacterControl(true);
-        yield break;
 
-        // Enable interaction / interact text
+        // TODO: Wait until player returns to previous look, and then enable player control.
+
+        // Enable interaction / interact text for player
+        Interactable.showInteractTextOnScreen = true;
+
+        yield break;
     }
 }

@@ -212,7 +212,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactText: Talk with.
-  _npcName: Henry
+  headLookAt: {fileID: 1498085517}
+  _npcName: 
 --- !u!1001 &126773259
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -514,6 +515,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!4 &1498085517 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3643293438439803783, guid: 07d5302a36b0ae247894a77fe0d97472, type: 3}
+  m_PrefabInstance: {fileID: 72264204}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1994826299
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -13,6 +13,11 @@ public abstract class Interactable : MonoBehaviour
     protected Camera playerCam;
     protected Coroutine mouseEnterCoroutine;
 
+    /// <summary>
+    /// Force the text to be on and off, especially during dialogue.
+    /// </summary>
+    public static bool showInteractTextOnScreen = true;
+
     protected virtual void Start()
     {
         playerCam = Camera.main;
@@ -54,6 +59,14 @@ public abstract class Interactable : MonoBehaviour
     {
         while(true)
         {
+            // Do not show on screen if disabled
+            if(!showInteractTextOnScreen)
+            {
+                playerUI.EnableInteractText(false);
+                yield return null;
+                continue;
+            }
+
             // Constantly check if player is in range
             if(IsPlayerInRangeToInteract())
             {
