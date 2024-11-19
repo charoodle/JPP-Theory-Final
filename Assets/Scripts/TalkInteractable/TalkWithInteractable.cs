@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CharacterController = MyProject.CharacterController;
 
 public abstract class TalkWithInteractable : Interactable
 {
@@ -28,7 +29,6 @@ public abstract class TalkWithInteractable : Interactable
         {
             Debug.LogError("No dialogue manager found in scene.");
         }
-
 
         base.Start();
     }
@@ -78,21 +78,16 @@ public abstract class TalkWithInteractable : Interactable
         yield break;
     }
 
-    protected IEnumerator ExampleFlow_TalkWithCoroutine()
-    {
-        yield return TextBox("The character says something here.");
-
-        yield return TextBox("The character says another thing here.");
-
-        yield break;
-    }
-
+    /// <summary>
+    /// Wait for some input during dialogue before progressing to next dialogue box.
+    /// </summary>
+    /// <returns></returns>
     protected IEnumerator WaitForPlayerContinue()
     {
         yield return new WaitUntil(PlayerWantToProgressToNextTextbox);
     }
 
-    public bool PlayerWantToProgressToNextTextbox()
+    protected bool PlayerWantToProgressToNextTextbox()
     {
         // TODO: Figure out when the player wants to progress to next text box. Bool that can check for on and then flip off here?
         return Input.GetMouseButtonDown(0);
@@ -107,12 +102,38 @@ public abstract class TalkWithInteractable : Interactable
 
     protected void EnablePlayerCharacterControl(bool enabled)
     {
-        // Turn off movement, look input from controlling character
+        PlayerController player = dialogue.Player as PlayerController;
 
-        // Turn off crosshair
+        // Turn off movement, look input from controlling character
+        player.canInputMove = enabled;
+        player.canInputLook = enabled;
     }
 
-    protected void CharacterLookAt(MyProject.CharacterController character, Transform target)
+    bool endTalk = false;
+    protected IEnumerator CharacterLookAtUntilEndOfTalk(MyProject.CharacterController character, Transform target)
     {
+        StartCoroutine(character.LookAtTargetAndThenBackUntil(() => endTalk, this.transform));
+        yield break;
+    }
+
+    protected IEnumerator StartTalk(Transform target)
+    {
+        // Make player look at target until end of talk
+        StartCoroutine(CharacterLookAtUntilEndOfTalk(dialogue.Player, target));
+        EnablePlayerCharacterControl(false);
+        endTalk = false;
+
+        // Disable interaction / interact text
+
+        yield break;
+    }
+
+    protected IEnumerator EndTalk()
+    {
+        endTalk = true;
+        EnablePlayerCharacterControl(true);
+        yield break;
+
+        // Enable interaction / interact text
     }
 }

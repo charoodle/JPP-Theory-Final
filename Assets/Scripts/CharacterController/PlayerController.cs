@@ -24,7 +24,7 @@ public class PlayerController : MyProject.CharacterController
     public bool canInputLook
     {
         get { return _canInputLook; }
-        set { _canInputMove = value; }
+        set { _canInputLook = value; }
     }
 
     protected enum Weapon

@@ -126,6 +126,29 @@ namespace MyProject
         }
 
         /// <summary>
+        /// Return true to indicate the action should be finished and should progress. Return false to continue waiting. Should be used for delegate for a coroutine's WaitUntil().
+        /// </summary>
+        /// <returns></returns>
+        public delegate bool WaitUntilAction();
+        public virtual IEnumerator LookAtTargetAndThenBackUntil(WaitUntilAction condition, Transform target, float withinDegrees = 3f, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            float savedPitch = pitchDegrees;
+            float savedYaw = yawDegrees;
+
+            // Look at the object
+            yield return LookAtUntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel);
+
+            // Keep looking there until some condition is true
+            yield return new WaitUntil(() => condition());
+
+            // Return to previous rotation if desired.
+            if (returnBackToPrevLookDir)
+            {
+                yield return LookAtTargetPitchYaw(savedPitch, savedYaw, withinDegrees, lookTime, initialLookVel);
+            }
+        }
+
+        /// <summary>
         /// Make the character controller's view move towards a target for a time period (in seconds).
         /// </summary>
         /// <inheritdoc cref="LookAtTargetForSecondsAndThenBack(Transform, float, float, bool, float, float)"/>

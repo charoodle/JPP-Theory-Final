@@ -2,14 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using CharacterController = MyProject.CharacterController;
+
 public class DialogueManager : MonoBehaviour
 {
     public DialogueBox box;
 
+    protected CharacterController _player;
+    public CharacterController Player
+    {
+        get
+        {
+            if(!_player)
+                throw new System.Exception("Dialogue: No player controller found in scene.");
+            return _player;
+        }
+        private set { _player = value; }
+    }
+
     private void Start()
     {
-        box.SetName("Henry");
-        box.SetDialogue("Hello, my name is Henry!");
+        Player = FindObjectOfType<PlayerController>();
     }
 
     public void CreateTextBox(string name, string startDialogue)
