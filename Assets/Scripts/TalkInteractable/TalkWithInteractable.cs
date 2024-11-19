@@ -21,8 +21,6 @@ public abstract class TalkWithInteractable : Interactable
 
     public override void InteractWith()
     {
-        base.InteractWith();
-
         TalkWith();
     }
 

@@ -8,7 +8,6 @@ using UnityEngine.Events;
 /// </summary>
 public abstract class Interactable : MonoBehaviour
 {
-    public UnityEvent unityEvent;
     protected PlayerUI playerUI;
     public string interactText;
     protected Camera playerCam;
@@ -20,10 +19,7 @@ public abstract class Interactable : MonoBehaviour
         playerUI = FindObjectOfType<PlayerUI>();
     }
 
-    public virtual void InteractWith()
-    {
-        unityEvent.Invoke();
-    }
+    public abstract void InteractWith();
 
     protected void OnMouseEnter()
     {

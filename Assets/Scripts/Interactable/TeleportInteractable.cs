@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TeleportInteractable : Interactable
+public class TeleportInteractable : UnityEventInteractable
 {
     [SerializeField] Transform teleportLocation;
 
