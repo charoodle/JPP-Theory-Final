@@ -216,4 +216,13 @@ public abstract class TalkWithInteractable : Interactable
 
         yield break;
     }
+
+    private void OnDisable()
+    {
+        // Stop any running talking/looking coroutines.
+        StopAllCoroutines();
+
+        // Forcibly exit the cutscene.
+        dialogue.CharacterKilled_DisableCutscene();
+    }
 }

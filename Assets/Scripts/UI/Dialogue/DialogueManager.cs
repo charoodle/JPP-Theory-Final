@@ -136,4 +136,19 @@ public class DialogueManager : MonoBehaviour
 
         yield break;
     }
+    
+    public void CharacterKilled_DisableCutscene()
+    {
+        if(cutsceneBarsAreEnabled)
+            ToggleCutsceneBars();
+
+        PlayerController player = Player as PlayerController;
+        player.canInputLook = true;
+        player.canInputMove = true;
+
+        Interactable.showInteractTextOnScreen = true;
+
+        // Disable any text boxes
+        DisappearTextBox();
+    }
 }
