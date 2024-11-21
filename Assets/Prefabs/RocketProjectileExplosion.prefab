@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4964496022477343568}
   - component: {fileID: 5612493263055238164}
   - component: {fileID: 2256997321568300842}
+  - component: {fileID: -581384244628768086}
   m_Layer: 0
   m_Name: RocketProjectileExplosion
   m_TagString: Untagged
@@ -71,6 +72,33 @@ MonoBehaviour:
   endRadius: 8
   duration: 0.6
   durationUntilDestroyed: 1.15
+--- !u!54 &-581384244628768086
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5713613637717643651}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1001 &7559256714557918471
 PrefabInstance:
   m_ObjectHideFlags: 0

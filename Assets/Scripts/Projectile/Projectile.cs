@@ -66,6 +66,9 @@ public abstract class Projectile : MonoBehaviour
         if (!allowCollisions)
             return;
 
+        // Must be done OnCollision. If called from a method (like OnCollisionEnter->DestroyProjectile), multiple hits can still occur.
+        allowCollisions = false;
+
         TakeHealthAwayFrom(collision);
 
         DestroyProjectile();

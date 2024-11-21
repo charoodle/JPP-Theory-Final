@@ -67,7 +67,7 @@ public class RocketProjectile : Projectile
         base.OnCollisionEnter(collision);
 
         // Not an enemy
-        if(!Utils.IsEnemy(collision.gameObject))
+        if(!Utils.IsHumanoidEnemy(collision.gameObject))
         {
             // Spawn explosion prefab, with up direction facing collision's normal direction (if its not an enemy)
             ContactPoint point = collision.GetContact(0);

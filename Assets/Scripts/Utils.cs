@@ -4,15 +4,31 @@ using UnityEngine;
 
 public static class Utils
 {
+    /// <summary>
+    /// Only works with EnemyController.
+    /// </summary>
     public static bool IsEnemy(GameObject obj, ref EnemyController enemy)
     {
         enemy = obj.GetComponent<EnemyController>();
         return (enemy != null);
     }
 
+    /// <summary>
+    /// Is this an enemy that can move around/is human?
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
+    public static bool IsHumanoidEnemy(GameObject obj)
+    {
+        return obj.GetComponent<EnemyController>();
+    }
+
+    /// <summary>
+    /// Detects anything with an EnemyController OR EnemyIdentifier.
+    /// </summary>
     public static bool IsEnemy(GameObject obj)
     {
-        return (obj.GetComponent<EnemyController>());
+        return (obj.GetComponent<EnemyController>() || obj.GetComponent<EnemyCastle>());
     }
 
     /// <summary>

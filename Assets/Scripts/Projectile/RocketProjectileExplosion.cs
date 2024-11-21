@@ -24,6 +24,11 @@ public class RocketProjectileExplosion : MonoBehaviour
     [SerializeField] float duration = 0.4f;
     [SerializeField] float durationUntilDestroyed = 1.15f;
 
+    /// <summary>
+    /// Track which enemies already received damage from explosion. Prevent doubled up damage from same explosion.
+    /// </summary>
+    List<GameObject> enemiesDamaged;
+
     private void Start()
     {
         explosionDamage = 10f;
@@ -32,6 +37,9 @@ public class RocketProjectileExplosion : MonoBehaviour
 
         // Destroy after particles finished
         Destroy(this.gameObject, 1.15f);
+
+        // Init list
+        enemiesDamaged = new List<GameObject>();
     }
 
     protected IEnumerator IncreaseRadius(float start, float end, float duration)
@@ -55,10 +63,11 @@ public class RocketProjectileExplosion : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Damage enemies in radius
-        if(IsEnemy(other.gameObject))
+        // Damage enemies (enemies or castles) in radius once. Check root, in case of compound colliders.
+        GameObject rootObj = other.transform.root.gameObject;
+        if(Utils.IsEnemy(rootObj) && !AlreadyDidDamageTo(rootObj))
         {
-            TakeHealthAwayFrom(other.gameObject);
+            TakeHealthAwayFrom(rootObj);
         }
 
         // Add explosion forces to any rigidbodies in explosion
@@ -67,6 +76,11 @@ public class RocketProjectileExplosion : MonoBehaviour
         //{
         //    StartCoroutine(HandleRigidbodyExplosion(rb));
         //}
+    }
+
+    private bool AlreadyDidDamageTo(GameObject enemy)
+    {
+        return enemiesDamaged.Contains(enemy.transform.root.gameObject);
     }
 
     IEnumerator HandleRigidbodyExplosion(Rigidbody rb)
@@ -108,21 +122,18 @@ public class RocketProjectileExplosion : MonoBehaviour
         yield break;
     }
 
-    protected bool IsEnemy(GameObject obj)
-    {
-        return obj.GetComponent<EnemyController>() != null;
-    }
-
     protected virtual bool TakeHealthAwayFrom(GameObject obj)
     {
         // Take health away from object when hit with this projectile
         //  Colliders usually on child objects. Scripts on parent objects.
-        Health health = obj.gameObject.GetComponent<Health>();
+        Health health = obj.GetComponent<Health>();
         if (health)
         {
             health.TakeDamage(explosionDamage);
+            enemiesDamaged.Add(obj.gameObject);
             return true;
         }
+
         return false;
     }
 }
