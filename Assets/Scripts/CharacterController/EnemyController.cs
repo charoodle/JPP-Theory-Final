@@ -31,8 +31,9 @@ public class EnemyController : MyProject.CharacterController
         RandomizeBaseWalkSpeed(1f);
 
         // Make them look at player castle
-        Transform playerCastle = GameObject.Find("PlayerCastle").transform;
-        StartCoroutine(LookAtPermanently(playerCastle));
+        GameObject playerCastle = GameObject.Find("PlayerCastle");
+        if(playerCastle)
+            StartCoroutine(LookAtPermanently(playerCastle.transform));
 
         base.Start();
     }

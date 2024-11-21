@@ -90,6 +90,13 @@ namespace MyProject
         // Param constants
         protected const float LOOKTIME = 0.5f;
         protected const float INITIAL_LOOKVEL = 0.5f;
+        protected const float WITHIN_DEGREES = 2f;
+
+        public void GetYawAndPitchDegrees(out float pitch, out float yaw)
+        {
+            pitch = pitchDegrees;
+            yaw = yawDegrees;
+        }
 
         /*
          * =============== LookAt TODO ===============
@@ -115,16 +122,17 @@ namespace MyProject
         /// <param name="returnBackToPrevLookDir">(Optionally) return to previous character's look direction.</param>
         /// <param name="lookTime">Roughly how many seconds until character's look direction matches to target direction.</param>
         /// <param name="initialLookVel">How fast the character look speed initially is.</param>
-        protected virtual IEnumerator LookAtTargetForSecondsAndThenBack(Transform target, float timePeriod, float withinDegrees = 3f, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        public virtual IEnumerator LookAtTargetForSecondsAndThenBack(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             float savedPitch = pitchDegrees;
             float savedYaw = yawDegrees;
-
+            
             // Look at the object
             yield return LookAtUntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel);
 
             // Hold look there for a time period
-            yield return LookAtForTimePeriod(target, 3f, lookTime, initialLookVel, true);
+            bool usePreviousLookAtVelocity = true;
+            yield return LookAtForTimePeriod(target, timePeriod, lookTime, initialLookVel, usePreviousLookAtVelocity);
 
             // Return to previous rotation if desired.
             if (returnBackToPrevLookDir)
@@ -138,7 +146,7 @@ namespace MyProject
         /// </summary>
         /// <returns></returns>
         public delegate bool WaitUntilAction();
-        public virtual IEnumerator LookAtTargetAndThenBackUntil(WaitUntilAction condition, Transform target, float withinDegrees = 3f, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        public virtual IEnumerator LookAtTargetAndThenBackUntil(WaitUntilAction condition, Transform target, float withinDegrees = WITHIN_DEGREES, bool returnBackToPrevLookDir = true, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             float savedPitch = pitchDegrees;
             float savedYaw = yawDegrees;
@@ -210,6 +218,12 @@ namespace MyProject
                 yield break;
             }
 
+            // Dont need to run through this code.
+            if (lookTime == 0)
+            {
+                yield break;
+            }
+
             float yawVel;
             float pitchVel;
             if(useSavedYawPitchVelocity)
@@ -244,12 +258,14 @@ namespace MyProject
         }
 
         /// <summary>
-        /// Make the character controller permanently look at a target (until manually stopped).
+        /// Make the character controller permanently look at a target (until manually stopped) or this coroutine is called again.
         /// Uses the look rotation's pitch and yaw system to get a target pitch/yaw to smoothly rotate towards the target transform.
         /// </summary>
         /// <inheritdoc cref="LookAtTargetForSecondsAndThenBack(Transform, float, float, bool, float, float)"/>
-        protected IEnumerator LookAtPermanently(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        public IEnumerator LookAtPermanently(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
+            StopAllCoroutines();
+
             // Cannot have negative look time.
             if (lookTime < 0)
             {
@@ -284,7 +300,7 @@ namespace MyProject
         /// <param name="targetPitch">Target pitch degrees to look at.</param>
         /// <param name="targetYaw">Target yaw degrees to look at.</param>
         /// <inheritdoc cref="LookAtTargetForSecondsAndThenBack(Transform, float, float, bool, float, float)"/>
-        protected virtual IEnumerator LookAtTargetPitchYaw(float targetPitch, float targetYaw, float withinDegrees = 1.5f, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        public virtual IEnumerator LookAtTargetPitchYaw(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             // Cannot have negative look time.
             if (lookTime < 0)

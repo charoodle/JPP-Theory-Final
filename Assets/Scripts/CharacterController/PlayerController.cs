@@ -163,11 +163,17 @@ public class PlayerController : MyProject.CharacterController
 
     protected override bool GetJumpInput()
     {
+        if (!canInputMove)
+            return false;
+
         return Input.GetKey(KeyCode.Space);
     }
 
     protected override bool GetSprintInput()
     {
+        if (!canInputMove)
+            return false;
+
         return Input.GetKey(KeyCode.LeftShift);
     }
 

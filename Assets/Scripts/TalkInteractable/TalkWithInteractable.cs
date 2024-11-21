@@ -3,26 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using CharacterController = MyProject.CharacterController;
 
+[RequireComponent(typeof(CharacterController))]
 public abstract class TalkWithInteractable : Interactable
 {
+    protected const float WAITAFTER_PREVTEXT_DISAPPEAR = 0.25f;
     [SerializeField] protected Transform headLookAt;
-
-    [SerializeField] protected string _npcName;
-    protected string npcName
+    protected DialogueManager dialogue;
+    protected CharacterController character;
+    protected CharacterController player
     {
-        get { return _npcName; }
-        set
+        get
         {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                Debug.LogError("NPC Name cannot be empty.");
-                return;
-            }
-            _npcName = value;
+            if (!dialogue)
+                Debug.LogError("No dialogue object");
+
+            if (!dialogue.Player)
+                Debug.LogError("No player object.");
+
+            return dialogue.Player;
         }
     }
-
-    protected DialogueManager dialogue;
 
     protected override void Start()
     {
@@ -31,29 +31,36 @@ public abstract class TalkWithInteractable : Interactable
         {
             Debug.LogError("No dialogue manager found in scene.");
         }
+        character = GetComponent<CharacterController>();
 
         base.Start();
     }
 
     public override void InteractWith()
     {
-        TalkWith();
+        TalkWith(character);
     }
 
-    protected virtual void TalkWith()
+    protected virtual void TalkWith(CharacterController character)
     {
-        Debug.Log("Talk with: " + npcName);
         StartCoroutine(TalkWithCoroutine());
     }
 
+    /// <summary>
+    /// The main talk coroutine. Can use yield return with:
+    /// TextBox
+    /// ...
+    /// </summary>
+    /// <returns></returns>
     protected abstract IEnumerator TalkWithCoroutine();
-
+    
     /// <summary>
     /// Summon a text box on screen and waits for the player before continuing.
     /// </summary>
     /// <param name="name">Name of the person talking.</param>
     /// <param name="text">What the person is saying.</param>
-    protected IEnumerator TextBox(string name, string text)
+    /// <param name="minAppearTime">Minimum time the text box will show on screen before letting player continue to next dialogue.</param>
+    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f)
     {
         // No name passed in = set just the text box.
         if(string.IsNullOrEmpty(name))
@@ -66,6 +73,9 @@ public abstract class TalkWithInteractable : Interactable
             dialogue.CreateTextBox(name, text);
         }
 
+        // Force the text box to stay on for a split second before skipping
+        yield return new WaitForSeconds(minAppearTime);
+
         // Yield wait until player wants to progress to next dialogue box
         yield return WaitForPlayerContinue();
 
@@ -73,7 +83,7 @@ public abstract class TalkWithInteractable : Interactable
         dialogue.DisappearTextBox();
 
         // Gap between text boxes
-        yield return new WaitForSeconds(0.25f);
+        yield return new WaitForSeconds(waitAfterDisappear);
 
         // Done
         yield break;
@@ -81,10 +91,15 @@ public abstract class TalkWithInteractable : Interactable
 
     /// <summary>Summon a text box, reusing the same name as the immediate previous text box.</summary>
     /// <inheritdoc cref="TextBox(string, string)"/>
-    protected IEnumerator TextBox(string text)
+    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR)
     {
         // Reuse name from previous text box.
-        yield return TextBox(null, text);
+        yield return TextBox(null, text, waitAfterDisappear);
+    }
+
+    protected IEnumerator Pause(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
     }
 
     /// <summary>
@@ -101,13 +116,6 @@ public abstract class TalkWithInteractable : Interactable
         return Input.GetMouseButtonDown(0);
     }
 
-    protected IEnumerator EnableCutsceneBlackBars(bool enabled)
-    {
-        // 
-
-        yield break;
-    }
-
     protected void EnablePlayerCharacterControl(bool enabled)
     {
         PlayerController player = dialogue.Player as PlayerController;
@@ -117,41 +125,81 @@ public abstract class TalkWithInteractable : Interactable
         player.canInputLook = enabled;
     }
 
-    bool endTalk = false;
-    protected IEnumerator CharacterLookAtUntilEndOfTalk(MyProject.CharacterController character, Transform target)
+    /// <summary>
+    /// Call this function to make the character look towards a specific direction/location.
+    /// </summary>
+    /// <param name="character"></param>
+    /// <param name="target"></param>
+    protected void SimultaneousCharacterLookAt(CharacterController character, Transform target)
     {
-        StartCoroutine(character.LookAtTargetAndThenBackUntil(() => endTalk, target, 0.3f));
-        yield break;
+        StartCoroutine(CharacterLookAt(character, target));
     }
 
+    /// <summary>
+    /// Yield return this function during a dialogue section (coroutine) to wait for the character to look at the specific direction/location.
+    /// </summary>
+    /// <param name="character">Character who will look at something.</param>
+    /// <param name="target">What to look at.</param>
+    /// <returns></returns>
+    protected IEnumerator CharacterLookAt(CharacterController character, Transform target)
+    {
+        yield return character.LookAtTargetForSecondsAndThenBack(target, timePeriod:1f, withinDegrees:2f, returnBackToPrevLookDir: false);
+    }
+
+    /// <inheritdoc cref="CharacterLookAt(CharacterController, Transform)"/>
+    /// <param name="pitch">Pitch direction </param>
+    protected IEnumerator CharacterLookAt(CharacterController character, float yaw, float pitch)
+    {
+        yield return character.LookAtTargetPitchYaw(pitch, yaw);
+    }
+
+    protected void GetCharacterLookRotation(CharacterController character, out float yaw, out float pitch)
+    {
+        character.GetYawAndPitchDegrees(out yaw, out pitch);
+    }
+
+    // Save initial character and player rotations.
+    float charYaw;
+    float charPitch;
+    float playerYaw;
+    float playerPitch;
     protected IEnumerator StartTalk()
     {
-        // Make player look at target until end of talk
-        StartCoroutine(CharacterLookAtUntilEndOfTalk(dialogue.Player, headLookAt));
+        // Disable player movement and look
         EnablePlayerCharacterControl(false);
-        endTalk = false;
-
-        // Make character controller look at initiater until end of talk
-        Transform playerHead = dialogue.Player.head;
-        CharacterController npc = GetComponent<CharacterController>();
-        StartCoroutine(CharacterLookAtUntilEndOfTalk(npc, playerHead));
 
         // Disable interaction / interact text for player
         Interactable.showInteractTextOnScreen = false;
+
+        // Save the character's rotations
+        character.GetYawAndPitchDegrees(out charYaw, out charPitch);
+        player.GetYawAndPitchDegrees(out playerYaw, out playerPitch);
+
+        // Make player and character look at each other during dialogue.
+        StartCoroutine(CharacterLookAt(character, player.head));
+        StartCoroutine(CharacterLookAt(player, character.head));
 
         yield break;
     }
 
     protected IEnumerator EndTalk()
     {
-        endTalk = true;
-        EnablePlayerCharacterControl(true);
+        // Make player & character look at their original rotation from before looking at each other.
+        // TODO: Stop the other look coroutine from StartTalk()
+        StartCoroutine(CharacterLookAt(character, charYaw, charPitch));
+        yield return CharacterLookAt(player, playerPitch, playerYaw);
 
-        // TODO: Wait until player returns to previous look, and then enable player control.
+        EnablePlayerCharacterControl(true);
 
         // Enable interaction / interact text for player
         Interactable.showInteractTextOnScreen = true;
 
+        yield break;
+    }
+
+    protected IEnumerator EnableCutsceneBlackBars(bool enabled)
+    {
+        // TODO...
         yield break;
     }
 }
