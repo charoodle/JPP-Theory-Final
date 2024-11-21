@@ -128,11 +128,19 @@ public abstract class TalkWithInteractable : Interactable
     /// <summary>
     /// Call this function to make the character look towards a specific direction/location.
     /// </summary>
-    /// <param name="character"></param>
-    /// <param name="target"></param>
+    /// <param name="character">Character to do the looking.</param>
+    /// <param name="target">Transform for character to look towards.</param>
     protected void SimultaneousCharacterLookAt(CharacterController character, Transform target)
     {
         StartCoroutine(CharacterLookAt(character, target));
+    }
+
+    /// <inheritdoc cref="SimultaneousCharacterLookAt(CharacterController, Transform)"/>
+    /// <param name="yaw">Yaw angle to look at.</param>
+    /// <param name="pitch">Pitch angle to look at.</param>
+    protected void SimultaneousCharacterLookAt(CharacterController character, float yaw, float pitch)
+    {
+        StartCoroutine(CharacterLookAt(character, yaw, pitch));
     }
 
     /// <summary>
@@ -143,6 +151,9 @@ public abstract class TalkWithInteractable : Interactable
     /// <returns></returns>
     protected IEnumerator CharacterLookAt(CharacterController character, Transform target)
     {
+        if (!character)
+            throw new System.Exception("Character is null.");
+
         yield return character.LookAtTargetForSecondsAndThenBack(target, timePeriod:1f, withinDegrees:2f, returnBackToPrevLookDir: false);
     }
 
@@ -150,6 +161,9 @@ public abstract class TalkWithInteractable : Interactable
     /// <param name="pitch">Pitch direction </param>
     protected IEnumerator CharacterLookAt(CharacterController character, float yaw, float pitch)
     {
+        if (!character)
+            throw new System.Exception("Character is null.");
+
         yield return character.LookAtTargetPitchYaw(pitch, yaw);
     }
 
@@ -175,6 +189,9 @@ public abstract class TalkWithInteractable : Interactable
         character.GetYawAndPitchDegrees(out charYaw, out charPitch);
         player.GetYawAndPitchDegrees(out playerYaw, out playerPitch);
 
+        // Turn on cutscene bars.
+        dialogue.ToggleCutsceneBars();
+
         // Make player and character look at each other during dialogue.
         StartCoroutine(CharacterLookAt(character, player.head));
         StartCoroutine(CharacterLookAt(player, character.head));
@@ -184,9 +201,12 @@ public abstract class TalkWithInteractable : Interactable
 
     protected IEnumerator EndTalk()
     {
+        // Turn off cutscene bars.
+        dialogue.ToggleCutsceneBars();
+
         // Make player & character look at their original rotation from before looking at each other.
         // TODO: Stop the other look coroutine from StartTalk()
-        StartCoroutine(CharacterLookAt(character, charYaw, charPitch));
+        SimultaneousCharacterLookAt(character, charYaw, charPitch);
         yield return CharacterLookAt(player, playerPitch, playerYaw);
 
         EnablePlayerCharacterControl(true);
@@ -194,12 +214,6 @@ public abstract class TalkWithInteractable : Interactable
         // Enable interaction / interact text for player
         Interactable.showInteractTextOnScreen = true;
 
-        yield break;
-    }
-
-    protected IEnumerator EnableCutsceneBlackBars(bool enabled)
-    {
-        // TODO...
         yield break;
     }
 }
