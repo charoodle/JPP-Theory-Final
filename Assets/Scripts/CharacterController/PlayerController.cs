@@ -51,9 +51,9 @@ public class PlayerController : MyProject.CharacterController
         if(switchWeapon)
             SwitchWeapon(switchToWeapon);
 
-        // Player interaction
+        // Player interaction only if interact text is shown on screen
         bool interactButton = GetInteractButtonInput();
-        if (interactButton)
+        if (interactButton && Interactable.showInteractTextOnScreen)
         {
             bool targetFound = false;
             GameObject target = ProjectileLauncher.GetPlayersCenterCameraTarget_GameObject(ref targetFound, interactRange);
