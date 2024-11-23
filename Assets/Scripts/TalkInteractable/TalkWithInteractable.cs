@@ -36,8 +36,16 @@ public abstract class TalkWithInteractable : Interactable
         base.Start();
     }
 
+    public virtual void TalkWith()
+    {
+        InteractWith();
+    }
+
     public override void InteractWith()
     {
+        if (!enabled)
+            return;
+
         TalkWith(character);
     }
 

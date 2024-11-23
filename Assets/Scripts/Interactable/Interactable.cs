@@ -28,6 +28,9 @@ public abstract class Interactable : MonoBehaviour
 
     protected void OnMouseEnter()
     {
+        if (!enabled)
+            return;
+
         if (mouseEnterCoroutine != null)
             StopCoroutine(mouseEnterCoroutine);
         mouseEnterCoroutine = StartCoroutine(ShowInteractTextIfInRange());
@@ -35,6 +38,9 @@ public abstract class Interactable : MonoBehaviour
 
     protected void OnMouseExit()
     {
+        if (!enabled)
+            return;
+
         DisableInteractText();
     }
 
