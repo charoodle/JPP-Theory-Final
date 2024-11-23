@@ -5,6 +5,9 @@ using UnityEngine;
 public class CastleAnimations : MonoBehaviour
 {
     protected Animator animator;
+    [SerializeField] ParticleSystem dustCloud;
+    [SerializeField] ParticleSystem groundExplosion;
+
     private void Start()
     {
         animator = GetComponent<Animator>();
@@ -14,12 +17,13 @@ public class CastleAnimations : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.C))
         {
-            animator.Play("CastleFallFromSky");
+            animator.Play("CastleTouchdown");
         }
     }
 
     public void PlayDustCloudParticles()
     {
-
+        groundExplosion.Play();
+        dustCloud.Play();
     }
 }

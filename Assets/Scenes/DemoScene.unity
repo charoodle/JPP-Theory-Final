@@ -531,6 +531,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactText: To bottom of castle.
+  _playerCanInteractWith: 1
   unityEvent:
     m_PersistentCalls:
       m_Calls:
@@ -1926,6 +1927,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactText: To top of your castle.
+  _playerCanInteractWith: 1
   unityEvent:
     m_PersistentCalls:
       m_Calls:
