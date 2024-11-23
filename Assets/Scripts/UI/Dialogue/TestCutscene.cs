@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TestCutscene : Cutscene
 {
-    public TalkWithInteractable person;
+    public TalkWithInteractable henry;
 
     private void Update()
     {
@@ -14,7 +14,8 @@ public class TestCutscene : Cutscene
 
     protected override IEnumerator CutsceneAction()
     {
-        person.TalkWith();
+        yield return henry.TalkWith();
+
         yield break;
     }
 }

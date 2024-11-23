@@ -36,9 +36,16 @@ public abstract class TalkWithInteractable : Interactable
         base.Start();
     }
 
-    public virtual void TalkWith()
+    /// <summary>
+    /// Used in other coroutines (ex: cutscenes) where they should wait for the talk to finish.
+    /// </summary>
+    /// <returns></returns>
+    public virtual IEnumerator TalkWith()
     {
-        InteractWith();
+        if (!enabled)
+            yield break;
+
+        yield return TalkWithCoroutine();
     }
 
     public override void InteractWith()
