@@ -60,7 +60,7 @@ public class PlayerController : MyProject.CharacterController
             if(targetFound)
             {
                 Interactable interactable = target.GetComponent<Interactable>();
-                if(interactable)
+                if(interactable && interactable.playerCanInteractWith)
                     interactable.InteractWith();
             }
         }

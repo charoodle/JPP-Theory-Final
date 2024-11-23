@@ -8,6 +8,12 @@ public class Cutscene : MonoBehaviour
 
     private void Start()
     {
+        
+    }
+
+    public void TriggerCutscene()
+    {
+        StopAllCoroutines();
         StartCoroutine(StartCutscene());
     }
 
@@ -15,5 +21,11 @@ public class Cutscene : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);
         person.TalkWith();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Y))
+            TriggerCutscene();
     }
 }

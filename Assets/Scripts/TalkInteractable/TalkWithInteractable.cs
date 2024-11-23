@@ -231,6 +231,7 @@ public abstract class TalkWithInteractable : Interactable
         StopAllCoroutines();
 
         // Forcibly exit the cutscene.
-        dialogue.CharacterKilled_DisableCutscene();
+        if(dialogue)
+            dialogue.CharacterKilled_DisableCutscene();
     }
 }

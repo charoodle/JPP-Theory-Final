@@ -18,6 +18,18 @@ public abstract class Interactable : MonoBehaviour
     /// </summary>
     public static bool showInteractTextOnScreen = true;
 
+    /// <inheritdoc cref="playerCanInteractWith"/>
+    [SerializeField] protected bool _playerCanInteractWith = true;
+
+    /// <summary>
+    /// Is the player allowed to interact with directly with this object by pressing their interact button?
+    /// </summary>
+    public bool playerCanInteractWith
+    {
+        get { return _playerCanInteractWith; }
+        protected set { _playerCanInteractWith = value; }
+    }
+
     protected virtual void Start()
     {
         playerCam = Camera.main;
@@ -28,7 +40,7 @@ public abstract class Interactable : MonoBehaviour
 
     protected void OnMouseEnter()
     {
-        if (!enabled)
+        if (!enabled || !playerCanInteractWith)
             return;
 
         if (mouseEnterCoroutine != null)
@@ -38,7 +50,7 @@ public abstract class Interactable : MonoBehaviour
 
     protected void OnMouseExit()
     {
-        if (!enabled)
+        if (!enabled || !playerCanInteractWith)
             return;
 
         DisableInteractText();

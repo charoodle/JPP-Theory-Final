@@ -271,12 +271,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 72264205}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 830161ce6862ca943a553bf4e6d52c5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   interactText: Talk
+  PlayerCanInteractWith: 1
   headLookAt: {fileID: 1498085517}
 --- !u!1001 &126773259
 PrefabInstance:
