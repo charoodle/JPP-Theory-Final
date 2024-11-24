@@ -15,10 +15,24 @@ public class CastleAnimations : MonoBehaviour
 
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.V))
+        {
+            StartCoroutine(CastleFallToGroundAnim());
+        }
+
         if(Input.GetKeyDown(KeyCode.C))
         {
             animator.Play("CastleTouchdown");
         }
+    }
+
+    protected IEnumerator CastleFallToGroundAnim()
+    {
+        animator.Play("CastleFallFromSky");
+
+        yield return new WaitForSeconds(4.95f);
+
+        animator.Play("CastleTouchdown");
     }
 
     public void PlayDustCloudParticles()
