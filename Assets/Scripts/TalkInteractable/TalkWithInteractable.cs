@@ -23,6 +23,7 @@ public abstract class TalkWithInteractable : Interactable
             return dialogue.Player;
         }
     }
+    public bool isRunning { get; protected set; }
 
     protected override void Start()
     {
@@ -211,6 +212,8 @@ public abstract class TalkWithInteractable : Interactable
         StartCoroutine(CharacterLookAt(character, player.head));
         StartCoroutine(CharacterLookAt(player, character.head));
 
+        isRunning = true;
+
         yield break;
     }
 
@@ -229,6 +232,8 @@ public abstract class TalkWithInteractable : Interactable
         // Enable interaction / interact text for player
         Interactable.showInteractTextOnScreen = true;
 
+        isRunning = false;
+
         yield break;
     }
 
@@ -237,8 +242,8 @@ public abstract class TalkWithInteractable : Interactable
         // Stop any running talking/looking coroutines.
         StopAllCoroutines();
 
-        // Forcibly exit the cutscene.
-        if(dialogue)
+        // Forcibly exit the cutscene, if its running.
+        if(dialogue && isRunning)
             dialogue.CharacterKilled_DisableCutscene();
     }
 }

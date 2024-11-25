@@ -137,15 +137,21 @@ public class DialogueManager : MonoBehaviour
         yield break;
     }
     
+    /// <summary>
+    /// When the character the player is currently talking to is killed or disabled suddenly, give player control and pull them out of the cutscene.
+    /// </summary>
     public void CharacterKilled_DisableCutscene()
     {
         if(cutsceneBarsAreEnabled)
             ToggleCutsceneBars();
 
-        PlayerController player = Player as PlayerController;
-        player.canInputLook = true;
-        player.canInputMove = true;
-
+        PlayerController player = _player as PlayerController;
+        if (player)
+        {
+            player.canInputLook = true;
+            player.canInputMove = true;
+        }
+        
         Interactable.showInteractTextOnScreen = true;
 
         // Disable any text boxes
