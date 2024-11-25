@@ -6,10 +6,12 @@ public class TestCutscene : Cutscene
 {
     public TalkWithInteractable henry;
 
-    private void Update()
+    protected override void Update()
     {
         if (Input.GetKeyDown(KeyCode.Y))
             TriggerCutscene();
+
+        base.Update();
     }
 
     protected override IEnumerator CutsceneAction()

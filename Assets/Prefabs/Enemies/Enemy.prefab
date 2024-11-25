@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2424105798403699081}
   - component: {fileID: 4912844305923083565}
   - component: {fileID: 154378166530389889}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -144,7 +144,7 @@ GameObject:
   - component: {fileID: 8925753294131931318}
   - component: {fileID: 6872670768648106686}
   - component: {fileID: 2414446171773279902}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -249,7 +249,7 @@ GameObject:
   - component: {fileID: 8161046456351729843}
   - component: {fileID: 8393601845821215844}
   - component: {fileID: 2983353160217547211}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -353,7 +353,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1920883581693370093}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}

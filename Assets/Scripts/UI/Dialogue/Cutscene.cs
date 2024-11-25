@@ -23,4 +23,12 @@ public abstract class Cutscene : MonoBehaviour
     /// </summary>
     /// <returns></returns>
     protected abstract IEnumerator CutsceneAction();
+
+    protected virtual void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            CameraShaker.instance.Shake(2.5f, 1f);
+        }
+    }
 }
