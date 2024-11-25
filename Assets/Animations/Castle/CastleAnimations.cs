@@ -33,6 +33,7 @@ public class CastleAnimations : MonoBehaviour
         yield return new WaitForSeconds(4.95f);
 
         animator.Play("CastleTouchdown");
+        CameraShaker.instance.Shake(0.7f, 1f);
     }
 
     public void PlayDustCloudParticles()

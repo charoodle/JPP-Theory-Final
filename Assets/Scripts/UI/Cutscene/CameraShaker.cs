@@ -43,19 +43,21 @@ public class CameraShaker : MonoBehaviour
 
     protected IEnumerator ShakeCoroutine(float seconds, float intensity)
     {
-        Vector3 camLocalPos = camera.transform.localPosition;
+        Quaternion rotation = camera.transform.localRotation;
 
         Debug.Log("Starting shake coroutine");
         float timer = 0f;
+
+        float waitTime = 1 / 60f;
         while (timer < seconds)
         {
-            camera.transform.localPosition = Random.insideUnitSphere * intensity;
-            timer += Time.deltaTime;
-            yield return null;
+            camera.transform.localRotation = Quaternion.Euler(Random.insideUnitSphere * intensity);
+            timer += waitTime;
+            yield return new WaitForSeconds(waitTime);
         }
 
         // Revert back to pos
-        camera.transform.localPosition = camLocalPos;
+        camera.transform.localRotation = rotation;
 
         yield break;
     }

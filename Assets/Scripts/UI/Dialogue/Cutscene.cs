@@ -28,7 +28,7 @@ public abstract class Cutscene : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.J))
         {
-            CameraShaker.instance.Shake(2.5f, 1f);
+            CameraShaker.instance.Shake(0.7f, 1f);
         }
     }
 }
