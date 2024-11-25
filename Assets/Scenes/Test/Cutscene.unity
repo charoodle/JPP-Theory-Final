@@ -341,6 +341,7 @@ MonoBehaviour:
   interactText: Talk
   _playerCanInteractWith: 0
   headLookAt: {fileID: 1498085517}
+  castleAnims: {fileID: 146629358}
 --- !u!1001 &126773259
 PrefabInstance:
   m_ObjectHideFlags: 0

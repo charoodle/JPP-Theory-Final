@@ -49,7 +49,6 @@ public class CameraShaker : MonoBehaviour
     {
         Quaternion rotation = camera.transform.localRotation;
 
-        Debug.Log("Starting shake coroutine");
         float timer = 0f;
 
         float waitTime = 1 / 60f;

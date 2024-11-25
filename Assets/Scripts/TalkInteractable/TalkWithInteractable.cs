@@ -142,13 +142,14 @@ public abstract class TalkWithInteractable : Interactable
     }
 
     /// <summary>
-    /// Call this function to make the character look towards a specific direction/location.
+    /// Call this function to make the character look towards a specific direction/location, and keep tracking target for duration.
     /// </summary>
     /// <param name="character">Character to do the looking.</param>
     /// <param name="target">Transform for character to look towards.</param>
-    protected void SimultaneousCharacterLookAt(CharacterController character, Transform target)
+    /// <param name="duration">How long to track the target for, once viewing angle is close enough to it.</param>
+    protected void SimultaneousCharacterLookAt(CharacterController character, Transform target, float duration = 1f)
     {
-        StartCoroutine(CharacterLookAt(character, target));
+        StartCoroutine(CharacterLookAt(character, target, duration));
     }
 
     /// <inheritdoc cref="SimultaneousCharacterLookAt(CharacterController, Transform)"/>
@@ -165,12 +166,12 @@ public abstract class TalkWithInteractable : Interactable
     /// <param name="character">Character who will look at something.</param>
     /// <param name="target">What to look at.</param>
     /// <returns></returns>
-    protected IEnumerator CharacterLookAt(CharacterController character, Transform target)
+    protected IEnumerator CharacterLookAt(CharacterController character, Transform target, float duration = 1f)
     {
         if (!character)
             throw new System.Exception("Character is null.");
 
-        yield return character.LookAtTargetForSecondsAndThenBack(target, timePeriod:1f, withinDegrees:2f, returnBackToPrevLookDir: false);
+        yield return character.LookAtTargetForSecondsAndThenBack(target, timePeriod:duration, withinDegrees:2f, returnBackToPrevLookDir: false);
     }
 
     /// <inheritdoc cref="CharacterLookAt(CharacterController, Transform)"/>
@@ -180,7 +181,7 @@ public abstract class TalkWithInteractable : Interactable
         if (!character)
             throw new System.Exception("Character is null.");
 
-        yield return character.LookAtTargetPitchYaw(pitch, yaw);
+        yield return character.LookAtTargetPitchYaw(pitch, yaw, withinDegrees: 0.1f);
     }
 
     protected void GetCharacterLookRotation(CharacterController character, out float yaw, out float pitch)

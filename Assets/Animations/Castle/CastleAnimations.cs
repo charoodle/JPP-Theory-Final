@@ -28,7 +28,7 @@ public class CastleAnimations : MonoBehaviour
         }
     }
 
-    protected IEnumerator CastleTouchdownAnim()
+    public IEnumerator CastleTouchdownAnim()
     {
         // Castle initial touchdown
         animator.Play("CastleTouchdown");
@@ -39,7 +39,7 @@ public class CastleAnimations : MonoBehaviour
         CameraShaker.instance.Shake(1.5f, 7f);
     }
 
-    protected IEnumerator CastleFallToGroundAnim()
+    public IEnumerator CastleFallToGroundAnim()
     {
         animator.Play("CastleFallFromSky");
 

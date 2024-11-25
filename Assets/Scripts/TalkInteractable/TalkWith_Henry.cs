@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class TalkWith_Henry : TalkWithInteractable
 {
+    [SerializeField] CastleAnimations castleAnims;
+
     protected override IEnumerator TalkWithCoroutine()
     {
         // Make preparations to present the dialogue between player and this npc
@@ -35,14 +37,17 @@ public class TalkWith_Henry : TalkWithInteractable
     {
         yield return TextBox("Oh, actually I do have a quest for you.");
 
-        yield return TextBox("Do you see that castle over there?");
+        yield return TextBox("Do you see that castle falling from the sky just over there?");
 
-        // Look at castle
+        // Player+Henry tracks castle while its falling.
+        float castleFallAnimSeconds = 5f;
         Transform castle = GameObject.Find("EnemyCastle").transform;
-        SimultaneousCharacterLookAt(character, castle);
-        yield return CharacterLookAt(player, castle);
+        SimultaneousCharacterLookAt(character, castle, castleFallAnimSeconds);
+        SimultaneousCharacterLookAt(player, castle, castleFallAnimSeconds);
+        yield return castleAnims.CastleFallToGroundAnim();
 
-        yield return TextBox("Do you think you could destroy their kingdom for our people?");
+        yield return TextBox("Yes, that castle.");
+        yield return TextBox("Do you think you could destroy them for us?");
 
         // Look back at each other
         SimultaneousCharacterLookAt(character, player.head);
