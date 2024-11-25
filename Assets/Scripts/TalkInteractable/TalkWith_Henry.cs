@@ -43,6 +43,7 @@ public class TalkWith_Henry : TalkWithInteractable
         float castleFallAnimSeconds = 5f;
         Transform castle = GameObject.Find("EnemyCastle").transform;
         SimultaneousCharacterLookAt(character, castle, castleFallAnimSeconds);
+        yield return Pause(1.5f);
         SimultaneousCharacterLookAt(player, castle, castleFallAnimSeconds);
         yield return castleAnims.CastleFallToGroundAnim();
 
@@ -50,8 +51,9 @@ public class TalkWith_Henry : TalkWithInteractable
         yield return TextBox("Do you think you could destroy them for us?");
 
         // Look back at each other
-        SimultaneousCharacterLookAt(character, player.head);
         SimultaneousCharacterLookAt(player, character.head);
+        yield return Pause(1.0f);
+        SimultaneousCharacterLookAt(character, player.head);
 
         yield return TextBox("Of course, not without the proper payment and backing from my kingdom.");
         yield return TextBox("We shall supply you and your crew with the finest...");
