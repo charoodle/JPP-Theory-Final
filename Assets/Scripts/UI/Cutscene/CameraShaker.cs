@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class CameraShaker : MonoBehaviour
 {
@@ -31,14 +32,17 @@ public class CameraShaker : MonoBehaviour
 
     protected Camera camera;
 
+    protected CinemachineVirtualCamera cinemachineVCam;
+
     protected virtual void Start()
     {
         camera = Camera.main;
+        cinemachineVCam = GetComponent<CinemachineVirtualCamera>();
     }
 
     public void Shake(float seconds, float intensity)
     {
-        StartCoroutine(ShakeCoroutine(seconds, intensity));
+        StartCoroutine(ShakeCoroutineCM(seconds, intensity));
     }
 
     protected IEnumerator ShakeCoroutine(float seconds, float intensity)
@@ -59,6 +63,30 @@ public class CameraShaker : MonoBehaviour
         // Revert back to pos
         camera.transform.localRotation = rotation;
 
+        yield break;
+    }
+
+    /// <summary>
+    /// Uses cinemachine. Basic Perlin noise frequency of 0.15 looks good.
+    /// </summary>
+    protected IEnumerator ShakeCoroutineCM(float seconds, float intensity)
+    {
+        CinemachineBasicMultiChannelPerlin cinemachineBMCP =
+            cinemachineVCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+
+        cinemachineBMCP.m_AmplitudeGain = intensity;
+
+        // Make amplitude go from intensity to 0 over seconds.
+        float timer = 0f;
+        while(timer < seconds)
+        {
+            float pct = timer / seconds;
+            cinemachineBMCP.m_AmplitudeGain = Mathf.Lerp(intensity, 0f, pct);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        cinemachineBMCP.m_AmplitudeGain = 0f;
         yield break;
     }
 }

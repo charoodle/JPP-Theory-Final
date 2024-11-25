@@ -17,13 +17,26 @@ public class CastleAnimations : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.V))
         {
+            StopAllCoroutines();
             StartCoroutine(CastleFallToGroundAnim());
         }
 
         if(Input.GetKeyDown(KeyCode.C))
         {
-            animator.Play("CastleTouchdown");
+            StopAllCoroutines();
+            StartCoroutine(CastleTouchdownAnim());
         }
+    }
+
+    protected IEnumerator CastleTouchdownAnim()
+    {
+        // Castle initial touchdown
+        animator.Play("CastleTouchdown");
+        CameraShaker.instance.Shake(1.80f, 30f);
+
+        // Aftershock from all the ground debris landing
+        yield return new WaitForSeconds(1.90f);
+        CameraShaker.instance.Shake(1.5f, 7f);
     }
 
     protected IEnumerator CastleFallToGroundAnim()
@@ -32,8 +45,7 @@ public class CastleAnimations : MonoBehaviour
 
         yield return new WaitForSeconds(4.95f);
 
-        animator.Play("CastleTouchdown");
-        CameraShaker.instance.Shake(0.7f, 1f);
+        yield return CastleTouchdownAnim();
     }
 
     public void PlayDustCloudParticles()
