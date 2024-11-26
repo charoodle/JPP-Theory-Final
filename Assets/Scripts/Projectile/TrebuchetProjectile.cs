@@ -9,6 +9,11 @@ public class TrebuchetProjectile : Projectile
     [SerializeField] GameObject embedIntoMaterialPrefab;
     Rigidbody rb;
 
+#if UNITY_EDITOR
+    [Tooltip("Ignores forced allowCollisions to false OnEnable.")]
+    [SerializeField] bool isDebugProjectile = false;
+#endif
+
     protected override void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -32,6 +37,10 @@ public class TrebuchetProjectile : Projectile
 
     protected void OnEnable()
     {
+#if UNITY_EDITOR
+        if (isDebugProjectile)
+            return;
+#endif
         // Don't allow projectile to be destroyed when its being reloaded
         allowCollisions = false;
     }
@@ -60,9 +69,24 @@ public class TrebuchetProjectile : Projectile
         if (collision_dirtParticles)
         {
             Instantiate(collision_dirtParticles, transform.position, collision_dirtParticles.transform.rotation);
-            // Random y rotation
+
+            // Spawn embed model to make ball look like its embedded into object
             Vector3 randomYRotation = new Vector3(0f, Random.Range(0f, 360f), 0f);
-            Instantiate(embedIntoMaterialPrefab, transform.position, Quaternion.Euler(randomYRotation));
+            GameObject embedObj = Instantiate(embedIntoMaterialPrefab, transform.position, Quaternion.Euler(randomYRotation));
+
+            // Get single color of surface hit
+            Renderer surfaceHitRenderer = collision.gameObject.GetComponent<Renderer>();
+            if (surfaceHitRenderer)
+            {
+                Color surfaceColor = MaterialColorGetter.GetColor(surfaceHitRenderer);
+
+                // Change embed model to color of surface it hit
+                RendererMaterialColorChanger colorChanger = embedObj.GetComponent<RendererMaterialColorChanger>();
+                if (colorChanger)
+                {
+                    colorChanger.ChangeColor(surfaceColor);
+                }
+            }
         }
 
         // If hit something with health, then take health away from it.

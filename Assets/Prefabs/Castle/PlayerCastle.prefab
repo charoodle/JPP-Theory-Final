@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactText: To bottom of castle.
+  _playerCanInteractWith: 1
   unityEvent:
     m_PersistentCalls:
       m_Calls:
@@ -458,6 +459,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactText: To top of your castle.
+  _playerCanInteractWith: 1
   unityEvent:
     m_PersistentCalls:
       m_Calls:
@@ -1306,6 +1308,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: FrontGate
       objectReference: {fileID: 0}
+    - target: {fileID: 2653228978803834145, guid: dc07df76fa6da5646a7b3a0c6a34dd86, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3569608739250348846, guid: dc07df76fa6da5646a7b3a0c6a34dd86, type: 3}
       propertyPath: m_Size.z
       value: 0.4718447
@@ -1340,7 +1346,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7374278236729201979, guid: dc07df76fa6da5646a7b3a0c6a34dd86, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
