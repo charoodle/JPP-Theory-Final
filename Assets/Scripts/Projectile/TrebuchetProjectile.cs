@@ -63,29 +63,35 @@ public class TrebuchetProjectile : Projectile
         // Stop moving. Embed ball within collision point.
         StopProjectileMovement();
         transform.position = collision.GetContact(0).point;
-        Debug.Log("Embedding self into contact point.");
 
         // Spawn collision particles + embed prefab
         if (collision_dirtParticles)
         {
-            Instantiate(collision_dirtParticles, transform.position, collision_dirtParticles.transform.rotation);
+            // Spawn dirt particles that shoot upwards
+            ParticleSystem dirtParticles = Instantiate(collision_dirtParticles, transform.position, collision_dirtParticles.transform.rotation);
 
             // Spawn embed model to make ball look like its embedded into object
             Vector3 randomYRotation = new Vector3(0f, Random.Range(0f, 360f), 0f);
             GameObject embedObj = Instantiate(embedIntoMaterialPrefab, transform.position, Quaternion.Euler(randomYRotation));
 
             // Get single color of surface hit
+            Color surfaceColor = Color.red + Color.white;
             Renderer surfaceHitRenderer = collision.gameObject.GetComponent<Renderer>();
+            RendererMaterialColorChanger colorChanger;
             if (surfaceHitRenderer)
             {
-                Color surfaceColor = MaterialColorGetter.GetColor(surfaceHitRenderer);
+                surfaceColor = MaterialColorGetter.GetColor(surfaceHitRenderer);
 
                 // Change embed model to color of surface it hit
-                RendererMaterialColorChanger colorChanger = embedObj.GetComponent<RendererMaterialColorChanger>();
+                colorChanger = embedObj.GetComponent<RendererMaterialColorChanger>();
                 if (colorChanger)
                 {
                     colorChanger.ChangeColor(surfaceColor);
                 }
+
+                // Change default start color of dirt particles
+                var particleSysMain = dirtParticles.main;
+                particleSysMain.startColor = surfaceColor;
             }
         }
 
