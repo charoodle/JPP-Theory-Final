@@ -141,5 +141,8 @@ public abstract class Projectile : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Make the projectile frozen in space.
+    /// </summary>
     protected abstract void StopProjectileMovement();
 }

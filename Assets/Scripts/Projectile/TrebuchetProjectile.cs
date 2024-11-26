@@ -5,6 +5,7 @@ using UnityEngine;
 public class TrebuchetProjectile : Projectile
 {
     [SerializeField] ParticleSystem particles;
+    [SerializeField] ParticleSystem collision_dirtParticles;
     Rigidbody rb;
 
     protected override void Start()
@@ -46,15 +47,28 @@ public class TrebuchetProjectile : Projectile
         if (!allowCollisions)
             return;
 
-        // If touch ground, disable particles
-        if (collision.gameObject.CompareTag("Ground"))
-            DisableParticles();
+        // If touch anything, disable flying particles
+        DisableParticles();
 
-        // Trebuchet projectile can roll and hit the castle
+        // Play collision particles
+        if (collision_dirtParticles)
+        {
+            Instantiate(collision_dirtParticles, transform.position, collision_dirtParticles.transform.rotation);
+        }
+
+        // Stop moving. Embed ball within collision point.
+        StopProjectileMovement();
+        transform.position = collision.GetContact(0).point;
+        Debug.Log("Embedding self into contact point.");
+
+        // If hit something with health, then take health away from it.
         if (TakeHealthAwayFrom(collision))
         {
-            DestroyProjectile();
+            //DestroyProjectile();
         }
+
+        // Disable any other collisions so it cannot take health away from anything else.
+        allowCollisions = false;
     }
 
     protected override void StopProjectileMovement()
