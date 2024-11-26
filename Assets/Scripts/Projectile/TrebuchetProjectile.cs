@@ -74,6 +74,10 @@ public class TrebuchetProjectile : Projectile
             Vector3 randomYRotation = new Vector3(0f, Random.Range(0f, 360f), 0f);
             GameObject embedObj = Instantiate(embedIntoMaterialPrefab, transform.position, Quaternion.Euler(randomYRotation));
 
+            // Parent embed model + rock to collided object
+            embedObj.transform.SetParent(collision.transform);
+            transform.SetParent(collision.transform);
+
             // Get single color of surface hit
             Color surfaceColor = Color.red + Color.white;
             Renderer surfaceHitRenderer = collision.gameObject.GetComponent<Renderer>();
