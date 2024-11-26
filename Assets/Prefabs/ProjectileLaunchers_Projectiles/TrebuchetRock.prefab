@@ -192,6 +192,7 @@ MonoBehaviour:
   _destroyAfterSeconds: 60
   particles: {fileID: 7739844800258365742}
   collision_dirtParticles: {fileID: 7845738880126123363, guid: ec55c6c4989438e4db26fac151bc62d1, type: 3}
+  embedIntoMaterialPrefab: {fileID: 2765853585821031938, guid: ad3b9d7b2a4f57c499650492afa4bae0, type: 3}
 --- !u!1001 &4746657785755591059
 PrefabInstance:
   m_ObjectHideFlags: 0

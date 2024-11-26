@@ -6,6 +6,7 @@ public class TrebuchetProjectile : Projectile
 {
     [SerializeField] ParticleSystem particles;
     [SerializeField] ParticleSystem collision_dirtParticles;
+    [SerializeField] GameObject embedIntoMaterialPrefab;
     Rigidbody rb;
 
     protected override void Start()
@@ -50,16 +51,19 @@ public class TrebuchetProjectile : Projectile
         // If touch anything, disable flying particles
         DisableParticles();
 
-        // Play collision particles
-        if (collision_dirtParticles)
-        {
-            Instantiate(collision_dirtParticles, transform.position, collision_dirtParticles.transform.rotation);
-        }
-
         // Stop moving. Embed ball within collision point.
         StopProjectileMovement();
         transform.position = collision.GetContact(0).point;
         Debug.Log("Embedding self into contact point.");
+
+        // Spawn collision particles + embed prefab
+        if (collision_dirtParticles)
+        {
+            Instantiate(collision_dirtParticles, transform.position, collision_dirtParticles.transform.rotation);
+            // Random y rotation
+            Vector3 randomYRotation = new Vector3(0f, Random.Range(0f, 360f), 0f);
+            Instantiate(embedIntoMaterialPrefab, transform.position, Quaternion.Euler(randomYRotation));
+        }
 
         // If hit something with health, then take health away from it.
         if (TakeHealthAwayFrom(collision))
