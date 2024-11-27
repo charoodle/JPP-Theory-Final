@@ -197,6 +197,9 @@ public class Trebuchet : ProjectileLauncher
 
         projectile.GetComponent<Projectile>().allowCollisions = true;
 
+        // Unparent projectile so trebuchet rotation doesn't affect it
+        projectile.transform.SetParent(null);
+
         // TODO: Add some slight left/right deviation
         // ...
     }
