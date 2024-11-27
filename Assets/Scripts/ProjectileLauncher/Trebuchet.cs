@@ -15,10 +15,16 @@ public class Trebuchet : ProjectileLauncher
     public Rigidbody mainArmRb;
     public GameObject mainArm;
     public HingeJoint postHingeJoint;
+    public HingeJoint counterweightHingeJoint;
     public LineRenderer rope;
 
     protected Coroutine shootingCoroutine;
     protected Coroutine tetherCoroutine;
+
+    /// <summary>
+    /// Counterweight's position at rest/start (local).
+    /// </summary>
+    protected Vector3 counterWeightLocalRestingPosition;
 
     // Material set for the projectile after launch.
     [SerializeField] protected PhysicMaterial rockMaterial;
@@ -39,6 +45,9 @@ public class Trebuchet : ProjectileLauncher
 
         // TEMP
         tetherCoroutine = StartCoroutine(TestRopeTetherToProjectile());
+
+        // Get counterweight's starting position (local)
+        counterWeightLocalRestingPosition = counterweightRb.transform.localPosition;
     }
 
     private IEnumerator TestRopeTetherToProjectile()
@@ -231,11 +240,69 @@ public class Trebuchet : ProjectileLauncher
         // Reset main arm to neutral rotation
         yield return ResetEntireArmToNeutralRotation();
 
+        // Reset counterweight to 0 velocity and pointing straight down
+        yield return ResetCounterweight();
+
         // Load another projectile into it
         yield return LoadProjectile();
 
         // Hold down the long arm end from launching the projectile
         yield return HoldDownArmFromLaunching();
+    }
+
+    private IEnumerator ResetCounterweight()
+    {
+        // Freeze weight rb
+        counterweightRb.isKinematic = true;
+
+        // Get hinge joint and axis to rotate around
+        Vector3 hingeJointLocal = counterweightHingeJoint.anchor;
+        Vector3 hingeJointWorld = counterweightHingeJoint.transform.TransformPoint(hingeJointLocal);
+        Vector3 axis = counterweightHingeJoint.transform.right;
+
+        // Target 1*
+        float target = 1f;
+
+
+        // Get opposite sign to make it travel in opposite dir (towards 0)
+        float angle = counterweightRb.transform.localRotation.eulerAngles.x;
+        float sign = Mathf.Sign(angle);
+        // Angle speed is negative if angle < 180. Angle speed is positive otherwise.
+        float angleSpeed = -1f;
+        // If angle is > 180, target opposite angle (360 - target)
+        if (Mathf.Abs(angle) > 180f)
+        {
+            target = 360f - target;
+            // Make positive angle speed
+            angleSpeed *= -1f;
+        }
+
+        // Rotate until euler.x of weight is close to 0 = close to neutral 0* position
+        //  Run a timer just in case too; more than x seconds, just break out
+        float start = counterweightRb.transform.localRotation.eulerAngles.x;
+        float end = 0f;
+        float timer = 0f;
+        float maxTimeToTake = 5f;
+        // Euler angles always seems to be from 0 to 360. Find difference between target and current x euler angle.
+        while(Mathf.Abs(target - counterweightRb.transform.localRotation.eulerAngles.x) > 1f)
+        {
+            counterweightRb.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
+            timer += Time.deltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+
+        // Unfreeze rigidbody
+        counterweightRb.isKinematic = false;
+
+        // Set to default resting position
+        counterweightRb.transform.localPosition = counterWeightLocalRestingPosition;
+        counterweightRb.transform.localRotation = Quaternion.identity;
+
+        // Remove any velocity on rigidbody
+        counterweightRb.velocity = Vector3.zero;
+        counterweightRb.angularVelocity = Vector3.zero;
+
+        yield break;
     }
 
     private IEnumerator HoldDownArmFromLaunching()

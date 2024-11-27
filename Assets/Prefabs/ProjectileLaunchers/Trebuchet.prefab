@@ -223,6 +223,7 @@ MonoBehaviour:
   mainArmRb: {fileID: 8561299757459314771}
   mainArm: {fileID: 4870001110568544598}
   postHingeJoint: {fileID: 7199338316531426852}
+  counterweightHingeJoint: {fileID: 4049683524633583343}
   rope: {fileID: 5697485465898583389}
   rockMaterial: {fileID: 13400000, guid: 8cf262a07002dd74daf14eb0dbfff233, type: 2}
 --- !u!1 &668158649183162409
