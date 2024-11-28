@@ -57,6 +57,9 @@ public class TrebuchetProjectile : Projectile
         if (!allowCollisions)
             return;
 
+        // Disable any other collisions so it cannot take health away from anything else.
+        allowCollisions = false;
+
         // If touch anything, disable flying particles
         DisableParticles();
 
@@ -74,9 +77,9 @@ public class TrebuchetProjectile : Projectile
             Vector3 randomYRotation = new Vector3(0f, Random.Range(0f, 360f), 0f);
             GameObject embedObj = Instantiate(embedIntoMaterialPrefab, transform.position, Quaternion.Euler(randomYRotation));
 
-            // Parent embed model + rock to collided object
-            embedObj.transform.SetParent(collision.transform);
-            transform.SetParent(collision.transform);
+            // Parent embed model + rock to collided object's root object + don't modify how it looks (scale esp.)
+            embedObj.transform.SetParent(collision.transform.root, true);
+            transform.SetParent(collision.transform.root, true);
 
             // Get single color of surface hit
             Color surfaceColor = Color.red + Color.white;
@@ -104,9 +107,6 @@ public class TrebuchetProjectile : Projectile
         {
             //DestroyProjectile();
         }
-
-        // Disable any other collisions so it cannot take health away from anything else.
-        allowCollisions = false;
     }
 
     protected override void StopProjectileMovement()

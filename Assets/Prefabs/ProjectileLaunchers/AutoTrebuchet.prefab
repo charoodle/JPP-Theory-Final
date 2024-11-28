@@ -118,6 +118,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd6385b900c52664b89dc524e0216400, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactText: Launch trebuchet
+  _playerCanInteractWith: 1
   unityEvent:
     m_PersistentCalls:
       m_Calls:
@@ -145,7 +147,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  interactText: Launch trebuchet
 --- !u!1 &101659858185820428
 GameObject:
   m_ObjectHideFlags: 0
@@ -2690,8 +2691,9 @@ MonoBehaviour:
   mainArmRb: {fileID: 765212353476664311}
   mainArm: {fileID: 472062003131890111}
   postHingeJoint: {fileID: 5823107132618203507}
+  counterweightHingeJoint: {fileID: 8702353004386758511}
   rope: {fileID: 5160851896003170846}
-  rockMaterial: {fileID: 0}
+  rockMaterial: {fileID: 13400000, guid: 8cf262a07002dd74daf14eb0dbfff233, type: 2}
   enemyUser: {fileID: 2499318813004568025}
 --- !u!114 &589982377211548276
 MonoBehaviour:
@@ -3318,6 +3320,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd6385b900c52664b89dc524e0216400, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactText: Reload trebuchet
+  _playerCanInteractWith: 1
   unityEvent:
     m_PersistentCalls:
       m_Calls:
@@ -3345,7 +3349,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  interactText: Reload trebuchet
 --- !u!1 &8218124711992966840
 GameObject:
   m_ObjectHideFlags: 0
