@@ -28,7 +28,7 @@ public class EnemyController : MyProject.CharacterController
         yawDegrees = transform.rotation.eulerAngles.y;
 
         // Vary move speed for each enemy
-        RandomizeBaseWalkSpeed(1f);
+        RandomizeBaseWalkSpeed(0.25f);
 
         // Make them look at player castle
         GameObject playerCastle = GameObject.Find("PlayerCastle");
@@ -37,6 +37,7 @@ public class EnemyController : MyProject.CharacterController
         base.Start();
     }
 
+    /// <summary>Deviate walk speed by +- a percent of their current walk speed.</summary>
     /// <param name="deviationPct">Max percent [0f-1f] of current walk speed to add/subtract from base walk speed.</param>
     protected void RandomizeBaseWalkSpeed(float deviationPct)
     {

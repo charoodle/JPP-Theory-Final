@@ -8,6 +8,12 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] protected BoxCollider spawnBox;
     [SerializeField] protected GameObject enemySpawnParticles;
 
+#if UNITY_EDITOR
+    [SerializeField] protected bool isDebugSpawner;
+    [SerializeField] protected int maxSpawnEnemies = 1;
+    [SerializeField] protected int enemiesSpawned = 0;
+#endif
+
     protected void Start()
     {
         InvokeRepeating("SpawnEnemy", 3.0f, 2.0f);
@@ -16,6 +22,20 @@ public class EnemySpawnManager : MonoBehaviour
     protected void SpawnEnemy()
     {
         StartCoroutine(SpawnEnemyCoroutine());
+
+#if UNITY_EDITOR
+        // Debug spawner only - only spawn a set amount of enemies before stop spawning enemies.
+        if (isDebugSpawner)
+        {
+            enemiesSpawned++;
+            if (enemiesSpawned >= maxSpawnEnemies)
+            {
+                // Stop repeating spawning enemies.
+                CancelInvoke("SpawnEnemy");
+                return;
+            }
+        }
+#endif
     }
 
     protected IEnumerator SpawnEnemyCoroutine()
