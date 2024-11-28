@@ -32,8 +32,7 @@ public class EnemyController : MyProject.CharacterController
 
         // Make them look at player castle
         GameObject playerCastle = GameObject.Find("PlayerCastle");
-        if(playerCastle)
-            StartCoroutine(LookAtPermanently(playerCastle.transform));
+        StartCoroutine(LookAtPermanently(playerCastle.transform));
 
         base.Start();
     }
@@ -85,8 +84,9 @@ public class EnemyController : MyProject.CharacterController
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        PlayerCastle playerCastle = hit.gameObject.GetComponentInParent<Castle>() as PlayerCastle;
         // If touch player castle, decrease its health
-        if (hit.transform.root.gameObject.name == "PlayerCastle")
+        if (playerCastle)
         {
             // Castle takes damage
             TakeHealthAwayFrom(hit);
