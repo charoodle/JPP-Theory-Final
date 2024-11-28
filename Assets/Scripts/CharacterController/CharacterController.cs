@@ -257,15 +257,24 @@ namespace MyProject
             }
         }
 
+        Coroutine lookAtPermanentlyCoroutine;
+        public void LookAtPermanently(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            if(lookAtPermanentlyCoroutine != null)
+            {
+                StopCoroutine(lookAtPermanentlyCoroutine);
+            }
+
+            lookAtPermanentlyCoroutine = StartCoroutine(LookAtPermanentlyCoroutine(target, lookTime, initialLookVel));
+        }
+
         /// <summary>
         /// Make the character controller permanently look at a target (until manually stopped) or this coroutine is called again.
         /// Uses the look rotation's pitch and yaw system to get a target pitch/yaw to smoothly rotate towards the target transform.
         /// </summary>
         /// <inheritdoc cref="LookAtTargetForSecondsAndThenBack(Transform, float, float, bool, float, float)"/>
-        public IEnumerator LookAtPermanently(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        public IEnumerator LookAtPermanentlyCoroutine(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
-            StopAllCoroutines();
-
             // Cannot have negative look time.
             if (lookTime < 0)
             {

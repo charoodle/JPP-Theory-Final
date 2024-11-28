@@ -15,7 +15,7 @@ public class Test_PlayerController_LookAt : PlayerController
         if (Input.GetKeyDown(KeyCode.K))
         {
             Transform target = GameObject.Find("LookAtPosition").transform;
-            StartCoroutine(LookAtPermanently(target));
+            LookAtPermanently(target);
         }
 
         if (Input.GetKeyDown(KeyCode.J))

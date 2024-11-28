@@ -32,7 +32,7 @@ public class EnemyController : MyProject.CharacterController
 
         // Make them look at player castle
         GameObject playerCastle = GameObject.Find("PlayerCastle");
-        StartCoroutine(LookAtPermanently(playerCastle.transform));
+        LookAtPermanently(playerCastle.transform);
 
         base.Start();
     }
