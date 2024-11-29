@@ -279,15 +279,18 @@ public class Trebuchet : ProjectileLauncher
 
         // Rotate until euler.x of weight is close to 0 = close to neutral 0* position
         //  Run a timer just in case too; more than x seconds, just break out
-        float start = counterweightRb.transform.localRotation.eulerAngles.x;
-        float end = 0f;
+        float end = 1f;
         float timer = 0f;
         float maxTimeToTake = 5f;
         // Euler angles always seems to be from 0 to 360. Find difference between target and current x euler angle.
-        while(Mathf.Abs(target - counterweightRb.transform.localRotation.eulerAngles.x) > 1f)
+        while(Mathf.Abs(target - counterweightRb.transform.localRotation.eulerAngles.x) > end && timer <= maxTimeToTake)
         {
+            // Keep updating hingeJointWorld, in case rotating trebuchet while reloading
+            hingeJointWorld = counterweightHingeJoint.transform.TransformPoint(counterweightHingeJoint.anchor);
+            axis = counterweightHingeJoint.transform.right;
+
             counterweightRb.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
-            timer += Time.deltaTime;
+            timer += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
         }
 
@@ -389,6 +392,10 @@ public class Trebuchet : ProjectileLauncher
 
             // Make the weight go towards 0 velocity anyways, even with wonky percent numbers
             yield return ReduceRigidbodyToZeroVelocity(counterweightRb, armPctRotation);
+
+            // Keep updating in case rotating trebuchet while reloading
+            hingeJointWorld = postHingeJoint.transform.TransformPoint(postHingeJoint.anchor);
+            axis = postHingeJoint.transform.right;
 
             // Rotate arm around hinge post (ASSUMES FORWARD MATCHES Z-AXIS FORWARD)
             mainArm.transform.RotateAround(hingeJointWorld, axis, angleSpeed);
