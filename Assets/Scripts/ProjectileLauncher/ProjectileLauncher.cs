@@ -122,6 +122,18 @@ public abstract class ProjectileLauncher : MonoBehaviour
     protected MeshRenderer[] weaponModels;
 
     /// <summary>
+    /// Camera shake duration on projectile launch.
+    /// </summary>
+    [SerializeField] protected float onLaunch_ShakeSeconds;
+
+    /// <summary>
+    /// Camera shake intensity on projectile launch.
+    /// </summary>
+    [SerializeField] protected float onLaunch_ShakeIntensity;
+
+
+
+    /// <summary>
     /// Show and hide the weapon from view. Monobehavior is enabled/disabled to allow coroutines to run in the background (ex reloading).
     /// </summary>
     public virtual void EquipWeapon(bool wantToEquip)
@@ -208,6 +220,9 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
         // Launch projectile forward with force
         LaunchProjectile_Forwards(projectile, launchForce, ref targetFound, target);
+
+        // Shake player camera
+        CameraShaker.instance.Shake(onLaunch_ShakeSeconds, onLaunch_ShakeIntensity);
 
         // If out of ammo, start reload coroutine
         if (ammoCount <= 0)

@@ -546,6 +546,8 @@ MonoBehaviour:
   launchForce: 100
   reloadSeconds: 3
   _ammoCount: 0
+  onLaunch_ShakeSeconds: 0.25
+  onLaunch_ShakeIntensity: 15
 --- !u!1 &9216523057346087311
 GameObject:
   m_ObjectHideFlags: 0

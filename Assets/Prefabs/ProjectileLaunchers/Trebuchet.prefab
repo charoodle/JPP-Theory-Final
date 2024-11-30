@@ -213,6 +213,8 @@ MonoBehaviour:
   launchForce: 0
   reloadSeconds: 3
   _ammoCount: 0
+  onLaunch_ShakeSeconds: 2
+  onLaunch_ShakeIntensity: 7
   trebuchetLaunchPreventer: {fileID: 4928727382161317165}
   trebuchetReloader: {fileID: 7838740746228662563}
   projectile: {fileID: 8793822764226564647}

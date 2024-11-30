@@ -127,6 +127,9 @@ public class Trebuchet : ProjectileLauncher
 
         IEnumerator DetachBall()
         {
+            // Camera shake
+            CameraShaker.instance.Shake(onLaunch_ShakeSeconds, onLaunch_ShakeIntensity);
+
             StartCoroutine(TestRopeDetachFromProjectile());
             ReleaseProjectileFromSling();
             shootingCoroutine = null;
