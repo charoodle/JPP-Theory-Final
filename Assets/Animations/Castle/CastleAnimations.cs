@@ -30,7 +30,8 @@ public class CastleAnimations : MonoBehaviour
     {
         animator.Play("CastleFallFromSky");
 
-        yield return new WaitForSeconds(4.95f);
+        float animationLength = 4.95f;
+        yield return new WaitForSeconds(animationLength);
 
         yield return CastleTouchdownAnim();
 

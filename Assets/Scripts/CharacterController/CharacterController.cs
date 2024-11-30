@@ -82,7 +82,9 @@ namespace MyProject
 
 
 
-        #region Look At Functions
+        #region Character Look At
+
+        #region LookAt Fields
         // Used to pass data between LookAt IEnumerators
         protected float lookAt_lastYawVel = 0f;
         protected float lookAt_lastPitchVel = 0f;
@@ -94,74 +96,73 @@ namespace MyProject
 
         // Current look coroutine that is making the character lock their view onto something.
         protected Coroutine currentLookAt;
+        #endregion
 
-        #region LookAt (stoppable midway)
-        /// These can be stopped if any other LookAt is called.
-
+        #region LookAt Functions (aka stoppable midway)
+        /// <summary>
+        /// Look at a target forever until another LookAt function is called or <see cref="LookAtStop"/> is called.
+        /// </summary>
+        /// <inheritdoc cref="LookAtTargetForSecondsCoroutine"/>
         public void LookAt(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             StopLookAtCoroutine(currentLookAt);
             currentLookAt = StartCoroutine(LookAtPermanentlyCoroutine(target, lookTime, initialLookVel));
         }
 
+        /// <summary>
+        /// Look at a target until the pitch/yaw degrees reach a certain degrees.
+        /// </summary>
+        /// <inheritdoc cref="LookAtTargetForSecondsCoroutine"/>
         public void LookAtUntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             StopLookAtCoroutine(currentLookAt);
             currentLookAt = StartCoroutine(LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel));
         }
 
+        /// <summary>
+        /// Look toward a target until pitch/yaw of view is <paramref name="withinDegrees"/> of target.
+        /// </summary>
+        /// <inheritdoc cref="LookAtTargetForSecondsCoroutine"/>
         public void LookAtTargetForSeconds(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             StopLookAtCoroutine(currentLookAt);
             currentLookAt = StartCoroutine(LookAtTargetForSecondsEnum(target, timePeriod, withinDegrees, lookTime, initialLookVel));
         }
 
+        /// <summary>
+        /// Look towards a pitch/yaw value. Can get the current pitch/yaw value to use this method later with <see cref="GetYawAndPitchDegrees(out float, out float)"/>.
+        /// </summary>
+        /// <inheritdoc cref="LookAtTargetPitchYawCoroutine(float, float, float, float, float)"/>
         public void LookAtTargetPitchYaw(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             StopLookAtCoroutine(currentLookAt);
             currentLookAt = StartCoroutine(LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel));
         }
 
+        /// <summary>
+        /// Get the character controller's current pitch/yaw rotation in degrees.
+        /// </summary>
+        /// <param name="pitch">X axis rotation of character view. Goes from <see cref="maxPitchDegreesDown"/> to <see cref="maxPitchDegreesUp"/>. </param>
+        /// <param name="yaw">Y axis rotation of character view. Goes from -180f - 180f. (Based on <see cref="Quaternion.Euler"/>)</param>
         public void GetYawAndPitchDegrees(out float pitch, out float yaw)
         {
             pitch = pitchDegrees;
             yaw = yawDegrees;
         }
 
+        /// <summary>
+        /// Look towards a target for <paramref name="timePeriod"/> seconds total. Time starts ticking the moment the function is called.
+        /// </summary>
+        /// <inheritdoc cref="LookAtTargetForSecondsCoroutine(Transform, float, float, float, float)"></inheritdoc>
         public void LookTowardUntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             StopLookAtCoroutine(currentLookAt);
             currentLookAt = StartCoroutine(LookTowardUntilTimePeriodCoroutine(target, timePeriod, lookTime, initialLookVel, useSavedYawPitchVelocity: false));
         }
-        #endregion
 
-        #region LookAt (IEnum) (unstoppable midway)
-
-        public IEnumerator LookAtTargetForSecondsEnum(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-        {
-            StopLookAtCoroutine(currentLookAt);
-            yield return LookAtTargetForSecondsCoroutine(target, timePeriod, withinDegrees, lookTime, initialLookVel);
-        }
-
-        public IEnumerator LookAtUntilWithinDegreesEnum(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-        {
-            StopLookAtCoroutine(currentLookAt);
-            yield return LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel);
-        }
-
-        public IEnumerator LookTowardUntilTimePeriodEnum(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-        {
-            StopLookAtCoroutine(currentLookAt);
-            yield return LookTowardUntilTimePeriodCoroutine(target, timePeriod, lookTime, initialLookVel, useSavedYawPitchVelocity: false);
-        }
-
-        public IEnumerator LookAtTargetPitchYawEnum(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-        {
-            StopLookAtCoroutine(currentLookAt);
-            yield return LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel);
-        }
-        #endregion
-
+        /// <summary>
+        /// Stop the current pausable LookAt coroutine. Does not work with any of the "LookAt___Enum" versions, since those must be played out until their conditions are satisfied.
+        /// </summary>
         public void LookAtStop()
         {
             // No couroutine exists.
@@ -173,14 +174,43 @@ namespace MyProject
 
             StopLookAtCoroutine(currentLookAt);
         }
+        #endregion
 
-        protected void StopLookAtCoroutine(Coroutine coroutine)
+        #region LookAt IEnum Functions (aka unstoppable midway)
+        /// <summary> Public coroutine version of <see cref="LookAtTargetForSeconds"/></summary>
+        /// <inheritdoc cref="LookAtTargetForSeconds"/>
+        public IEnumerator LookAtTargetForSecondsEnum(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
-            if (coroutine != null)
-                StopCoroutine(coroutine);
+            StopLookAtCoroutine(currentLookAt);
+            yield return LookAtTargetForSecondsCoroutine(target, timePeriod, withinDegrees, lookTime, initialLookVel);
         }
 
+        /// <summary> Public coroutine version of <see cref="LookAtUntilWithinDegrees"/></summary>
+        /// <inheritdoc cref="LookAtTargetForSeconds"/>
+        public IEnumerator LookAtUntilWithinDegreesEnum(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            StopLookAtCoroutine(currentLookAt);
+            yield return LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel);
+        }
 
+        /// <summary> Public coroutine version of <see cref="LookTowardUntilTimePeriod"/></summary>
+        /// <inheritdoc cref="LookAtTargetForSeconds"/>
+        public IEnumerator LookTowardUntilTimePeriodEnum(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            StopLookAtCoroutine(currentLookAt);
+            yield return LookTowardUntilTimePeriodCoroutine(target, timePeriod, lookTime, initialLookVel, useSavedYawPitchVelocity: false);
+        }
+
+        /// <summary> Public coroutine version of <see cref="LookAtTargetPitchYaw(float, float, float, float, float)"/></summary>
+        /// <inheritdoc cref="LookAtTargetForSeconds"/>
+        public IEnumerator LookAtTargetPitchYawEnum(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+        {
+            StopLookAtCoroutine(currentLookAt);
+            yield return LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel);
+        }
+        #endregion
+
+        #region Main LookAt Coroutines
         /// <summary>
         /// Make the character controller look towards a target until its within a certain degrees, keeps looking towards it for x seconds, and then stops.
         /// </summary>
@@ -296,7 +326,7 @@ namespace MyProject
         /// Make the character controller permanently look at a target (until manually stopped) or this coroutine is called again.
         /// Uses the look rotation's pitch and yaw system to get a target pitch/yaw to smoothly rotate towards the target transform.
         /// </summary>
-        /// <inheritdoc cref="LookAtTargetForSecondsAndThenBack(Transform, float, float, bool, float, float)"/>
+        /// <inheritdoc cref="LookAtTargetForSecondsCoroutine(Transform, float, float, float, float)"/>
         protected IEnumerator LookAtPermanentlyCoroutine(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             // Cannot have negative look time.
@@ -332,7 +362,7 @@ namespace MyProject
         /// </summary>
         /// <param name="targetPitch">Target pitch degrees to look at.</param>
         /// <param name="targetYaw">Target yaw degrees to look at.</param>
-        /// <inheritdoc cref="LookAtTargetForSecondsAndThenBack(Transform, float, float, bool, float, float)"/>
+        /// <inheritdoc cref="LookAtTargetForSecondsCoroutine(Transform, float, float, float, float)"/>
         protected virtual IEnumerator LookAtTargetPitchYawCoroutine(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
         {
             // Cannot have negative look time.
@@ -361,7 +391,9 @@ namespace MyProject
                 yield return null;
             }
         }
+        #endregion
 
+        #region LookAt Helper Functions
         /// <summary>
         /// Meant to be used in a while loop. SmoothDamps yawDegrees and pitchDegrees towards targetYaw and targetPitch.
         /// </summary>
@@ -462,6 +494,17 @@ namespace MyProject
             lookAt_lastYawVel = yawVel;
             lookAt_lastPitchVel = pitchVel;
         }
+
+        /// <summary>
+        /// Stop the current LookAt coroutine.
+        /// </summary>
+        protected void StopLookAtCoroutine(Coroutine coroutine)
+        {
+            if (coroutine != null)
+                StopCoroutine(coroutine);
+        }
+        #endregion
+
         #endregion
 
 
