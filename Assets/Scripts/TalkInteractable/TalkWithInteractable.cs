@@ -142,14 +142,13 @@ public abstract class TalkWithInteractable : Interactable
     }
 
     /// <summary>
-    /// Call this function to make the character look towards a specific direction/location, and keep tracking target for duration.
+    /// Call this function to make the character look towards a specific direction/location, and keep tracking target until another LookAt function is called.
     /// </summary>
     /// <param name="character">Character to do the looking.</param>
     /// <param name="target">Transform for character to look towards.</param>
-    /// <param name="duration">How long to track the target for, once viewing angle is close enough to it.</param>
-    protected void SimultaneousCharacterLookAt(CharacterController character, Transform target, float duration = 1f)
+    protected void SimultaneousCharacterLookAt(CharacterController character, Transform target)
     {
-        StartCoroutine(CharacterLookAt(character, target, duration));
+        character.LookAt(target);
     }
 
     /// <inheritdoc cref="SimultaneousCharacterLookAt(CharacterController, Transform)"/>
@@ -165,13 +164,14 @@ public abstract class TalkWithInteractable : Interactable
     /// </summary>
     /// <param name="character">Character who will look at something.</param>
     /// <param name="target">What to look at.</param>
+    /// <param name="duration">How long to look at the object for.</param>
     /// <returns></returns>
     protected IEnumerator CharacterLookAt(CharacterController character, Transform target, float duration = 1f)
     {
         if (!character)
             throw new System.Exception("Character is null.");
 
-        yield return character.LookAtTargetForSecondsAndThenBack(target, timePeriod:duration, withinDegrees:2f, returnBackToPrevLookDir: false);
+        yield return character.LookAtTargetForSecondsEnum(target, timePeriod:duration, withinDegrees:2f);
     }
 
     /// <inheritdoc cref="CharacterLookAt(CharacterController, Transform)"/>
@@ -181,7 +181,7 @@ public abstract class TalkWithInteractable : Interactable
         if (!character)
             throw new System.Exception("Character is null.");
 
-        yield return character.LookAtTargetPitchYaw(pitch, yaw, withinDegrees: 0.1f);
+        yield return character.LookAtTargetPitchYawEnum(pitch, yaw, withinDegrees: 0.1f);
     }
 
     protected void GetCharacterLookRotation(CharacterController character, out float yaw, out float pitch)
@@ -210,8 +210,8 @@ public abstract class TalkWithInteractable : Interactable
         dialogue.ToggleCutsceneBars();
 
         // Make player and character look at each other during dialogue.
-        StartCoroutine(CharacterLookAt(character, player.head));
-        StartCoroutine(CharacterLookAt(player, character.head));
+        SimultaneousCharacterLookAt(character, player.head);
+        SimultaneousCharacterLookAt(player, character.head);
 
         isRunning = true;
 
@@ -240,11 +240,16 @@ public abstract class TalkWithInteractable : Interactable
 
     private void OnDisable()
     {
+        ExitCutscene();
+    }
+
+    public void ExitCutscene()
+    {
         // Stop any running talking/looking coroutines.
         StopAllCoroutines();
 
         // Forcibly exit the cutscene, if its running.
-        if(dialogue && isRunning)
+        if (dialogue && isRunning)
             dialogue.CharacterKilled_DisableCutscene();
     }
 }

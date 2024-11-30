@@ -40,11 +40,10 @@ public class TalkWith_Henry : TalkWithInteractable
         yield return TextBox("Do you see that castle falling from the sky just over there?");
 
         // Player+Henry tracks castle while its falling.
-        float castleFallAnimSeconds = 5f;
         Transform castle = GameObject.Find("EnemyCastle").transform;
-        SimultaneousCharacterLookAt(character, castle, castleFallAnimSeconds);
+        SimultaneousCharacterLookAt(character, castle);
         yield return Pause(1.5f);
-        SimultaneousCharacterLookAt(player, castle, castleFallAnimSeconds);
+        SimultaneousCharacterLookAt(player, castle);
         yield return castleAnims.CastleFallToGroundAnim();
 
         yield return TextBox("Yes, that castle.");
