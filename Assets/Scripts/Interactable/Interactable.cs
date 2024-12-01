@@ -23,11 +23,19 @@ public abstract class Interactable : MonoBehaviour
 
     /// <summary>
     /// Is the player allowed to interact with directly with this object by pressing their interact button?
+    /// If true, will show up on player's screen. If false, will not appear on player's screen.
     /// </summary>
     public bool playerCanInteractWith
     {
         get { return _playerCanInteractWith; }
-        protected set { _playerCanInteractWith = value; }
+        protected set
+        {
+            // If cannot interact with anymore, disable interact text.
+            if (!value)
+                DisableInteractText();
+
+            _playerCanInteractWith = value;
+        }
     }
 
     protected virtual void Start()
@@ -61,7 +69,7 @@ public abstract class Interactable : MonoBehaviour
         DisableInteractText();
     }
 
-    private void DisableInteractText()
+    protected void DisableInteractText()
     {
         if (mouseEnterCoroutine != null)
             StopCoroutine(mouseEnterCoroutine);

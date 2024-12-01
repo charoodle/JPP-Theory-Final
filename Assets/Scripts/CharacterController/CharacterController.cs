@@ -599,10 +599,12 @@ namespace MyProject
             KeepYawBetween180(ref yawDegrees);
 
             // Rotate camera - assumes its on a separate object from character that follow's character's body
-            detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
+            if(detachedHead)
+                detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
 
             // Rotate player body to match camera view rotation
-            body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
+            if(body)
+                body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
         }
 
         /// <summary>
