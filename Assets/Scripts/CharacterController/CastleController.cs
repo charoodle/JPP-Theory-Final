@@ -47,10 +47,11 @@ public class CastleController : MyProject.CharacterController
 
     protected void Move(Vector2 dir)
     {
-        StartCoroutine(MoveEnum(dir));
+        float duration = 3f;
+        StartCoroutine(MoveEnum(dir, duration));
     }
 
-    protected IEnumerator MoveEnum(Vector2 moveDir, float seconds = 2f)
+    protected IEnumerator MoveEnum(Vector2 moveDir, float seconds = 3f)
     {
         OnStartMove?.Invoke();
 

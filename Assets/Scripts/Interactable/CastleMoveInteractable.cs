@@ -54,7 +54,7 @@ public class CastleMoveInteractable : Interactable
     {
         // Castle can only do one move at a time
         canMove = false;
-        // Tell player button is unavaiable
+        // Tell player button is unavailable
         interactText += "\n(Castle is currently moving.)";
     }
 
