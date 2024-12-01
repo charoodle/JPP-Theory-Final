@@ -1234,6 +1234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 176022277}
+  rootGameObject: {fileID: 0}
   playerVelocity: {x: 0, y: 0, z: 0}
   _walkSpeed: 3
   sprintSpeedMultiplier: 2
@@ -1382,6 +1383,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7769664347342756429, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1315359854}
+    - targetCorrespondingSourceObject: {fileID: 7769664347342756429, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1315359855}
   m_SourcePrefab: {fileID: 100100000, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
 --- !u!1 &215085429 stripped
 GameObject:
@@ -14780,6 +14784,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 1315359851}
+  rootGameObject: {fileID: 0}
   playerVelocity: {x: 0, y: 0, z: 0}
   _walkSpeed: 3
   sprintSpeedMultiplier: 2
@@ -14794,6 +14799,18 @@ MonoBehaviour:
   characterLayer:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &1315359855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 215085429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d669ed77436b59e4c8f923be795c2d26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1317925239
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17531,6 +17548,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PLAYER
       objectReference: {fileID: 0}
+    - target: {fileID: 4189486101769705112, guid: 49f8900bad9dbfa4e9497b2c4bd10274, type: 3}
+      propertyPath: rootGameObject
+      value: 
+      objectReference: {fileID: 388686113}
     - target: {fileID: 7096569618207570936, guid: 49f8900bad9dbfa4e9497b2c4bd10274, type: 3}
       propertyPath: field of view
       value: 60.000004

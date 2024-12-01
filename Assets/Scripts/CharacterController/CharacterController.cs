@@ -11,6 +11,30 @@ namespace MyProject
     public abstract class CharacterController : MonoBehaviour
     {
         [SerializeField] protected UnityEngine.CharacterController controller;
+        /// <summary>
+        /// Property for <see cref="controller"/>, for the (Unity) character controller component.
+        /// </summary>
+        public UnityEngine.CharacterController charController
+        {
+            get
+            {
+                return controller;
+            }
+            protected set
+            {
+                controller = value;
+            }
+        }
+
+        /// <summary>
+        /// Is there a higher root object to this character controller?
+        /// Will be parented/unparented when they walk on surfaces.
+        /// </summary>
+        [SerializeField] Transform rootGameObject;
+        /// <summary>
+        /// Original root object on game start. Used to parent/unparent this object back and forth from to this transform (ex: ground checks).
+        /// </summary>
+        protected Transform originalRoot;
 
         // Input
         Vector2 moveInput;
@@ -53,6 +77,14 @@ namespace MyProject
             protected set { _isGrounded = value; }
         }
 
+        // Movement with a parent
+        /// <summary>
+        /// Is the character controller currently grounded on something that can move? May need to supply additional movement to the CharacterController.Move() function.
+        /// </summary>
+        [SerializeField] MovableGroundSurface currentMovingGroundSurface;
+        [SerializeField] Vector3 currentGroundVelocity;
+        [SerializeField] Vector3 lastTouchedGroundVelocity;
+
         // Layers (for jumping)
         [SerializeField] LayerMask characterLayer;
         LayerMask groundCheckLayer;
@@ -78,6 +110,13 @@ namespace MyProject
 
             // Check player from going out of bounds every couple secons
             StartCoroutine(PreventOutOfBoundsCoroutine());
+
+            // Get one layer above the root game object as the original root. Assumes (!!!) char controller is only one layer deep (?).
+            if(rootGameObject)
+            {
+                originalRoot = rootGameObject.transform.parent;
+            }
+            
         }
 
 
@@ -512,6 +551,9 @@ namespace MyProject
         #region Character Control
         protected virtual void Update()
         {
+            if (Input.GetKeyDown(KeyCode.F))
+                currentMovingGroundSurface = null;
+
             // Update input
             bool jumpInput = false;
             bool sprintInput = false;
@@ -559,10 +601,36 @@ namespace MyProject
             if (sprintInput)
                 moveSpeed *= sprintSpeedMultiplier;
 
-            // Move around (x and z values only)
+            // Player move around (x and z values only)
             Vector3 moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
-            controller.Move(moveDirection.normalized * Time.deltaTime * moveSpeed);
+            Vector3 playerMovement = moveDirection.normalized * Time.deltaTime * moveSpeed;
 
+            // Movable ground additional velocity - is there a surface we're grounded on that is currently moving? Add additional velocity from it.
+            Vector3 additionalMovement = Vector3.zero;
+            if (currentMovingGroundSurface != null)
+            {
+                // Get the current ground velocity
+                currentGroundVelocity = currentMovingGroundSurface.velocity;
+
+                // Update the last touched ground velocity
+                //  Character will keep velocity of the ground they last touched while in the air.
+                //  When they touch a new ground and that has velocity of 0, then there will be no additional velocity from moving ground.
+                lastTouchedGroundVelocity = currentGroundVelocity;
+            }
+            else
+            {
+                // No ground = no extra velocity.
+                // Seems like this is useless atm but does clear up any confusion from looking at inspector values.
+                currentGroundVelocity = Vector3.zero;
+            }
+
+            // Character will add velocity of the ground they last touched (ex: while in the air).
+            additionalMovement = (lastTouchedGroundVelocity * Time.deltaTime);
+
+            //  Add in movable ground velocity, from the last moving ground surface that player touched.
+            Vector3 finalHorizontalMovement = playerMovement + additionalMovement;
+
+            #region Ground & Jumping
             // Reset player velocity while touching ground.
             if (isGrounded)
             {
@@ -578,9 +646,11 @@ namespace MyProject
             // Apply gravity if not on ground
             if (!isGrounded)
                 playerVelocity += worldGravity * Time.deltaTime;
+            #endregion
 
             // Move with gravity (y value affected only)
-            controller.Move(playerVelocity * Time.deltaTime);
+            //  Combined into one movement movement so CharacterController.velocity reading is accurate.
+            controller.Move(finalHorizontalMovement + (playerVelocity * Time.deltaTime));
         }
 
         /// <summary>
@@ -604,7 +674,7 @@ namespace MyProject
 
             // Rotate player body to match camera view rotation
             if(body)
-                body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
+                body.rotation = Quaternion.Euler(0f, yawDegrees, 0f); 
         }
 
         /// <summary>
@@ -643,7 +713,11 @@ namespace MyProject
 
         /// <returns>True if character wants to sprint this frame. False otherwise.</returns>
         protected abstract bool GetSprintInput();
-        
+
+        /// <summary>
+        /// Is the current character touching a ground surface?
+        /// <para>Additionally detects and sets <see cref="currentMovingGroundSurface"/> if the surface underneath is a <see cref="MovableGroundSurface"/>.</para>
+        /// </summary>
         /// <returns>True if character is touching ground (depends on CharacterController.skinWidth).</returns>
         protected bool IsGrounded()
         {
@@ -659,6 +733,23 @@ namespace MyProject
             {
                 //Debug.Log("Hit: " + hitInfo.collider.gameObject + " " + LayerMask.LayerToName(hitInfo.collider.gameObject.layer), hitInfo.collider.gameObject);
                 hitGround = true;
+
+                // Is the ground that was touched have a component to mark it as movable?
+                MovableGroundSurface movableGround = hitInfo.collider.gameObject.GetComponentInParent<MovableGroundSurface>();
+                if (movableGround)
+                    currentMovingGroundSurface = movableGround;
+                /// If hit some kind of ground object, but is not marked as movable ground, then set to null (no additional velocity to account for in <see cref="MoveCharacter"/>).
+                else
+                {
+                    currentMovingGroundSurface = null;
+                    // Additional movement velocity = 0.
+                    lastTouchedGroundVelocity = Vector3.zero;
+                }
+            }
+            else
+            {
+                // If not grounded - move character with previous ground's velocity
+                currentMovingGroundSurface = null;
             }
 
             // Green = is grounded, red = not grounded.
