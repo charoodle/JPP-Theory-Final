@@ -1,0 +1,3 @@
+GitIgnore:
+Unity Terrain Sample Assets (2.0.1):
+	https://assetstore.unity.com/packages/3d/environments/landscapes/terrain-sample-asset-pack-145808
