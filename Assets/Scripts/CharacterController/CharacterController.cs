@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -112,11 +111,11 @@ namespace MyProject
             StartCoroutine(PreventOutOfBoundsCoroutine());
 
             // Get one layer above the root game object as the original root. Assumes (!!!) char controller is only one layer deep (?).
-            if(rootGameObject)
+            if (rootGameObject)
             {
                 originalRoot = rootGameObject.transform.parent;
             }
-            
+
         }
 
 
@@ -130,6 +129,7 @@ namespace MyProject
 
         // Param constants
         protected const float LOOKTIME = 0.5f;
+        protected const float LOOKTIME_LERP = 1f;
         protected const float INITIAL_LOOKVEL = 0.5f;
         protected const float WITHIN_DEGREES = 2f;
 
@@ -176,6 +176,14 @@ namespace MyProject
         {
             StopLookAtCoroutine(currentLookAt);
             currentLookAt = StartCoroutine(LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel));
+        }
+
+        /// <summary>Make the character look towards a target pitch/yaw within <paramref name="lookTime"/> seconds exactly (uses Lerp instead of SmoothDamp).</summary>
+        /// <inheritdoc cref="LookAtTargetPitchYawLerpCoroutine"/>
+        public void LookAtTargetPitchYaw_Lerp(float targetPitch, float targetYaw, float lookTime)
+        {
+            StopLookAtCoroutine(currentLookAt);
+            currentLookAt = StartCoroutine(LookAtTargetPitchYawLerpCoroutine(targetPitch, targetYaw, lookTime));
         }
 
         /// <summary>
@@ -246,6 +254,12 @@ namespace MyProject
         {
             StopLookAtCoroutine(currentLookAt);
             yield return LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel);
+        }
+
+        public IEnumerator LookAtTargetPitchYaw_LerpEnum(float targetPitch, float targetYaw, float lookTime)
+        {
+            StopLookAtCoroutine(currentLookAt);
+            yield return LookAtTargetPitchYawLerpCoroutine(targetPitch, targetYaw, lookTime);
         }
         #endregion
 
@@ -330,7 +344,7 @@ namespace MyProject
 
             float yawVel;
             float pitchVel;
-            if(useSavedYawPitchVelocity)
+            if (useSavedYawPitchVelocity)
             {
                 yawVel = lookAt_lastYawVel;
                 pitchVel = lookAt_lastPitchVel;
@@ -429,6 +443,50 @@ namespace MyProject
                 SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
                 yield return null;
             }
+
+            // When done, make sure to snap character rotation to target rotation.
+            pitchDegrees = targetPitch;
+            yawDegrees = targetYaw;
+        }
+
+        /// <summary>
+        /// Make the character controller rotate to look at a target pitch and yaw exactly within <paramref name="lookTime"/> seconds.
+        /// </summary>
+        /// <param name="lookTime">Exactly how many seconds until character's look direction will match target direction.</param>
+        /// <inheritdoc cref="LookAtTargetPitchYawCoroutine(float, float, float, float, float)"/>
+        protected virtual IEnumerator LookAtTargetPitchYawLerpCoroutine(float targetPitch, float targetYaw, float lookTime = LOOKTIME_LERP)
+        {
+            // Cannot have negative look time.
+            if (lookTime < 0)
+            {
+                Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
+                yield break;
+            }
+
+            // Cannot divide by 0 in lerp function. Skips loop.
+            if (lookTime == 0)
+            {
+                this.pitchDegrees = targetPitch;
+                this.yawDegrees = targetYaw;
+                yield break;
+            }
+
+            // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+
+            float timer = 0f;
+            float startYaw = yawDegrees;
+            float startPitch = pitchDegrees;
+            while (timer <= lookTime)
+            {
+                float pct = timer / lookTime;
+                LerpYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, startYaw, startPitch, pct);
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            // When done, make sure to snap character rotation to target rotation.
+            pitchDegrees = targetPitch;
+            yawDegrees = targetYaw;
         }
         #endregion
 
@@ -457,6 +515,26 @@ namespace MyProject
             // SmoothDamp current yaw and pitch towards target yaw/pitch
             this.yawDegrees = Mathf.SmoothDamp(currentYaw, targetYaw, ref yawVel, lookTime);
             this.pitchDegrees = Mathf.SmoothDamp(currentPitch, targetPitch, ref pitchVel, lookTime);
+
+            // Convert to -180 to 180 for pitch system
+            KeepYawBetween180(ref yawDegrees);
+            // Pitch - Clamp from -90 to 90
+            pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
+        }
+
+        /// <param name="pct">Lerp percent (0f-1f).</param>
+        /// <inheritdoc cref="SmoothDampYawAndPitchToTarget(ref float, ref float, float, float, ref float, ref float, float)"/>
+        protected void LerpYawAndPitchToTarget(ref float yawDegrees, ref float pitchDegrees, float targetYaw, float targetPitch, float startYaw, float startPitch, float pct)
+        {
+            // Make sure the target angle has same system as this cc's yaw system.
+            KeepYawBetween180(ref targetYaw);
+
+            // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
+            startYaw = DetectIfYawPassesOver180(startYaw, targetYaw);
+
+            // Lerp current yaw and pitch towards target yaw/pitch
+            this.yawDegrees = Mathf.Lerp(startYaw, targetYaw, pct);
+            this.pitchDegrees = Mathf.Lerp(startPitch, targetPitch, pct);
 
             // Convert to -180 to 180 for pitch system
             KeepYawBetween180(ref yawDegrees);
@@ -558,7 +636,7 @@ namespace MyProject
             bool jumpInput = false;
             bool sprintInput = false;
             UpdateInputs(ref moveInput, ref lookInput, ref jumpInput, ref sprintInput);
-            
+
             // Move character
             MoveCharacter(moveInput, jumpInput, sprintInput, ref _isGrounded);
 
@@ -669,12 +747,12 @@ namespace MyProject
             KeepYawBetween180(ref yawDegrees);
 
             // Rotate camera - assumes its on a separate object from character that follow's character's body
-            if(detachedHead)
+            if (detachedHead)
                 detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
 
             // Rotate player body to match camera view rotation
-            if(body)
-                body.rotation = Quaternion.Euler(0f, yawDegrees, 0f); 
+            if (body)
+                body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
         }
 
         /// <summary>

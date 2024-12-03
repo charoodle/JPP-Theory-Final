@@ -10,6 +10,16 @@ public class CastleController : MyProject.CharacterController
 
     protected Vector2 castleMoveInput;
 
+    protected override void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+            Turn(MoveDir.Left);
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
+            Turn(MoveDir.Right);
+
+        base.Update();
+    }
+
     public enum MoveDir
     {
         /// <summary>
@@ -45,10 +55,37 @@ public class CastleController : MyProject.CharacterController
         }
     }
 
+    public void TurnCastle(MoveDir dir)
+    {
+        Turn(dir);
+    }
+
     protected void Move(Vector2 dir)
     {
         float duration = 3f;
         StartCoroutine(MoveEnum(dir, duration));
+    }
+
+    protected void Turn(MoveDir dir)
+    {
+        // Add/subtract degrees from current yaw degrees if want to turn left/right
+        const float degreesToTurn = 45f;
+        // Determine degree signage by direction
+        float degreeDiff = 0f;
+        if (dir == MoveDir.Left)
+            degreeDiff = -degreesToTurn;
+        else if (dir == MoveDir.Right)
+            degreeDiff = degreesToTurn;
+        // Determine the target degrees to turn to
+        float currYawDegrees = yawDegrees;
+        float targetYawDegrees = currYawDegrees + degreeDiff;
+
+        // Make sure angle is within -180 to 180 euler system
+        KeepYawBetween180(ref targetYawDegrees);
+
+        // Do the turn
+        const float secondsToTurnRoughly = 5f;
+        LookAtTargetPitchYaw_Lerp(pitchDegrees, targetYawDegrees, secondsToTurnRoughly);
     }
 
     protected IEnumerator MoveEnum(Vector2 moveDir, float seconds = 3f)
