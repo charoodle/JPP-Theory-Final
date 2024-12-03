@@ -1,3 +1,9 @@
 GitIgnore:
-Unity Terrain Sample Assets (2.0.1):
+Unity Terrain Sample Assets (vers 2.0.1):
 	https://assetstore.unity.com/packages/3d/environments/landscapes/terrain-sample-asset-pack-145808
+
+Polytope Studio - Lowpoly Environment - Nature Free - MEDIEVAL FANTASY SERIES (vers 1.1):
+	https://assetstore.unity.com/packages/3d/environments/lowpoly-environment-nature-free-medieval-fantasy-series-187052
+
+Chromisua - Handpainted Grass & Ground Textures (vers 1.4):
+	https://assetstore.unity.com/packages/2d/textures-materials/nature/handpainted-grass-ground-textures-187634
