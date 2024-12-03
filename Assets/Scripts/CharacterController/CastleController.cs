@@ -10,16 +10,6 @@ public class CastleController : MyProject.CharacterController
 
     protected Vector2 castleMoveInput;
 
-    protected override void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-            Turn(MoveDir.Left);
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
-            Turn(MoveDir.Right);
-
-        base.Update();
-    }
-
     public enum MoveDir
     {
         /// <summary>
@@ -84,8 +74,8 @@ public class CastleController : MyProject.CharacterController
         KeepYawBetween180(ref targetYawDegrees);
 
         // Do the turn
-        const float secondsToTurnRoughly = 5f;
-        LookAtTargetPitchYaw_Lerp(pitchDegrees, targetYawDegrees, secondsToTurnRoughly);
+        const float seconds = 5f;
+        StartCoroutine(TurnEnum(targetYawDegrees, seconds));
     }
 
     protected IEnumerator MoveEnum(Vector2 moveDir, float seconds = 3f)
@@ -99,6 +89,23 @@ public class CastleController : MyProject.CharacterController
 
         // Change back to 0
         castleMoveInput = Vector2.zero;
+
+        OnStopMove?.Invoke();
+    }
+
+    /// <summary>
+    /// Turn the castle on the y axis (yaw).
+    /// </summary>
+    /// <param name="targetYawDegrees"></param>
+    /// <param name=""></param>
+    /// <returns></returns>
+    protected IEnumerator TurnEnum(float targetYawDegrees, float secondsToTurn)
+    {
+        OnStartMove?.Invoke();
+
+        // Lerp castle rotation from current rotation to target rotation.
+        //  Does not change pitch.
+        yield return LookAtTargetPitchYaw_LerpEnum(pitchDegrees, targetYawDegrees, secondsToTurn);
 
         OnStopMove?.Invoke();
     }

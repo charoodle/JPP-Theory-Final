@@ -116,6 +116,8 @@ namespace MyProject
                 originalRoot = rootGameObject.transform.parent;
             }
 
+            // Make look system update to same rotation as object's initial starting rotation
+            yawDegrees = transform.rotation.eulerAngles.y;
         }
 
 

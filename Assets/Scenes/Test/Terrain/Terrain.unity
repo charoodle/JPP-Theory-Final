@@ -1655,9 +1655,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5248155738795681162, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
-      propertyPath: rotateBody
-      value: 
-      objectReference: {fileID: 1575920484}
+      propertyPath: yawDegrees
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7769664347342756429, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
       propertyPath: m_Name
       value: PlayerCastle
