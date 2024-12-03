@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2415298023417548968}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ParticlePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,7 +41,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2398910740482518439}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fins
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -76,7 +76,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5529404477181436954}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -113,7 +113,7 @@ GameObject:
   - component: {fileID: 696428806967329620}
   - component: {fileID: 4462391010440699596}
   - component: {fileID: 7707504542362208546}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -220,7 +220,7 @@ GameObject:
   - component: {fileID: 1970766519105079425}
   - component: {fileID: 824976633665119467}
   - component: {fileID: 5375216392845748934}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fins Pivot (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -326,7 +326,7 @@ GameObject:
   - component: {fileID: 4868633573686783421}
   - component: {fileID: 5631370421756633610}
   - component: {fileID: 3910271577404574200}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -431,7 +431,7 @@ GameObject:
   - component: {fileID: 4226798681249972431}
   - component: {fileID: 799801615897907765}
   - component: {fileID: 8677927867636399697}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -535,7 +535,7 @@ GameObject:
   - component: {fileID: 2466702330188793500}
   - component: {fileID: 3256982322440120500}
   - component: {fileID: 5436385980853332803}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: RocketProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -615,7 +615,7 @@ GameObject:
   - component: {fileID: 5242486118289845537}
   - component: {fileID: 8972057659486827505}
   - component: {fileID: 172127638812515428}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -720,7 +720,7 @@ GameObject:
   - component: {fileID: 1354467394216192827}
   - component: {fileID: 9218231545804163723}
   - component: {fileID: 6488794460282728295}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fins Pivot (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -826,7 +826,7 @@ GameObject:
   - component: {fileID: 2337501126775879418}
   - component: {fileID: 320092055876201032}
   - component: {fileID: 5113891761034950069}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fins Pivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -932,7 +932,7 @@ GameObject:
   - component: {fileID: 3350196846667148243}
   - component: {fileID: 1080477356325952214}
   - component: {fileID: 1106045894245298410}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1037,7 +1037,7 @@ GameObject:
   - component: {fileID: 1252672072816517954}
   - component: {fileID: 3271275212230520393}
   - component: {fileID: 4142912738573429937}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1144,7 +1144,7 @@ GameObject:
   - component: {fileID: 4664884535117261774}
   - component: {fileID: 1327797914501805080}
   - component: {fileID: 3785252875158788330}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fins Pivot (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1250,7 +1250,7 @@ GameObject:
   - component: {fileID: 2138901965340409763}
   - component: {fileID: 6703364916822115561}
   - component: {fileID: 5835413148647813644}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: RocketPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1407,6 +1407,10 @@ PrefabInstance:
     - target: {fileID: 7142042731045135324, guid: 172ae503330fdb0439fa438b2f5ff586, type: 3}
       propertyPath: m_Name
       value: RocketTravel Particles
+      objectReference: {fileID: 0}
+    - target: {fileID: 7142042731045135324, guid: 172ae503330fdb0439fa438b2f5ff586, type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

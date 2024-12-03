@@ -233,7 +233,12 @@ public abstract class ProjectileLauncher : MonoBehaviour
     {
         // TEMP - Get raycast forward from player view
         GameObject playerCam = Camera.main.gameObject;
-        if (Physics.Raycast(playerCam.transform.position, playerCam.transform.forward, out RaycastHit hit, maxRange))
+
+        // Ignore MovementBoundary layer (keeps players inbounds, but lets projectiles through)
+        int layerMask = LayerMask.GetMask("MapMovementBoundary");
+        layerMask = ~layerMask;
+
+        if (Physics.Raycast(playerCam.transform.position, playerCam.transform.forward, out RaycastHit hit, maxRange, layerMask))
         {
             targetFound = true;
             return hit.point;
