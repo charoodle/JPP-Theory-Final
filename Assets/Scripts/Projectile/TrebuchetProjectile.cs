@@ -77,6 +77,11 @@ public class TrebuchetProjectile : Projectile
             Vector3 randomYRotation = new Vector3(0f, Random.Range(0f, 360f), 0f);
             GameObject embedObj = Instantiate(embedIntoMaterialPrefab, transform.position, Quaternion.Euler(randomYRotation));
 
+            // Make embed model have same rotation as surface normal
+            Vector3 surfaceNormal = collision.GetContact(0).normal;
+            embedObj.transform.up = surfaceNormal;
+            dirtParticles.transform.up = surfaceNormal; 
+
             // Parent embed model + rock to collided object's root object + don't modify how it looks (scale esp.)
             embedObj.transform.SetParent(collision.transform.root, true);
             transform.SetParent(collision.transform.root, true);
