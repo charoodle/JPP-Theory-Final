@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class CastleController : MyProject.CharacterController
 {
+    /// <summary>
+    /// To only allow one move at a time. Ex: Move/Rotate buttons get disabled if a move happens.
+    /// Buttons reenabled when the move is finished.
+    /// </summary>
     public delegate void CastleMoveAction();
     public event CastleMoveAction OnStartMove;
     public event CastleMoveAction OnStopMove;
