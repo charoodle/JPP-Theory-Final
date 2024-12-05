@@ -794,6 +794,20 @@ namespace MyProject
         /// <returns>True if character wants to sprint this frame. False otherwise.</returns>
         protected abstract bool GetSprintInput();
 
+
+        #region GroundCheck - Spherecast Debug
+        // Spherecast debug vars
+        Vector3 sc_position;
+        float sc_radius;
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = IsGroundedSphereCast ? Color.green : Color.red;
+            Gizmos.DrawSphere(sc_position, sc_radius);
+        }
+        #endregion
+
+
+        [SerializeField] bool IsGroundedSphereCast = false;
         /// <summary>
         /// Is the current character touching a ground surface?
         /// <para>Additionally detects and sets <see cref="currentMovingGroundSurface"/> if the surface underneath is a <see cref="MovableGroundSurface"/>.</para>
@@ -809,6 +823,21 @@ namespace MyProject
             Vector3 characterFeet = transform.position;
 
             bool hitGround = false;
+            Vector3 spherePosition = characterFeet;
+            spherePosition.y = characterFeet.y + controller.radius;
+
+            sc_position = spherePosition;
+            sc_radius = controller.radius;
+            float distance = controller.skinWidth + 0.02f;
+            if(Physics.SphereCast(spherePosition, controller.radius, Vector3.down, out RaycastHit hitInto, distance, groundCheckLayer))
+            {
+                IsGroundedSphereCast = true;
+            }
+            else
+            {
+                IsGroundedSphereCast = false;
+            }
+
             if (Physics.Raycast(characterFeet, Vector3.down, out RaycastHit hitInfo, maxDistance, groundCheckLayer))
             {
                 //Debug.Log("Hit: " + hitInfo.collider.gameObject + " " + LayerMask.LayerToName(hitInfo.collider.gameObject.layer), hitInfo.collider.gameObject);

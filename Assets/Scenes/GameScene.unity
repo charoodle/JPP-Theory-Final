@@ -1228,6 +1228,7 @@ MonoBehaviour:
   characterLayer:
     serializedVersion: 2
     m_Bits: 64
+  IsGroundedSphereCast: 0
   lookXSens: 750
   lookYSens: 750
   invertLookX: 0
@@ -16690,7 +16691,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1703108056
 Transform:
   m_ObjectHideFlags: 0
@@ -18662,11 +18663,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 961760027543693659, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 961760027543693659, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3850520278386344056, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_LocalPosition.x
@@ -18714,11 +18715,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5994774020627521904, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5994774020627521904, guid: 48bec0aecb5c06143996d1759a326872, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
