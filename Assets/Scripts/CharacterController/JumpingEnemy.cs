@@ -22,7 +22,10 @@ public class JumpingEnemy : EnemyController
     {
         while(true)
         {
-            // Jump as soon as cooldown over
+            // Jump as soon as on ground and cooldown is over
+            yield return new WaitUntil(() => isGrounded);
+
+            // Jump the moment it can jump
             wantsToJump = true;
 
             // Wait for update to see if not grounded
