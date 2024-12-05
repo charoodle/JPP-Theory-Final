@@ -796,6 +796,7 @@ namespace MyProject
 
 
         #region GroundCheck - Spherecast Debug
+#if UNITY_EDITOR
         // Spherecast debug vars
         Vector3 sc_position;
         float sc_radius;
@@ -805,7 +806,8 @@ namespace MyProject
             Gizmos.color = isGrounded ? Color.green : Color.red;
             Gizmos.DrawSphere(sc_position, sc_radius);
         }
-        #endregion
+#endif
+#endregion
 
         /// <summary>
         /// Is the current character touching a ground surface?
@@ -829,8 +831,10 @@ namespace MyProject
             spherePosition.y = characterFeet.y + controller.radius;
             float radius = controller.radius + additionalRadius;
             float distance = controller.skinWidth + additionalDistance;
+#if UNITY_EDITOR
             sc_position = spherePosition;
             sc_radius = radius;
+#endif
             if (Physics.SphereCast(spherePosition, radius, Vector3.down, out RaycastHit hitInfo, distance, groundCheckLayer))
             {
                 //Debug.Log("Hit: " + hitInfo.collider.gameObject + " " + LayerMask.LayerToName(hitInfo.collider.gameObject.layer), hitInfo.collider.gameObject);
@@ -880,6 +884,6 @@ namespace MyProject
                 yield return new WaitForSeconds(checkSeconds);
             }
         }
-        #endregion
+#endregion
     }
 }
