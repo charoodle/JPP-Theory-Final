@@ -799,15 +799,14 @@ namespace MyProject
         // Spherecast debug vars
         Vector3 sc_position;
         float sc_radius;
+        Vector3 sc_position_end;
         private void OnDrawGizmos()
         {
-            Gizmos.color = IsGroundedSphereCast ? Color.green : Color.red;
+            Gizmos.color = isGrounded ? Color.green : Color.red;
             Gizmos.DrawSphere(sc_position, sc_radius);
         }
         #endregion
 
-
-        [SerializeField] bool IsGroundedSphereCast = false;
         /// <summary>
         /// Is the current character touching a ground surface?
         /// <para>Additionally detects and sets <see cref="currentMovingGroundSurface"/> if the surface underneath is a <see cref="MovableGroundSurface"/>.</para>
@@ -822,23 +821,17 @@ namespace MyProject
             float maxDistance = controller.skinWidth + 0.02f;
             Vector3 characterFeet = transform.position;
 
+            float additionalRadius = 0.02f;
+            float additionalDistance = 0.02f;
+
             bool hitGround = false;
             Vector3 spherePosition = characterFeet;
             spherePosition.y = characterFeet.y + controller.radius;
-
+            float radius = controller.radius + additionalRadius;
+            float distance = controller.skinWidth + additionalDistance;
             sc_position = spherePosition;
-            sc_radius = controller.radius;
-            float distance = controller.skinWidth + 0.02f;
-            if(Physics.SphereCast(spherePosition, controller.radius, Vector3.down, out RaycastHit hitInto, distance, groundCheckLayer))
-            {
-                IsGroundedSphereCast = true;
-            }
-            else
-            {
-                IsGroundedSphereCast = false;
-            }
-
-            if (Physics.Raycast(characterFeet, Vector3.down, out RaycastHit hitInfo, maxDistance, groundCheckLayer))
+            sc_radius = radius;
+            if (Physics.SphereCast(spherePosition, radius, Vector3.down, out RaycastHit hitInfo, distance, groundCheckLayer))
             {
                 //Debug.Log("Hit: " + hitInfo.collider.gameObject + " " + LayerMask.LayerToName(hitInfo.collider.gameObject.layer), hitInfo.collider.gameObject);
                 hitGround = true;
