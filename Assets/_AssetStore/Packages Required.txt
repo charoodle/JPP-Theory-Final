@@ -10,3 +10,6 @@ Chromisua - Handpainted Grass & Ground Textures (vers 1.4):
 
 Render Knight - Fantasy Skybox FREE
 	https://assetstore.unity.com/packages/2d/textures-materials/sky/fantasy-skybox-free-18353
+
+Toon RTS Units - Demo
+	https://assetstore.unity.com/packages/p/toon-rts-units-demo-69687
