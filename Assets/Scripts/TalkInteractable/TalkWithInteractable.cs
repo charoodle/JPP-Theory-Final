@@ -5,6 +5,8 @@ using CharacterController = MyProject.CharacterController;
 
 public abstract class TalkWithInteractable : Interactable
 {
+    [SerializeField] protected KeyCode advanceTextKey = KeyCode.Mouse0;
+
     protected const float WAITAFTER_PREVTEXT_DISAPPEAR = 0.25f;
     [SerializeField] protected Transform headLookAt;
     protected DialogueManager dialogue;
@@ -132,7 +134,7 @@ public abstract class TalkWithInteractable : Interactable
     protected bool PlayerWantToProgressToNextTextbox()
     {
         // TODO: Figure out when the player wants to progress to next text box. Bool that can check for on and then flip off here?
-        return Input.GetMouseButtonDown(0);
+        return Input.GetKeyDown(advanceTextKey);
     }
 
     protected void EnablePlayerCharacterControl(bool enabled)
