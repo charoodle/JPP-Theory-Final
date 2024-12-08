@@ -6,6 +6,7 @@ using TMPro;
 public class DialogueBox : MonoBehaviour
 {
     [SerializeField] protected TextMeshProUGUI textField;
+    [SerializeField] protected GameObject continueIcon;
 
     protected string characterName;
     protected string dialogue;
@@ -25,6 +26,15 @@ public class DialogueBox : MonoBehaviour
 
         this.dialogue = dialogue;
         UpdateBox();
+    }
+
+    /// <summary>
+    /// Turns on/off the icon on the bottom right of the box that indicates the player can progress to the next text box with the appropriate button press.
+    /// </summary>
+    /// <param name="enable"></param>
+    public void EnableContinueIcon(bool enable)
+    {
+        continueIcon.SetActive(enable);
     }
 
     protected void UpdateBox()

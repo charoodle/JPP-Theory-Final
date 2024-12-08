@@ -4,6 +4,8 @@ using UnityEngine;
 
 /// <summary>
 /// Janky workaround to not make a separate banner-type dialogue manager to announce the beginning of a game.
+/// 
+/// Can just call Talk_BeginGame()
 /// </summary>
 public class Announcer_Tutorial : TalkWithInteractable
 {
@@ -27,14 +29,17 @@ public class Announcer_Tutorial : TalkWithInteractable
             if (isRunning)
                 return;
             // Start talk
-            Talk_BeginGame();
+            BeginTalk();
             // Turn off bool in inspector
             beginGame = false;
         }
     }
 #endif
 
-    public void Talk_BeginGame()
+    /// <summary>
+    /// Since no character, so just circumvent my poorly designed system and call the coroutine with a more verbose function name.
+    /// </summary>
+    public void BeginTalk()
     {
         StartCoroutine(TalkWithCoroutine());
     }
@@ -44,7 +49,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return StartTalk();
 
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
-        yield return TextBox("I will not repeat myself, so listen up carefully! (Or rather, I can't because I'm limited by whoever programmed me!)");
+        yield return TextBox("Voice", "I will not repeat myself, so listen up carefully! (Or rather, I can't because I'm limited by whoever programmed me!)", minAppearTime:2.5f);
         yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.");
         yield return TextBox("Use [SPACEBAR] to jump. Use [LEFT SHIFT] to run.");
         yield return TextBox("You know, the standard FPS shooter controls.");

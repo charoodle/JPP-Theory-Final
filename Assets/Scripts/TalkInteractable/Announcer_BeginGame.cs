@@ -27,14 +27,17 @@ public class Announcer_BeginGame : TalkWithInteractable
             if (isRunning)
                 return;
             // Start talk
-            Talk_BeginGame();
+            BeginTalk();
             // Turn off bool in inspector
             beginGame = false;
         }
     }
 #endif
 
-    public void Talk_BeginGame()
+    /// <summary>
+    /// Since no character, so just circumvent my poorly designed system and call the coroutine with a more verbose function name.
+    /// </summary>
+    public void BeginTalk()
     {
         StartCoroutine(TalkWithCoroutine());
     }

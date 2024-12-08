@@ -78,6 +78,15 @@ public class DialogueManager : MonoBehaviour
         box.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Turn on/off the little icon that indicates the player can progress to the next text box.
+    /// </summary>
+    /// <param name="enabled"></param>
+    public void TextBoxEnableContinueIcon(bool enabled)
+    {
+        box.EnableContinueIcon(enabled);
+    }
+
     public void ToggleCutsceneBars()
     {
         StopAllCoroutines();

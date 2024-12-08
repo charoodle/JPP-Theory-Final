@@ -83,6 +83,9 @@ public abstract class TalkWithInteractable : Interactable
     /// <param name="minAppearTime">Minimum time the text box will show on screen before letting player continue to next dialogue.</param>
     protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f)
     {
+        // Disable the little continue indicator until text box can actually continue
+        dialogue.TextBoxEnableContinueIcon(false);
+
         // No name passed in = set just the text box.
         if(string.IsNullOrEmpty(name))
         {
@@ -96,6 +99,9 @@ public abstract class TalkWithInteractable : Interactable
 
         // Force the text box to stay on for a split second before skipping
         yield return new WaitForSeconds(minAppearTime);
+
+        // Enable the little continue indicator again
+        dialogue.TextBoxEnableContinueIcon(true);
 
         // Yield wait until player wants to progress to next dialogue box
         yield return WaitForPlayerContinue();
