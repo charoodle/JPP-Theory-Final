@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using CharacterController = MyProject.CharacterController;
 
-[RequireComponent(typeof(CharacterController))]
 public abstract class TalkWithInteractable : Interactable
 {
     protected const float WAITAFTER_PREVTEXT_DISAPPEAR = 0.25f;
@@ -23,6 +22,9 @@ public abstract class TalkWithInteractable : Interactable
             return dialogue.Player;
         }
     }
+    /// <summary>
+    /// Is the talk currently running?
+    /// </summary>
     public bool isRunning { get; protected set; }
 
     protected override void Start()
@@ -59,6 +61,7 @@ public abstract class TalkWithInteractable : Interactable
 
     protected virtual void TalkWith(CharacterController character)
     {
+        //TODO: Remove character? Not used?
         StartCoroutine(TalkWithCoroutine());
     }
 
@@ -194,7 +197,7 @@ public abstract class TalkWithInteractable : Interactable
     float charPitch;
     float playerYaw;
     float playerPitch;
-    protected IEnumerator StartTalk()
+    protected virtual IEnumerator StartTalk()
     {
         // Disable player movement and look
         EnablePlayerCharacterControl(false);
@@ -218,7 +221,7 @@ public abstract class TalkWithInteractable : Interactable
         yield break;
     }
 
-    protected IEnumerator EndTalk()
+    protected virtual IEnumerator EndTalk()
     {
         // Turn off cutscene bars.
         dialogue.ToggleCutsceneBars();
