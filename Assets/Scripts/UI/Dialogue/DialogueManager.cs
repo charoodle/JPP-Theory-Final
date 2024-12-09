@@ -7,6 +7,7 @@ using CharacterController = MyProject.CharacterController;
 public class DialogueManager : MonoBehaviour
 {
     public DialogueBox box;
+    public InfoBox infoBox;
 
     protected CharacterController _player;
     public CharacterController Player
@@ -47,6 +48,23 @@ public class DialogueManager : MonoBehaviour
         Player = FindObjectOfType<PlayerController>();
     }
 
+    #region InfoBox
+    /// <summary>
+    /// Give a caller control over an info box on the player's screen.
+    /// TODO: Be able to instantiate multiple if needed?
+    /// </summary>
+    public InfoBox CreateInfoBox()
+    {
+        return infoBox;
+    }
+    #endregion
+
+    /// <summary>
+    /// Creates a dialogue-like text box across the bottom of the screen. Includes a name and some
+    /// dialogue for that character that is speaking.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="startDialogue"></param>
     public void CreateTextBox(string name, string startDialogue)
     {
         // Set the box
