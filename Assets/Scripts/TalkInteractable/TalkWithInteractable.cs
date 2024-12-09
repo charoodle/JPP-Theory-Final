@@ -81,7 +81,7 @@ public abstract class TalkWithInteractable : Interactable
     /// <param name="name">Name of the person talking.</param>
     /// <param name="text">What the person is saying.</param>
     /// <param name="minAppearTime">Minimum time the text box will show on screen before letting player continue to next dialogue.</param>
-    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f)
+    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, TextBoxWaitUntilCondition waitCondition = null)
     {
         // Disable the little continue indicator until text box can actually continue
         dialogue.TextBoxEnableContinueIcon(false);
@@ -104,7 +104,7 @@ public abstract class TalkWithInteractable : Interactable
         dialogue.TextBoxEnableContinueIcon(true);
 
         // Yield wait until player wants to progress to next dialogue box
-        yield return WaitForPlayerContinue();
+        yield return WaitForPlayerContinue(waitCondition);
 
         // Turn off the text box
         dialogue.DisappearTextBox();
@@ -118,10 +118,10 @@ public abstract class TalkWithInteractable : Interactable
 
     /// <summary>Summon a text box, reusing the same name as the immediate previous text box.</summary>
     /// <inheritdoc cref="TextBox(string, string)"/>
-    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR)
+    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, TextBoxWaitUntilCondition waitCondition = null)
     {
         // Reuse name from previous text box.
-        yield return TextBox(null, text, waitAfterDisappear);
+        yield return TextBox(null, text, waitAfterDisappear, minAppearTime, waitCondition);
     }
 
     protected IEnumerator Pause(float seconds)
@@ -132,10 +132,25 @@ public abstract class TalkWithInteractable : Interactable
     /// <summary>
     /// Wait for some input during dialogue before progressing to next dialogue box.
     /// </summary>
-    protected IEnumerator WaitForPlayerContinue()
+    protected IEnumerator WaitForPlayerContinue(TextBoxWaitUntilCondition condition = null)
     {
-        yield return new WaitUntil(PlayerWantToProgressToNextTextbox);
+        // No custom wait condition = user presses button to progress to next text box.
+        if(condition == null)
+            yield return new WaitUntil(PlayerWantToProgressToNextTextbox);
+        // Custom wait condition = code waits for something to happen before progressing to next text box.
+        else
+            yield return new WaitUntil(() => condition() == true);
     }
+
+
+    #region TextBox Wait Until Conditions
+    /// <summary>
+    /// Used for delegates to determine when a text box is allowed to advance.
+    /// </summary>
+    /// <returns></returns>
+    public delegate bool TextBoxWaitUntilCondition();
+    #endregion
+
 
     protected bool PlayerWantToProgressToNextTextbox()
     {
