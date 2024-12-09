@@ -17,35 +17,6 @@ using TMPro;
 /// </summary>
 public class InfoBox : MonoBehaviour
 {
-    #region DELETE AFTER DONE TESTING
-    private void Start()
-    {
-        // TODO: Debug only - DELETE AFTER DONE
-        SetInfo("Hello world!");
-        SetInfoFontSize(80f);
-        SetHorizontalFontAlignment(HorizontalTextAlign.Right);
-        SetVerticalFontAlignment(VerticalTextAlign.Middle);
-    }
-
-
-    // On my screen, goes from about +-960
-    [SerializeField] float xPosition = 0f;
-
-    // On my screen, goes from about +-540.23...?
-    [SerializeField] float yPosition = 0f;
-
-    // ohhh multiply by 2 = 1920 x 1080, i see
-    //  but the 540 has a wonky decimal idk, w/e
-
-    private void OnValidate()
-    {
-        if (!Application.isPlaying)
-            return;
-
-        SetWindowAnchorPosition(xPosition, yPosition);
-    }
-    #endregion
-
     [SerializeField] protected TextMeshProUGUI textField;
 
     /// <summary> Rect transform that is considered the entire info box window itself. </summary>
@@ -67,15 +38,14 @@ public class InfoBox : MonoBehaviour
     {
         window = GetComponent<RectTransform>();
 
+        // Get pixel size of canvas, to be able to normalize a value between 0-1?
+        /// Not sure if this is what I want to use to normalize x/y in <see cref="SetWindowAnchorPosition(float, float)".
         Canvas windowCanvas = window.GetComponentInParent<Canvas>();
         canvasWidth = windowCanvas.pixelRect.width;
         canvasHeight = windowCanvas.pixelRect.height;
 
-        SetWindowSize(300f, 200f);
-
-        // How to get center x/y of canvas?
-        // 0,0 is center
-        SetWindowAnchorPosition(0, 0);
+        // Default size of window.
+        SetWindowSize(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT);
     }
 
     /// <param name="horizontal">How wide window should be.</param>
@@ -86,6 +56,10 @@ public class InfoBox : MonoBehaviour
         window.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, vertical);
     }
 
+    /// <summary>
+    /// 0,0 represents center of current canvas? Depends? Not 100% sure. Currently anchored to middle of screen.
+    /// </summary>
+    /// <param name="position"></param>
     public void SetWindowAnchorPosition(Vector2 position)
     {
         window.anchoredPosition = position;

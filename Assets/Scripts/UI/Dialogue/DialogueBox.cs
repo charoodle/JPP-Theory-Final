@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+/// <summary>
+/// TODO: Inherit from InfoBox maybe? Have to rework in that case. Only if time allows.
+/// </summary>
 public class DialogueBox : MonoBehaviour
 {
     [SerializeField] protected TextMeshProUGUI textField;
