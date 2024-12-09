@@ -649,9 +649,6 @@ namespace MyProject
         #region Character Control
         protected virtual void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F))
-                currentMovingGroundSurface = null;
-
             // Update input
             bool jumpInput = false;
             bool sprintInput = false;
