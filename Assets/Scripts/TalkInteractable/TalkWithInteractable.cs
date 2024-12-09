@@ -74,14 +74,17 @@ public abstract class TalkWithInteractable : Interactable
     /// </summary>
     /// <returns></returns>
     protected abstract IEnumerator TalkWithCoroutine();
-    
+
     /// <summary>
     /// Summon a text box on screen and waits for the player before continuing.
     /// </summary>
     /// <param name="name">Name of the person talking.</param>
     /// <param name="text">What the person is saying.</param>
     /// <param name="minAppearTime">Minimum time the text box will show on screen before letting player continue to next dialogue.</param>
-    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, TextBoxWaitUntilCondition waitCondition = null)
+    /// <param name="waitAfterDisappear">How many seconds the box will disappear for before the next dialogue box appears. Helpful in giving a gap between text boxes.</param>
+    /// <param name="waitCondition">A custom IEnumerator wait condition. Text box will wait until this condition yield break before continuing to next text box. 
+    ///                             <para>If left null, waits for player to click the <see cref="advanceTextKey"/> in <see cref="PlayerWantToProgressToNextTextbox"/></para></param>
+    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null)
     {
         // Disable the little continue indicator until text box can actually continue
         dialogue.TextBoxEnableContinueIcon(false);
@@ -117,8 +120,8 @@ public abstract class TalkWithInteractable : Interactable
     }
 
     /// <summary>Summon a text box, reusing the same name as the immediate previous text box.</summary>
-    /// <inheritdoc cref="TextBox(string, string)"/>
-    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, TextBoxWaitUntilCondition waitCondition = null)
+    /// <inheritdoc cref="TextBox"/>
+    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null)
     {
         // Reuse name from previous text box.
         yield return TextBox(null, text, waitAfterDisappear, minAppearTime, waitCondition);
@@ -132,14 +135,14 @@ public abstract class TalkWithInteractable : Interactable
     /// <summary>
     /// Wait for some input during dialogue before progressing to next dialogue box.
     /// </summary>
-    protected IEnumerator WaitForPlayerContinue(TextBoxWaitUntilCondition condition = null)
+    protected IEnumerator WaitForPlayerContinue(IEnumerator condition = null)
     {
         // No custom wait condition = user presses button to progress to next text box.
-        if(condition == null)
+        if (condition == null)
             yield return new WaitUntil(PlayerWantToProgressToNextTextbox);
-        // Custom wait condition = code waits for something to happen before progressing to next text box.
+        // Custom wait condition = code waits for another coroutine to happen before progressing to next text box.
         else
-            yield return new WaitUntil(() => condition() == true);
+            yield return condition;
     }
 
 
