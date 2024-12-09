@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Not really used at the moment. See <see cref="TalkWithInteractable" instead./>
+/// </summary>
 public abstract class Cutscene : MonoBehaviour
 {
     public void TriggerCutscene()

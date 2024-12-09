@@ -54,7 +54,8 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return StartTalk();
 
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
-        yield return TextBox("I will not repeat myself, so listen up carefully! (Or rather, I can't because I'm limited by whoever programmed me!)", minAppearTime:2.5f);
+        yield return TextBox("This is your first time here, right? Let me teach you the basics.");
+        yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime:2.5f);
         yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilCharacterMovesAndLooksAround(playerController));
         yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilCharacterJumps(playerController));
         yield return TextBox("Hold [LEFT SHIFT] to run.", waitCondition: WaitUntilCharacterRuns(playerController));
@@ -85,10 +86,10 @@ public class Announcer_Tutorial : TalkWithInteractable
         float enoughSec = 0.65f;
 
         // Modify these strings to be displayed
-        string fwdStr = "Forward: ---\n";
-        string backStr = "Backwd: ---\n";
-        string leftStr = "Left: ---\n";
-        string rightStr = "Right: ---";
+        string fwdStr = "<color=white>Forward: --\n";
+        string backStr = "<color=white>Backwd: --\n";
+        string leftStr = "<color=white>Left: --\n";
+        string rightStr = "<color=white>Right: --";
 
         // Concatenate the movement strings into one for info box
         string GetMovementInfoString()
@@ -107,13 +108,13 @@ public class Announcer_Tutorial : TalkWithInteractable
 
             // Update the string if enough seconds
             if (fwdOK)
-                fwdStr = "Forward: OK\n";
+                fwdStr = "<color=white>Forward: <color=green>OK\n";
             if (backOK)
-                backStr = "Backwd: OK\n";
+                backStr = "<color=white>Backwd: <color=green>OK\n";
             if (leftOK)
-                leftStr = "Left: OK\n";
+                leftStr = "<color=white>Left: <color=green>OK\n";
             if (rightOK)
-                rightStr = "Right: OK\n";
+                rightStr = "<color=white>Right: <color=green>OK\n";
 
             return fwdOK && backOK && leftOK && rightOK;
         }
@@ -160,7 +161,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         } 
 
         // Final update
-        infoBox.SetInfo(GetMovementInfoString() + "Move OK");
+        infoBox.SetInfo(GetMovementInfoString());
         #endregion
 
         // Gap between boxes
@@ -174,7 +175,7 @@ public class Announcer_Tutorial : TalkWithInteractable
 
 
         #region Look Around
-        string lookAroundStr = "Look Around: ---\n";
+        string lookAroundStr = "Look Around: --\n";
 
         // Turn box on
         infoBox.SetActive(true);
@@ -197,7 +198,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         }
 
         // Player looked around enough, update info box and let player see for a couple sec
-        infoBox.SetInfo("Look: OK\n");
+        infoBox.SetInfo("<color=white>Look Around: <color=green>OK\n");
 
         yield return new WaitForSeconds(gapBetweenBoxes);
 

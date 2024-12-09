@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Not really used at the moment.
+/// </summary>
 public class TestCutscene : Cutscene
 {
     public TalkWithInteractable henry;

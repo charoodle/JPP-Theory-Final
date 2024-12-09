@@ -103,8 +103,9 @@ public abstract class TalkWithInteractable : Interactable
         // Force the text box to stay on for a split second before skipping
         yield return new WaitForSeconds(minAppearTime);
 
-        // Enable the little continue indicator again
-        dialogue.TextBoxEnableContinueIcon(true);
+        // Enable the little continue indicator again (if no waitCondition provided)
+        if(waitCondition == null)
+            dialogue.TextBoxEnableContinueIcon(true);
 
         // Yield wait until player wants to progress to next dialogue box
         yield return WaitForPlayerContinue(waitCondition);
