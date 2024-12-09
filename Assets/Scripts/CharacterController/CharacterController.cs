@@ -9,6 +9,20 @@ namespace MyProject
 {
     public abstract class CharacterController : MonoBehaviour
     {
+        #region Events
+        public delegate void CharacterAction();
+        /// <summary>
+        /// Happens when the character jumps.
+        /// </summary>
+        public event CharacterAction OnCharacterJump;
+         
+        /// <summary>
+        /// Happens when the character lands.
+        /// </summary>
+        public event CharacterAction OnCharacterLand;
+        #endregion
+
+
         [SerializeField] protected UnityEngine.CharacterController controller;
         /// <summary>
         /// Property for <see cref="controller"/>, for the (Unity) character controller component.
@@ -93,6 +107,11 @@ namespace MyProject
             get { return _isGrounded; }
             protected set { _isGrounded = value; }
         }
+        /// <summary>
+        /// Flag to manage allowing one jump command per accepted character jump inpu. This should initially be true on game start to let the character jump.
+        /// <para>Triggered by <see cref="WaitForCharacterToLandOnGround"/>, and is used in the jump section of <see cref="MoveCharacter(Vector3, bool, bool, ref bool)"/></para>
+        /// </summary>
+        protected bool isGroundedAndCanJumpAgain = true;
 
         // Movement with a parent
         /// <summary>
@@ -732,10 +751,13 @@ namespace MyProject
                 playerVelocity = Vector3.zero;
             }
 
-            // Jump if on ground
-            if (jumpInput && isGrounded)
+            // Jump if on ground - do this once per isGrounded only
+            if (jumpInput && isGrounded && isGroundedAndCanJumpAgain)
             {
                 playerVelocity.y += Mathf.Sqrt(jumpHeight * -2.0f * worldGravity.y);
+
+                // Only allow one jump per accepted jump input. Waits for character to land again before can jump again.
+                StartCoroutine(WaitForCharacterToLandOnGround());
             }
 
             // Apply gravity if not on ground
@@ -746,6 +768,48 @@ namespace MyProject
             // Move with gravity (y value affected only)
             //  Combined into one movement movement so CharacterController.velocity reading is accurate.
             controller.Move(finalHorizontalMovement + (playerVelocity * Time.deltaTime));
+        }
+
+        /// <summary>
+        /// Manages forcing player to jump only once per accepted jump input (since jumping is processed each frame; want to prevent doubling up on jump events across first couple jump frames).
+        /// Sends out jump event and land event once.
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerator WaitForCharacterToLandOnGround()
+        {
+            // Minimum time between a jump and a land. Since after a jump can still be considered grounded for first couple frames.
+            const float delayBetweenCheckingJumpAndLand = 0.25f;
+
+            isGroundedAndCanJumpAgain = false;
+
+            // Send jump event out
+            OnCharacterJump?.Invoke();
+
+            // Mark time of jump
+            float timeOfJump = Time.time;
+            
+            // Next isGrounded=true can be accepted at this timestamp:
+            float timeOfNextIsGrounded = timeOfJump + delayBetweenCheckingJumpAndLand;
+            // Wait for player to land on ground after initial jump
+            while (true)
+            {
+                // If past timestamp, check if grounded
+                if (Time.time > timeOfNextIsGrounded)
+                {
+                    // If grounded again after acceptable timestamp, break out
+                    if (isGrounded)
+                        break;
+                }
+
+                // TODO: Moving and jumping doesn't really happen in fixed update at the moment (prevent jittery camera)...
+                yield return new WaitForFixedUpdate();
+            }
+
+            // Allow player to jump again
+            isGroundedAndCanJumpAgain = true;
+
+            // Send land event out
+            OnCharacterLand?.Invoke();
         }
 
         /// <summary>
