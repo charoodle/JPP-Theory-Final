@@ -52,6 +52,7 @@ namespace MyProject
         // Input
         Vector2 _moveInput;
         Vector2 _lookInput;
+        protected bool _sprintInput = false;
 
         /// <summary>
         /// The current character's move input.
@@ -71,7 +72,15 @@ namespace MyProject
             protected set { _lookInput = value; }
         }
 
+        /// <summary>
+        /// Is the character holding the sprint button while moving in a direction?
+        /// </summary>
+        public bool isSprinting { get { return _sprintInput && moveInput.magnitude > 0; } }
+
         // Movement
+        /// <summary>
+        /// TODO: This only works with gravity. Does not update X/Z velocity.
+        /// </summary>
         [SerializeField] Vector3 playerVelocity;
         [SerializeField] protected float _walkSpeed = 3.0f;
         protected virtual float walkSpeed
@@ -89,6 +98,8 @@ namespace MyProject
             }
         }
         [SerializeField] protected float sprintSpeedMultiplier = 2.0f;
+        
+        
 
         // Look-around
         [SerializeField] Transform rotateBody;
@@ -670,11 +681,10 @@ namespace MyProject
         {
             // Update input
             bool jumpInput = false;
-            bool sprintInput = false;
-            UpdateInputs(ref _moveInput, ref _lookInput, ref jumpInput, ref sprintInput);
+            UpdateInputs(ref _moveInput, ref _lookInput, ref jumpInput, ref _sprintInput);
 
             // Move character
-            MoveCharacter(moveInput, jumpInput, sprintInput, ref _isGrounded);
+            MoveCharacter(moveInput, jumpInput, _sprintInput, ref _isGrounded);
 
             // Update rotation (values only)
             UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);

@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Avoid using Unity.CharacterController
+using CharacterController = MyProject.CharacterController;
+
 /// <summary>
 /// Janky workaround to not make a separate banner-type dialogue manager to announce the beginning of a game.
 /// 
@@ -52,9 +55,9 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
         yield return TextBox("I will not repeat myself, so listen up carefully! (Or rather, I can't because I'm limited by whoever programmed me!)", minAppearTime:2.5f);
-        yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilPlayerMovesAndLooksAround(playerController));
-        yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilPlayerJumps());
-        yield return TextBox("Hold [LEFT SHIFT] to run.");
+        yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilCharacterMovesAndLooksAround(playerController));
+        yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilCharacterJumps(playerController));
+        yield return TextBox("Hold [LEFT SHIFT] to run.", waitCondition: WaitUntilCharacterRuns(playerController));
         yield return TextBox("Fairly standard FPS shooter controls.");
         yield return TextBox("Use the top-row number keys 1-2-3 to switch your weapons between pistol, rocket launcher, and unarmed.");
         yield return TextBox("You will move faster and jump higher when you're unarmed.");
@@ -63,7 +66,14 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return EndTalk();
     }
 
-    protected IEnumerator WaitUntilPlayerMovesAndLooksAround(PlayerController charController)
+    /// <summary>
+    /// Detects whether the character has...
+    ///     Moved around in all 4 directions for enough seconds.
+    ///     Looked around (any input) for enough seconds.
+    /// Also pulls up an info box on player's screen to show player if they've done the action or not for each of those two steps.
+    /// </summary>
+    /// <param name="charController"></param>
+    protected IEnumerator WaitUntilCharacterMovesAndLooksAround(CharacterController charController)
     {
         #region Wait until player moves around
         float timeWentForward = 0f;
@@ -199,16 +209,18 @@ public class Announcer_Tutorial : TalkWithInteractable
         #endregion
     }
 
-    protected IEnumerator WaitUntilPlayerJumps()
+    /// <summary>
+    /// Detects when the character has jumped once.
+    /// </summary>
+    protected IEnumerator WaitUntilCharacterJumps(CharacterController charController)
     {
         bool playerJumped = false;
         void OnPlayerJump()
         {
             playerJumped = true;
-            Debug.Log("On jump");
         }
 
-        playerController.OnCharacterJump += OnPlayerJump;
+        charController.OnCharacterJump += OnPlayerJump;
 
         while(!playerJumped)
         {
@@ -216,11 +228,27 @@ public class Announcer_Tutorial : TalkWithInteractable
             yield return new WaitForFixedUpdate();
         }
 
-        playerController.OnCharacterJump -= OnPlayerJump;
+        charController.OnCharacterJump -= OnPlayerJump;
 
         yield return new WaitForSeconds(2f);
 
         yield break;
+    }
+
+    /// <summary>
+    /// Detects when the character has run for some seconds.
+    /// </summary>
+    protected IEnumerator WaitUntilCharacterRuns(CharacterController charController)
+    {
+        const float enoughSec = 2f;
+        float runTimer = 0f;
+        while(runTimer < enoughSec)
+        {
+            if (charController.isSprinting)
+                runTimer += Time.deltaTime;
+
+            yield return null;
+        }
     }
 
     /// <summary>
