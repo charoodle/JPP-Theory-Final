@@ -25,7 +25,7 @@ public class Announcer_Tutorial : TalkWithInteractable
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (beginGame)
+        if (Application.isPlaying && beginGame)
         {
             // Don't begin again if running
             if (isRunning)
@@ -52,9 +52,10 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
         yield return TextBox("I will not repeat myself, so listen up carefully! (Or rather, I can't because I'm limited by whoever programmed me!)", minAppearTime:2.5f);
-        yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilPlayerMovesForward(playerController));
-        yield return TextBox("Use [SPACEBAR] to jump. Use [LEFT SHIFT] to run.");
-        yield return TextBox("You know, the standard FPS shooter controls.");
+        yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilPlayerMovesAndLooksAround(playerController));
+        yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilPlayerJumps());
+        yield return TextBox("Hold [LEFT SHIFT] to run.");
+        yield return TextBox("Fairly standard FPS shooter controls.");
         yield return TextBox("Use the top-row number keys 1-2-3 to switch your weapons between pistol, rocket launcher, and unarmed.");
         yield return TextBox("You will move faster and jump higher when you're unarmed.");
         yield return TextBox("Move ahead to learn more about your weapons at the shooting range.");
@@ -62,15 +63,16 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return EndTalk();
     }
 
-    protected IEnumerator WaitUntilPlayerMovesForward(PlayerController charController)
+    protected IEnumerator WaitUntilPlayerMovesAndLooksAround(PlayerController charController)
     {
+        #region Wait until player moves around
         float timeWentForward = 0f;
         float timeWentBackward = 0f;
         float timeWentLeft = 0f;
         float timeWentRight = 0f;
 
         // How long player has to press each direction keys 
-        const float enoughSec = 0.65f;
+        float enoughSec = 0.65f;
 
         // Modify these strings to be displayed
         string fwdStr = "Forward: ---\n";
@@ -149,10 +151,76 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         // Final update
         infoBox.SetInfo(GetMovementInfoString() + "Move OK");
+        #endregion
+
+        // Gap between boxes
+        const float gapBetweenBoxes = 2f;
+        yield return new WaitForSeconds(gapBetweenBoxes);
+
+        // Turn box off. (Maybe destroy it?)
+        infoBox.SetActive(false);
+
+        yield return new WaitForSeconds(gapBetweenBoxes);
+
+
+        #region Look Around
+        string lookAroundStr = "Look Around: ---\n";
+
+        // Turn box on
+        infoBox.SetActive(true);
+        // Initialize info box position, font sizing, starting text, ...
+        infoBox.SetInfo(lookAroundStr);
+        infoBox.SetInfoFontSize(50f);
+        infoBox.SetWindowSize(400f, 90f);
+        infoBox.SetWindowAnchorPosition(-600f, 100f);
+        infoBox.SetVerticalFontAlignment(InfoBox.VerticalTextAlign.Middle);
+        infoBox.SetHorizontalFontAlignment(InfoBox.HorizontalTextAlign.Right);
+
+        float timeLookAround = 0f;
+        enoughSec = 2f;
+        while(timeLookAround < enoughSec)
+        {
+            Vector2 lookInput = charController.lookInput;
+            if (lookInput.magnitude > 0)
+                timeLookAround += Time.deltaTime;
+            yield return null;
+        }
+
+        // Player looked around enough, update info box and let player see for a couple sec
+        infoBox.SetInfo("Look: OK\n");
+
+        yield return new WaitForSeconds(gapBetweenBoxes);
+
+        // Turn box off.
+        infoBox.SetActive(false);
+
+        yield return new WaitForSeconds(gapBetweenBoxes);
+
+        #endregion
+    }
+
+    protected IEnumerator WaitUntilPlayerJumps()
+    {
+        bool playerJumped = false;
+        void OnPlayerJump()
+        {
+            playerJumped = true;
+            Debug.Log("On jump");
+        }
+
+        playerController.OnCharacterJump += OnPlayerJump;
+
+        while(!playerJumped)
+        {
+            // Wait for player to jump
+            yield return new WaitForFixedUpdate();
+        }
+
+        playerController.OnCharacterJump -= OnPlayerJump;
 
         yield return new WaitForSeconds(2f);
 
-        infoBox.SetActive(false);
+        yield break;
     }
 
     /// <summary>

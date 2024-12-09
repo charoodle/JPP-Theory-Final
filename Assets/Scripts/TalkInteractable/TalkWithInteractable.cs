@@ -83,7 +83,7 @@ public abstract class TalkWithInteractable : Interactable
     /// <param name="minAppearTime">Minimum time the text box will show on screen before letting player continue to next dialogue.</param>
     /// <param name="waitAfterDisappear">How many seconds the box will disappear for before the next dialogue box appears. Helpful in giving a gap between text boxes.</param>
     /// <param name="waitCondition">A custom IEnumerator wait condition. Text box will wait until this condition yield break before continuing to next text box. 
-    ///                             <para>If left null, waits for player to click the <see cref="advanceTextKey"/> in <see cref="PlayerWantToProgressToNextTextbox"/></para></param>
+    ///                             <para>If left null, waits for player to click the <see cref="advanceTextKey"/> in the default predicate: <see cref="PlayerWantToProgressToNextTextbox"/></para></param>
     protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null)
     {
         // Disable the little continue indicator until text box can actually continue
