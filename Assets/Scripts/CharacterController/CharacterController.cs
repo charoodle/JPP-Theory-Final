@@ -36,8 +36,26 @@ namespace MyProject
         protected Transform originalRoot;
 
         // Input
-        Vector2 moveInput;
-        Vector2 lookInput;
+        Vector2 _moveInput;
+        Vector2 _lookInput;
+
+        /// <summary>
+        /// The current character's move input.
+        /// </summary>
+        public Vector2 moveInput
+        {
+            get { return _moveInput; }
+            protected set { _moveInput = value; }
+        }
+
+        /// <summary>
+        /// The current character's look input.
+        /// </summary>
+        public Vector2 lookInput
+        {
+            get { return _lookInput; }
+            protected set { _lookInput = value; }
+        }
 
         // Movement
         [SerializeField] Vector3 playerVelocity;
@@ -637,7 +655,7 @@ namespace MyProject
             // Update input
             bool jumpInput = false;
             bool sprintInput = false;
-            UpdateInputs(ref moveInput, ref lookInput, ref jumpInput, ref sprintInput);
+            UpdateInputs(ref _moveInput, ref _lookInput, ref jumpInput, ref sprintInput);
 
             // Move character
             MoveCharacter(moveInput, jumpInput, sprintInput, ref _isGrounded);

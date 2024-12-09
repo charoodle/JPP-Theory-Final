@@ -343,6 +343,17 @@ MonoBehaviour:
   advanceTextKey: 323
   headLookAt: {fileID: 1498085517}
   castleAnims: {fileID: 146629358}
+--- !u!114 &73157836 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4189486101769705112, guid: 49f8900bad9dbfa4e9497b2c4bd10274, type: 3}
+  m_PrefabInstance: {fileID: 1994826299}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a9c91732eb8f447966e35382dedc54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &126773259
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25489,6 +25500,7 @@ MonoBehaviour:
   _playerCanInteractWith: 1
   advanceTextKey: 323
   headLookAt: {fileID: 0}
+  playerController: {fileID: 73157836}
   beginGame: 0
 --- !u!4 &1498085517 stripped
 Transform:

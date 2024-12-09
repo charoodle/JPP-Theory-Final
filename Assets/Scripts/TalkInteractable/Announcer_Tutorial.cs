@@ -64,16 +64,38 @@ public class Announcer_Tutorial : TalkWithInteractable
 
     protected IEnumerator WaitUntilPlayerMovesForward(PlayerController charController)
     {
-        float timePressedForward = 0f;
+        float timeWentForward = 0f;
+        float timeWentBackward = 0f;
+        float timeWentLeft = 0f;
+        float timeWentRight = 0f;
+        const float enoughSec = 1.5f;
 
-        // Wait until player presses forward for enough seconds
-        while (timePressedForward < 1f)
+        bool MovedForEnoughSec()
         {
-            Debug.Log("Waiting for player to press forward for 1 second total...");
-            if(Input.GetKey(KeyCode.W))
-            {
-                timePressedForward += Time.deltaTime;
-            }
+            return timeWentForward  > enoughSec &&
+                   timeWentBackward > enoughSec &&
+                   timeWentLeft     > enoughSec &&
+                   timeWentRight    > enoughSec;
+        }
+
+        // Wait until player presses each direction enough
+        while (!MovedForEnoughSec())
+        {
+            Vector2 moveInput = charController.moveInput;
+            float time = Time.deltaTime;
+            
+            // Right
+            if (moveInput.x > 0)
+                timeWentRight += time;
+            // Left
+            if (moveInput.x < 0)
+                timeWentLeft += time;
+            // Forward
+            if (moveInput.y > 0)
+                timeWentForward += time;
+            // Backward
+            if (moveInput.y < 0)
+                timeWentBackward += time;
 
             yield return null;
         }
