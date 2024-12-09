@@ -9,8 +9,8 @@ using TMPro;
 ///     (tested) x Text content
 ///     (tested) x Font sizing   
 ///     (tested) x Font alignment (vertical & horizontal)
-///       Window sizing
-///       Anchored position
+///     (tested) x Window sizing
+///     (tested) x Anchored position (basic x/y functionality - 0,0 represents center?)
 ///     (tested) x Box active state
 ///     (tested) x Box destroyable
 /// 
@@ -26,16 +26,81 @@ public class InfoBox : MonoBehaviour
         SetHorizontalFontAlignment(HorizontalTextAlign.Right);
         SetVerticalFontAlignment(VerticalTextAlign.Middle);
     }
+
+
+    // On my screen, goes from about +-960
+    [SerializeField] float xPosition = 0f;
+
+    // On my screen, goes from about +-540.23...?
+    [SerializeField] float yPosition = 0f;
+
+    // ohhh multiply by 2 = 1920 x 1080, i see
+    //  but the 540 has a wonky decimal idk, w/e
+
+    private void OnValidate()
+    {
+        if (!Application.isPlaying)
+            return;
+
+        SetWindowAnchorPosition(xPosition, yPosition);
+    }
     #endregion
 
     [SerializeField] protected TextMeshProUGUI textField;
+
+    /// <summary> Rect transform that is considered the entire info box window itself. </summary>
+    protected RectTransform window;
 
     /// <summary>
     /// What info box holds inside it.
     /// </summary>
     protected string textContent;
 
+    const float WINDOW_DEFAULT_WIDTH = 430f;
+    const float WINDOW_DEFAULT_HEIGHT = 330f;
 
+    /// TODO: Use these to normalize x/y to a 0-1 range in <see cref="SetWindowAnchorPosition(float,float)"/> ?
+    float canvasWidth;
+    float canvasHeight;
+
+    private void Awake()
+    {
+        window = GetComponent<RectTransform>();
+
+        Canvas windowCanvas = window.GetComponentInParent<Canvas>();
+        canvasWidth = windowCanvas.pixelRect.width;
+        canvasHeight = windowCanvas.pixelRect.height;
+
+        SetWindowSize(300f, 200f);
+
+        // How to get center x/y of canvas?
+        // 0,0 is center
+        SetWindowAnchorPosition(0, 0);
+    }
+
+    /// <param name="horizontal">How wide window should be.</param>
+    /// <param name="vertical">How high window should be.</param>
+    public void SetWindowSize(float horizontal, float vertical)
+    {
+        window.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, horizontal);
+        window.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, vertical);
+    }
+
+    public void SetWindowAnchorPosition(Vector2 position)
+    {
+        window.anchoredPosition = position;
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    public void SetWindowAnchorPosition(float x, float y)
+    {
+        // I believe x/y is based off the parented Canvas Scaler's reference resolution, where 0,0 represents the center.
+        SetWindowAnchorPosition(new Vector2(x, y));
+    }
 
     /// <summary>
     /// Turn the info box on and off.
@@ -57,6 +122,7 @@ public class InfoBox : MonoBehaviour
         textField.fontSize = size;
     }
 
+    #region Alignment Enums
     public enum HorizontalTextAlign
     {
         Left,
@@ -69,6 +135,7 @@ public class InfoBox : MonoBehaviour
         Middle,
         Bottom
     }
+    #endregion
     public void SetHorizontalFontAlignment(HorizontalTextAlign alignment)
     {
         // Default to left?? Can't leave it null
