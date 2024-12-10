@@ -832,14 +832,14 @@ namespace MyProject
                 }
 
                 // TODO: Moving and jumping doesn't really happen in fixed update at the moment (prevent jittery camera)...
-                yield return new WaitForFixedUpdate();
+                yield return null;
             }
-
-            // Allow player to jump again
-            isGroundedAndCanJumpAgain = true;
 
             // Send land event out
             OnCharacterLand?.Invoke();
+
+            // Allow player to jump again
+            isGroundedAndCanJumpAgain = true;
         }
 
         /// <summary>

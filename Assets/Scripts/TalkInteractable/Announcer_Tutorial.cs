@@ -75,17 +75,17 @@ public class Announcer_Tutorial : TalkWithInteractable
     {
         yield return StartTalk();
         // Disable player controls initially, tutorial will enable them one by one
-        //playerController.canInputLook = false;
-        //playerController.canInputMove = false;
+        playerController.canInputLook = false;
+        playerController.canInputMove = false;
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
-        //yield return TextBox("This is your first time here, right? Let me teach you the basics.");
-        ////// Longer wait time so player takes time to not skip through carelessly.
-        //yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime: 2.5f);
-        //yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilCharacterMovesAndLooksAround(playerController));
-        yield return TextBox("Press [SPACEBAR] to jump over that fence.", waitCondition: WaitUntilCharacterJumpsOverFence(playerController, jumpFenceTrigger));
+        yield return TextBox("This is your first time here, right? Let me teach you the basics.");
+        //// Longer wait time so player takes time to not skip through carelessly.
+        yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime: 2.5f);
+        yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilCharacterMovesAndLooksAround(playerController));
+        yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilCharacterJumpsOverFence(playerController, jumpFenceTrigger));
         yield return TextBox("Hold [LEFT SHIFT] to run.", waitCondition: WaitUntilCharacterRuns(playerController));
         yield return TextBox("Fairly standard FPS shooter controls.");
-        yield return TextBox("Run on ahead to the shooting range learn more about weapons.");
+        yield return TextBox("Run on ahead to the shooting range to learn more about weapons.");
 
         //yield return TextBox("Use the top-row number keys 1-2-3 to switch your weapons between pistol, rocket launcher, and unarmed.");
         //yield return TextBox("You will move faster and jump higher when you're unarmed.");
@@ -258,12 +258,17 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         bool loopAgainSincePlayerJumpedButNotOverFence = false;
 
+        // Keep track of how many times the player has failed the fence jump.
+        int timesJumped = 0;
+
         #region Helper Functions
         void OnPlayerJump()
         {
             playerJumped = true;
             // Reset bool to wait for next land
             playerLanded = false;
+
+            //timesJumped++;
         }
         void OnPlayerLand()
         {
@@ -286,15 +291,23 @@ public class Announcer_Tutorial : TalkWithInteractable
 
             while (true)
             {
+                // Player got past fence without jumping
+                if (playerOverFence && !playerJumped)
+                {
+                    yield return TextBox("Did you just skip the fence without jumping?");
+                    yield return TextBox("Ok weirdo. Anyways...");
+                    break;
+                }
+
                 // Player in mid-air still
-                if (playerJumped && !playerLanded)
+                else if (!playerLanded)
                 {
                     // Wait
-                    yield return new WaitForFixedUpdate();
+                    yield return null;
                 }
 
                 // Player jumped once and landed, check if over fence or not.
-                else if (playerJumped && playerLanded)
+                else if (playerLanded)
                 {
                     // Player jumped past fence; ok
                     if (playerOverFence)
@@ -312,15 +325,7 @@ public class Announcer_Tutorial : TalkWithInteractable
                     }
                 }
 
-                // Player got past fence without jumping
-                else if (playerOverFence && !playerJumped)
-                {
-                    yield return TextBox("Did you just skip the fence without jumping?");
-                    yield return TextBox("Ok weirdo. Anyways...");
-                    break;
-                }
-
-                yield return new WaitForFixedUpdate();
+                yield return null;
             }
         }
         #endregion
@@ -350,41 +355,45 @@ public class Announcer_Tutorial : TalkWithInteractable
          *  If player somehow skips fence without jumping through any of the jumps: Be able to display that dialogue bit telling them they glitched the game.
          */
         yield return Loop();
-        // Keep track of how many times the player has failed the fence jump.
-        int timesJumped = 0;
+        
         // Keep doing the loop 
         while (loopAgainSincePlayerJumpedButNotOverFence)
         {
-            // Player jumped
             timesJumped++;
 
             // How many times jumped already?
-            if(timesJumped < 5)
+            if(timesJumped < 3)
             {
                 yield return TextBox("Now jump over that fence with [SPACEBAR].", waitCondition: Loop());
             }
-            else if (timesJumped < 8)
+            else if (timesJumped < 5)
                 yield return TextBox("Just hold [SPACEBAR] and jump over the fence by additionally holding down the direction you want to move [W A S D].", waitCondition: Loop());
-            else if (timesJumped < 11)
+            else if (timesJumped < 9)
                 yield return TextBox("Look at the fence, move forward with [W] and at the same time press [SPACEBAR]. Maybe your keyboard or controls are broken?", waitCondition: Loop());
-            else if (timesJumped == 11)
+            else if (timesJumped == 9)
                 yield return TextBox("You've gotta be pulling my leg here. [SPACEBAR] + [W] while close enough to the fence.", waitCondition: Loop());
-            else if (timesJumped < 13)
+            else if (timesJumped < 12)
                 yield return TextBox("[SPACEBAR] + [W] while close enough and looking at the fence.", waitCondition: Loop());
-            else if(timesJumped >= 13)
+            else if(timesJumped >= 12)
             {
                 // Delete fence
                 fence.SetActive(false);
                 // Do not set loop wait condition
-                yield return TextBox("That's it, I'm removing the fence. Its been over 13 times. Are you happy now?");
+                yield return TextBox($"That's it, I'm removing the fence. You failed the first fence jump {timesJumped}+ times. Are you happy now?");
                 yield return TextBox("That's the only bit I had time to code in this game. Please don't waste your time looking for more. I promise.");
                 yield return TextBox("Moving on from that...");
                 // Do not loop again
                 break;
             }
         }
-        
 
+        // Special ballpark of narrator being irritated and knows the player is doing this on purpose, but player successfully jumped over fence before narrator forces removal.
+        if (timesJumped >= 9 && timesJumped < 12)
+        {
+            yield return TextBox("Sheesh, finally.");
+            yield return TextBox("Anyways, moving on from that...");
+        }
+        
         charController.OnCharacterJump -= OnPlayerJump;
         charController.OnCharacterLand -= OnPlayerLand;
         fenceTrigger.OnPlayerEnter -= OnPlayerJumpedOverFence;
