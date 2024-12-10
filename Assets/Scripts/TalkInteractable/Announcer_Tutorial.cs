@@ -302,7 +302,8 @@ public class Announcer_Tutorial : TalkWithInteractable
                 if (playerOverFence && !playerJumped)
                 {
                     yield return TextBox("Did you just skip the fence without jumping?");
-                    yield return TextBox("Ok weirdo. Anyways...");
+                    yield return TextBox("Well, the movement system isn't perfect. But it works for now.");
+                    yield return TextBox("Anyways...");
                     break;
                 }
 

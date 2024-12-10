@@ -937,6 +937,7 @@ namespace MyProject
         {
             Gizmos.color = isGrounded ? Color.green : Color.red;
             Gizmos.DrawSphere(sc_position, sc_radius);
+            Gizmos.DrawSphere(sc_position_end, sc_radius);
         }
 #endif
 #endregion
@@ -952,10 +953,9 @@ namespace MyProject
             LayerMask groundCheckLayer = this.groundCheckLayer;
 
             // Account for the controller's skin width in raycast + a little more
-            float maxDistance = controller.skinWidth + 0.02f;
             Vector3 characterFeet = transform.position;
 
-            float additionalRadius = 0.02f;
+            float additionalRadius = 0f;
             float additionalDistance = 0.02f;
 
             bool hitGround = false;
@@ -965,6 +965,7 @@ namespace MyProject
             float distance = controller.skinWidth + additionalDistance;
 #if UNITY_EDITOR
             sc_position = spherePosition;
+            sc_position_end = spherePosition + (Vector3.down * distance);
             sc_radius = radius;
 #endif
             if (Physics.SphereCast(spherePosition, radius, Vector3.down, out RaycastHit hitInfo, distance, groundCheckLayer))
