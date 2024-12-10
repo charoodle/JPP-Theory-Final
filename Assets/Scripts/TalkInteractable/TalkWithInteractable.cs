@@ -75,8 +75,10 @@ public abstract class TalkWithInteractable : Interactable
     /// <returns></returns>
     protected abstract IEnumerator TalkWithCoroutine();
 
+    protected bool nextTextBoxCallsAreChildBoxes;
+
     /// <summary>
-    /// Summon a text box on screen and waits for the player before continuing.
+    /// Summon a text box on screen and waits for the player before continuing. TextBoxes can also be called from within each other if you use <paramref name="waitCondition"/> as a coroutine and call the textbox from there.
     /// </summary>
     /// <param name="name">Name of the person talking.</param>
     /// <param name="text">What the person is saying.</param>
@@ -85,10 +87,18 @@ public abstract class TalkWithInteractable : Interactable
     /// <param name="waitCondition">A custom IEnumerator wait condition. Text box will wait until this condition yield break before continuing to next text box. 
     ///                             <para>If left null, waits for player to click the <see cref="advanceTextKey"/> in the default predicate: <see cref="PlayerWantToProgressToNextTextbox"/></para></param>
     /// <param name="childBox">Does this textbox need to make the previous text box disappear + delay? Useful for textboxes called from within text boxes (conditionals?).</param>
-    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null, bool childBox = false)
+    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null)
     {
-        // If this text box is called from within another text box + bool is set
-        if (childBox)
+        // If this is the first text box in call stack, set this call to be the parent text box.
+        bool isParentTextBox = false;
+        if (!nextTextBoxCallsAreChildBoxes)
+        {
+            nextTextBoxCallsAreChildBoxes = true;
+            // Trigger flag to say only this original text box in call stack is the first text box call.
+            isParentTextBox = true;
+        }
+        // If this textbox is not the parent text box call (ex: recursive textbox calls), then make the previous text disappear and leave a visible time gap before this next textbox.
+        else
         {
             dialogue.DisappearTextBox();
             yield return new WaitForSeconds(waitAfterDisappear);
@@ -118,11 +128,18 @@ public abstract class TalkWithInteractable : Interactable
         // Yield wait until player wants to progress to next dialogue box
         yield return WaitForPlayerContinue(waitCondition);
 
-        // Turn off the text box
-        dialogue.DisappearTextBox();
+        // Parent text box done displaying.
+        if (isParentTextBox)
+        {
+            // Turn off the text box
+            dialogue.DisappearTextBox();
 
-        // Gap between text boxes
-        yield return new WaitForSeconds(waitAfterDisappear);
+            // Parent leaves gap before next parent text box.
+            yield return new WaitForSeconds(waitAfterDisappear);
+
+            // Await for next parent textbox call.
+            nextTextBoxCallsAreChildBoxes = false;
+        }
 
         // Done
         yield break;
@@ -130,10 +147,10 @@ public abstract class TalkWithInteractable : Interactable
 
     /// <summary>Summon a text box, reusing the same name as the immediate previous text box.</summary>
     /// <inheritdoc cref="TextBox"/>
-    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null, bool childBox = false)
+    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null)
     {
         // Reuse name from previous text box.
-        yield return TextBox(null, text, waitAfterDisappear, minAppearTime, waitCondition, childBox);
+        yield return TextBox(null, text, waitAfterDisappear, minAppearTime, waitCondition);
     }
 
     protected IEnumerator Pause(float seconds)
