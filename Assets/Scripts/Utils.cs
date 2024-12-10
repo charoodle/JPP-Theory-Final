@@ -5,8 +5,19 @@ using UnityEngine;
 public static class Utils
 {
     /// <summary>
+    /// Is the object a player?
+    /// </summary>
+    /// <returns>Returns player controller if it has one. Otherwise will remain null.</returns>
+    public static bool IsPlayer(GameObject obj, ref PlayerController player)
+    {
+        player = obj.GetComponent<PlayerController>();
+        return (player != null);
+    }
+
+    /// <summary>
     /// Only works with EnemyController.
     /// </summary>
+    /// <returns>Returns enemy controller if it has one. Otherwise will remain null.</returns>
     public static bool IsEnemy(GameObject obj, ref EnemyController enemy)
     {
         enemy = obj.GetComponent<EnemyController>();

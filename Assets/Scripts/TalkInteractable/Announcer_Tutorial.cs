@@ -13,6 +13,9 @@ using CharacterController = MyProject.CharacterController;
 public class Announcer_Tutorial : TalkWithInteractable
 {
     [SerializeField] PlayerController playerController;
+    [SerializeField] PlayerTrigger jumpFenceTrigger;
+
+
 
 #if UNITY_EDITOR
     [SerializeField] bool beginGame;
@@ -35,10 +38,6 @@ public class Announcer_Tutorial : TalkWithInteractable
 
     protected IEnumerator GameStartBeginTalk()
     {
-        // Disable player controls initially, tutorial will enable them one by one
-        playerController.canInputLook = false;
-        playerController.canInputMove = false;
-        
         // Slight delay
         yield return new WaitForSeconds(2f);
 
@@ -72,18 +71,21 @@ public class Announcer_Tutorial : TalkWithInteractable
     protected override IEnumerator TalkWithCoroutine()
     {
         yield return StartTalk();
-
+        // Disable player controls initially, tutorial will enable them one by one
+        playerController.canInputLook = false;
+        playerController.canInputMove = false;
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
         yield return TextBox("This is your first time here, right? Let me teach you the basics.");
-        // Longer wait time so player takes time to not skip through carelessly.
-        yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime:2.5f);
+        //// Longer wait time so player takes time to not skip through carelessly.
+        yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime: 2.5f);
         yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilCharacterMovesAndLooksAround(playerController));
-        yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilCharacterJumps(playerController));
+        yield return TextBox("Press [SPACEBAR] to jump over that fence.", waitCondition: WaitUntilCharacterJumpsOverFence(playerController, jumpFenceTrigger));
         yield return TextBox("Hold [LEFT SHIFT] to run.", waitCondition: WaitUntilCharacterRuns(playerController));
         yield return TextBox("Fairly standard FPS shooter controls.");
-        yield return TextBox("Use the top-row number keys 1-2-3 to switch your weapons between pistol, rocket launcher, and unarmed.");
-        yield return TextBox("You will move faster and jump higher when you're unarmed.");
-        yield return TextBox("Move ahead to learn more about your weapons at the shooting range.");
+        yield return TextBox("Move on ahead to learn more about your weapons at the shooting range.");
+
+        //yield return TextBox("Use the top-row number keys 1-2-3 to switch your weapons between pistol, rocket launcher, and unarmed.");
+        //yield return TextBox("You will move faster and jump higher when you're unarmed.");
 
         yield return EndTalk();
     }
@@ -241,27 +243,92 @@ public class Announcer_Tutorial : TalkWithInteractable
     }
 
     /// <summary>
-    /// Detects when the character has jumped once.
+    /// Detects when the character has jumped once + over the fence into the trigger.
+    /// Has funny little dialogue bit to detect if got past fence without jumping.
     /// </summary>
-    protected IEnumerator WaitUntilCharacterJumps(CharacterController charController)
+    protected IEnumerator WaitUntilCharacterJumpsOverFence(CharacterController charController, PlayerTrigger fenceTrigger)
     {
         bool playerJumped = false;
+        bool playerLanded = false;
+        bool playerOverFence = false;
+
+        #region Helper Functions
         void OnPlayerJump()
         {
             playerJumped = true;
         }
+        void OnPlayerLand()
+        {
+            playerLanded = true;
+        }
+        void OnPlayerJumpedOverFence()
+        {
+            playerOverFence = true;
+        }
+        IEnumerator WaitForPlayerToGetPastFence()
+        {
+            while(!playerOverFence)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+        }
+        #endregion
 
         charController.OnCharacterJump += OnPlayerJump;
+        charController.OnCharacterLand += OnPlayerLand;
+        fenceTrigger.OnPlayerEnter += OnPlayerJumpedOverFence;
 
-        while(!playerJumped)
+        // Wait for player choice and give appropriate text dialogue
+        /* 
+         * If they jump, wait to see if trigger is hit or not.
+         * 
+         * 1. No hit: Jump no fence
+         * 2. Hit: Jump over fence
+         * 
+         * If they don't jump but trigger is hit:
+         *  3. Over fence, no jump (hmmmmge, funny)
+         */
+        while(true)
         {
-            // Wait for player to jump
+            // Player in mid-air still
+            if(playerJumped && !playerLanded)
+            {
+                // Wait
+                yield return new WaitForFixedUpdate();
+            }
+
+            // Player jumped once, check if over fence or not.
+            else if(playerJumped && playerLanded)
+            {
+                // Check if player past fence or not
+                if(playerOverFence)
+                {
+                    break;
+                }
+                // Not past fence yet with jump
+                else
+                {
+                    yield return TextBox("Now jump over that fence with [SPACEBAR].", waitCondition: WaitForPlayerToGetPastFence(), childBox: true);
+                }
+            }
+
+            // Player got past fence without jumping
+            else if(playerOverFence && !playerJumped)
+            {
+                yield return TextBox("Did you just skip the fence without jumping?", childBox:true);
+                yield return TextBox("Ok weirdo. Anyways...", childBox:true);
+                break;
+            }
+
             yield return new WaitForFixedUpdate();
         }
 
         charController.OnCharacterJump -= OnPlayerJump;
+        charController.OnCharacterLand -= OnPlayerLand;
+        fenceTrigger.OnPlayerEnter -= OnPlayerJumpedOverFence;
 
-        yield return new WaitForSeconds(2f);
+        // Disable fence trigger
+        fenceTrigger.Enable(false);
 
         yield break;
     }

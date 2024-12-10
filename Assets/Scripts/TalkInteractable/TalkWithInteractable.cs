@@ -84,8 +84,16 @@ public abstract class TalkWithInteractable : Interactable
     /// <param name="waitAfterDisappear">How many seconds the box will disappear for before the next dialogue box appears. Helpful in giving a gap between text boxes.</param>
     /// <param name="waitCondition">A custom IEnumerator wait condition. Text box will wait until this condition yield break before continuing to next text box. 
     ///                             <para>If left null, waits for player to click the <see cref="advanceTextKey"/> in the default predicate: <see cref="PlayerWantToProgressToNextTextbox"/></para></param>
-    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null)
+    /// <param name="childBox">Does this textbox need to make the previous text box disappear + delay? Useful for textboxes called from within text boxes (conditionals?).</param>
+    protected IEnumerator TextBox(string name, string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null, bool childBox = false)
     {
+        // If this text box is called from within another text box + bool is set
+        if (childBox)
+        {
+            dialogue.DisappearTextBox();
+            yield return new WaitForSeconds(waitAfterDisappear);
+        }
+
         // Disable the little continue indicator until text box can actually continue
         dialogue.TextBoxEnableContinueIcon(false);
 
@@ -122,10 +130,10 @@ public abstract class TalkWithInteractable : Interactable
 
     /// <summary>Summon a text box, reusing the same name as the immediate previous text box.</summary>
     /// <inheritdoc cref="TextBox"/>
-    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null)
+    protected IEnumerator TextBox(string text, float waitAfterDisappear = WAITAFTER_PREVTEXT_DISAPPEAR, float minAppearTime = 0.3f, IEnumerator waitCondition = null, bool childBox = false)
     {
         // Reuse name from previous text box.
-        yield return TextBox(null, text, waitAfterDisappear, minAppearTime, waitCondition);
+        yield return TextBox(null, text, waitAfterDisappear, minAppearTime, waitCondition, childBox);
     }
 
     protected IEnumerator Pause(float seconds)
