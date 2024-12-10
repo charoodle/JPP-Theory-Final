@@ -25,6 +25,26 @@ public class Announcer_Tutorial : TalkWithInteractable
         playerCanInteractWith = false;
     }
 
+    protected override void Start()
+    {
+        base.Start();
+
+        // Start tutorial on player load in
+        StartCoroutine(GameStartBeginTalk());
+    }
+
+    protected IEnumerator GameStartBeginTalk()
+    {
+        // Disable player controls initially, tutorial will enable them one by one
+        playerController.canInputLook = false;
+        playerController.canInputMove = false;
+        
+        // Slight delay
+        yield return new WaitForSeconds(2f);
+
+        BeginTalk();
+    }
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -55,6 +75,7 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
         yield return TextBox("This is your first time here, right? Let me teach you the basics.");
+        // Longer wait time so player takes time to not skip through carelessly.
         yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime:2.5f);
         yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilCharacterMovesAndLooksAround(playerController));
         yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilCharacterJumps(playerController));
@@ -69,13 +90,18 @@ public class Announcer_Tutorial : TalkWithInteractable
 
     /// <summary>
     /// Detects whether the character has...
-    ///     Moved around in all 4 directions for enough seconds.
-    ///     Looked around (any input) for enough seconds.
+    ///     <list type="bullet">
+    ///         <item>Moved around in all 4 directions for enough seconds.</item>
+    ///         <item>Looked around (any input) for enough seconds.</item>
+    ///     </list>
     /// Also pulls up an info box on player's screen to show player if they've done the action or not for each of those two steps.
     /// </summary>
     /// <param name="charController"></param>
     protected IEnumerator WaitUntilCharacterMovesAndLooksAround(CharacterController charController)
     {
+        // Reenable character movement
+        charController.canInputMove = true;
+
         #region Wait until player moves around
         float timeWentForward = 0f;
         float timeWentBackward = 0f;
@@ -175,6 +201,10 @@ public class Announcer_Tutorial : TalkWithInteractable
 
 
         #region Look Around
+
+        // Reenable character looking
+        charController.canInputLook = true;
+
         string lookAroundStr = "Look Around: --\n";
 
         // Turn box on

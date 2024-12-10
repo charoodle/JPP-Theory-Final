@@ -53,6 +53,8 @@ namespace MyProject
         Vector2 _moveInput;
         Vector2 _lookInput;
         protected bool _sprintInput = false;
+        [SerializeField] protected bool _canInputMove = true;
+        [SerializeField] protected bool _canInputLook = true;
 
         /// <summary>
         /// The current character's move input.
@@ -76,6 +78,24 @@ namespace MyProject
         /// Is the character holding the sprint button while moving in a direction?
         /// </summary>
         public bool isSprinting { get { return _sprintInput && moveInput.magnitude > 0; } }
+
+        /// <summary>
+        /// Is the character allowed to input move?
+        /// </summary>
+        public bool canInputMove
+        {
+            get { return _canInputMove; }
+            set { _canInputMove = value; }
+        }
+
+        /// <summary>
+        /// Is the character allowed to input look?
+        /// </summary>
+        public bool canInputLook
+        {
+            get { return _canInputLook; }
+            set { _canInputLook = value; }
+        }
 
         // Movement
         /// <summary>
@@ -698,13 +718,13 @@ namespace MyProject
 
         protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
         {
-            // Movement
-            moveInput = GetMoveInput();
+            // Movement, if that input is allowed
+            moveInput = canInputMove ? GetMoveInput() : Vector2.zero;
             jumpInput = GetJumpInput();
             sprintInput = GetSprintInput();
 
-            // Look
-            lookInput = GetLookInput();
+            // Look, if that input is allowed
+            lookInput = canInputLook ? GetLookInput() : Vector2.zero;
             lookInput = ProcessLookInput(lookInput);
         }
 
