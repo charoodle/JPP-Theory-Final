@@ -53,8 +53,13 @@ namespace MyProject
         Vector2 _moveInput;
         Vector2 _lookInput;
         protected bool _sprintInput = false;
+        protected bool _jumpInput = false;
+
+        // Input control
         [SerializeField] protected bool _canInputMove = true;
         [SerializeField] protected bool _canInputLook = true;
+        [SerializeField] protected bool _canInputSprint = true;
+        [SerializeField] protected bool _canInputJump = true;
 
         /// <summary>
         /// The current character's move input.
@@ -96,6 +101,25 @@ namespace MyProject
             get { return _canInputLook; }
             set { _canInputLook = value; }
         }
+
+        /// <summary>
+        /// Is the character allowed to input sprint?
+        /// </summary>
+        public bool canInputSprint
+        {
+            get { return _canInputSprint; }
+            set { _canInputSprint = value; }
+        }
+
+        /// <summary>
+        /// Is the character allowed to input jump?
+        /// </summary>
+        public bool canInputJump
+        {
+            get { return _canInputJump; }
+            set { _canInputJump = value; }
+        }
+
 
         // Movement
         /// <summary>
@@ -700,11 +724,10 @@ namespace MyProject
         protected virtual void Update()
         {
             // Update input
-            bool jumpInput = false;
-            UpdateInputs(ref _moveInput, ref _lookInput, ref jumpInput, ref _sprintInput);
+            UpdateInputs(ref _moveInput, ref _lookInput, ref _jumpInput, ref _sprintInput);
 
             // Move character
-            MoveCharacter(moveInput, jumpInput, _sprintInput, ref _isGrounded);
+            MoveCharacter(moveInput, _jumpInput, _sprintInput, ref _isGrounded);
 
             // Update rotation (values only)
             UpdateLookRotation(lookInput, ref yawDegrees, ref pitchDegrees);
@@ -720,8 +743,8 @@ namespace MyProject
         {
             // Movement, if that input is allowed
             moveInput = canInputMove ? GetMoveInput() : Vector2.zero;
-            jumpInput = GetJumpInput();
-            sprintInput = GetSprintInput();
+            jumpInput = canInputJump ? GetJumpInput() : false;
+            sprintInput = canInputSprint ? GetSprintInput() : false;
 
             // Look, if that input is allowed
             lookInput = canInputLook ? GetLookInput() : Vector2.zero;

@@ -74,9 +74,13 @@ public class Announcer_Tutorial : TalkWithInteractable
     protected override IEnumerator TalkWithCoroutine()
     {
         yield return StartTalk();
+
         // Disable player controls initially, tutorial will enable them one by one
         playerController.canInputLook = false;
         playerController.canInputMove = false;
+        playerController.canInputJump = false;
+        playerController.canInputSprint = false;
+
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
         yield return TextBox("This is your first time here, right? Let me teach you the basics.");
         //// Longer wait time so player takes time to not skip through carelessly.
@@ -223,7 +227,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         infoBox.SetHorizontalFontAlignment(InfoBox.HorizontalTextAlign.Right);
 
         float timeLookAround = 0f;
-        enoughSec = 2f;
+        enoughSec = 0.75f;
         while(timeLookAround < enoughSec)
         {
             Vector2 lookInput = charController.lookInput;
@@ -252,6 +256,9 @@ public class Announcer_Tutorial : TalkWithInteractable
     /// </summary>
     protected IEnumerator WaitUntilCharacterJumpsOverFence(CharacterController charController, PlayerTrigger fenceTrigger)
     {
+        // Reenable jumping for character
+        charController.canInputJump = true;
+
         bool playerJumped = false;
         bool playerLanded = false;
         bool playerOverFence = false;
@@ -409,6 +416,9 @@ public class Announcer_Tutorial : TalkWithInteractable
     /// </summary>
     protected IEnumerator WaitUntilCharacterRuns(CharacterController charController)
     {
+        // Reenable sprinting for character
+        charController.canInputSprint = true;
+
         const float enoughSec = 2f;
         float runTimer = 0f;
         while(runTimer < enoughSec)
