@@ -171,11 +171,9 @@ public class Announcer_Tutorial : TalkWithInteractable
         {
             playerController.canFireWeaponInHand = true;
         }
+
         yield return WaitUntilPlayerFiresCurrentWeapon(playerController);
-        
-
         yield return TextBox("This has an AOE on whatever it hits, it flies a little faster, but as a tradeoff it takes longer to reload.");
-
         // Assumes rocket launcher is out
         ProjectileLauncher rocketLauncher = playerController.GetCurrentWeapon();
         {
@@ -183,7 +181,6 @@ public class Announcer_Tutorial : TalkWithInteractable
         }
 
         yield return new WaitForSeconds(secondsToAdmireGun);
-
         yield return TextBox("In this land, you cannot manually reload weapons until they run out of their last bullet.");
         yield return TextBox("However, on the plus side, every weapon has infinite reserve ammo. So fire away to your heart's content.");
         {
@@ -191,7 +188,6 @@ public class Announcer_Tutorial : TalkWithInteractable
         }
 
         yield return TextBox("Now switch back to your pistol using [1], it should be fully reloaded with ammo again.", waitCondition:WaitUntilPlayerPullsPistolOut(playerController));
-
         // Allow pistol to finish reload and display message
         {
             pistol.preventReloadFromFinishing = false;
@@ -202,11 +198,15 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         yield return new WaitForSeconds(secondsToAdmireGun);
         yield return TextBox("Keep practicing your shots until you're comfortable enough with both weapons.");
+        
+        // TODO: Wait until player looks at gate
         yield return TextBox("And when you're done, head on over to the next gate over. It's time to teach you how to use our ultimate weapon...", minAppearTime: 1f);
         yield return TextBox("...the trebuchet.", minAppearTime: 2f);
         {
             playerController.canFireWeaponInHand = true;
         }
+
+        // Wait until player returns to original look position
 
         yield return EndTalk();
 
