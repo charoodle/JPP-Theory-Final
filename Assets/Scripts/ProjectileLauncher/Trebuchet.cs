@@ -130,6 +130,9 @@ public class Trebuchet : ProjectileLauncher
             // Camera shake
             CameraShaker.instance.Shake(onLaunch_ShakeSeconds, onLaunch_ShakeIntensity);
 
+            // Send event that projectile has launched.
+            OnProjectileLaunch?.Invoke();
+
             StartCoroutine(TestRopeDetachFromProjectile());
             ReleaseProjectileFromSling();
             shootingCoroutine = null;

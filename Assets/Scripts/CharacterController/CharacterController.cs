@@ -855,7 +855,7 @@ namespace MyProject
                 }
 
                 // TODO: Moving and jumping doesn't really happen in fixed update at the moment (prevent jittery camera)...
-                yield return null;
+                yield return new WaitForFixedUpdate();
             }
 
             // Send land event out

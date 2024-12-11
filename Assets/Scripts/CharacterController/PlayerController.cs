@@ -14,9 +14,84 @@ public class PlayerController : MyProject.CharacterController
     [SerializeField] protected ProjectileLauncher[] weapons;
     protected ProjectileLauncher currentWeapon;
 
+    /// <param name="weapon">The weapon that was switched to and is currently active.</param>
+    public delegate void WeaponSwitchAction(Weapon weapon);
+    public WeaponSwitchAction OnWeaponSwitch;
+    public delegate void WeaponAction();
+    public WeaponAction OnWeaponLaunchProjectile;
+    public WeaponAction OnWeaponReloadStart;
+    public WeaponAction OnWeaponReloadFinish;
+
+    public bool canSwitchToPistol = true;
+    public bool canSwitchToRocketLauncher = true;
+    public bool canSwitchToUnarmed = true;
+    /// <summary>
+    /// Can the player fire the current weapon equipped in hand?
+    /// </summary>
+    public bool canFireWeaponInHand  = true;
+
+    [SerializeField] protected KeyCode fireWeaponKey = KeyCode.Mouse0;
+
+    /// <summary>
+    /// Gets the current weapon in the character's hand.
+    /// </summary>
+    /// <returns>The projectile launcher object itself.</returns>
+    public ProjectileLauncher GetCurrentWeapon()
+    {
+        return currentWeapon;
+    }
 
 
-    protected enum Weapon
+    private void OnEnable()
+    {
+        foreach(ProjectileLauncher launcher in weapons)
+        {
+            launcher.OnProjectileLaunch += OnAnyWeaponLaunchProjectile;
+            launcher.OnStartReload += OnAnyWeaponStartReload;
+            launcher.OnFinishReload += OnAnyWeaponFinishReload;
+        }
+    }
+
+    private void OnDisable()
+    {
+        foreach (ProjectileLauncher launcher in weapons)
+        {
+            if (!launcher)
+                continue;
+
+            launcher.OnProjectileLaunch += OnAnyWeaponLaunchProjectile;
+            launcher.OnStartReload += OnAnyWeaponStartReload;
+            launcher.OnFinishReload += OnAnyWeaponFinishReload;
+        }
+    }
+
+    /// <summary>
+    /// When any weapon on player launches a projectile.
+    /// </summary>
+    protected void OnAnyWeaponLaunchProjectile()
+    {
+        OnWeaponLaunchProjectile?.Invoke();
+    }
+
+    /// <summary>
+    /// When any weapon on player starts reloading.
+    /// </summary>
+    protected void OnAnyWeaponStartReload()
+    {
+        OnWeaponReloadStart?.Invoke();
+    }
+
+    /// <summary>
+    /// When any weapon on player finishes reloading.
+    /// </summary>
+    protected void OnAnyWeaponFinishReload()
+    {
+        OnWeaponReloadFinish?.Invoke();
+    }
+
+
+
+    public enum Weapon
     {
         PISTOL = 1,
         RL = 2,
@@ -32,6 +107,13 @@ public class PlayerController : MyProject.CharacterController
 
     protected override void Update()
     {
+        // Fire weapon in hand, if input allows
+        if (Input.GetKeyDown(fireWeaponKey) && canFireWeaponInHand)
+        {
+            if(currentWeapon)
+                currentWeapon.LaunchProjectile();
+        }
+
         // Additional weapon switch input
         Weapon switchToWeapon = 0; 
         bool switchWeapon = GetWeaponSwitchInput(ref switchToWeapon);
@@ -59,6 +141,14 @@ public class PlayerController : MyProject.CharacterController
 
     protected virtual void SwitchWeapon(Weapon weaponToSwitchTo)
     {
+        // If the weapon is allowed to switch to, then switch to it, otherwise don't
+        if (!canSwitchToPistol && weaponToSwitchTo == Weapon.PISTOL)
+            return;
+        if (!canSwitchToRocketLauncher && weaponToSwitchTo == Weapon.RL)
+            return;
+        if (!canSwitchToUnarmed && weaponToSwitchTo == Weapon.DISARMED)
+            return;
+
         // Unequip current weapon
         UnequipCurrentWeaponGameObject();
 
@@ -75,6 +165,8 @@ public class PlayerController : MyProject.CharacterController
         else {
             Debug.LogError("Weapon not supported: " + weaponToSwitchTo);
         }
+
+        OnWeaponSwitch?.Invoke(weaponToSwitchTo);
     }
 
     protected virtual ProjectileLauncher EquipWeaponGameObject(string weaponName)

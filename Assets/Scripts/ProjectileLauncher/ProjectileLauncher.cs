@@ -8,6 +8,16 @@ using TMPro;
 /// </summary>
 public abstract class ProjectileLauncher : MonoBehaviour
 {
+    public delegate void ProjectileLauncherAction();
+    public ProjectileLauncherAction OnProjectileLaunch;
+    public ProjectileLauncherAction OnStartReload;
+    public ProjectileLauncherAction OnFinishReload;
+
+    /// <summary>
+    /// Set to true to "jam" the weapon just before it is about to finish reloading. Make sure to set it back to false when you can allow it to reload again.
+    /// </summary>
+    public bool preventReloadFromFinishing = false;
+
     /// <summary>
     /// The projectile prefab to be launched out.
     /// </summary>
@@ -193,8 +203,8 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
     protected void Update()
     {
-        if (CheckForLaunchInput())
-            LaunchProjectile();
+        //if (CheckForLaunchInput())
+        //    LaunchProjectile();
     }
 
     /// <summary>
@@ -220,6 +230,8 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
         // Launch projectile forward with force
         LaunchProjectile_Forwards(projectile, launchForce, ref targetFound, target);
+
+        OnProjectileLaunch?.Invoke();
 
         // Shake player camera
         CameraShaker.instance.Shake(onLaunch_ShakeSeconds, onLaunch_ShakeIntensity);
@@ -305,6 +317,10 @@ public abstract class ProjectileLauncher : MonoBehaviour
             return;
         }
 
+        // Send event that reload has started.
+        OnStartReload?.Invoke();
+
+        // Start the reload.
         reloadCoroutine = StartCoroutine(ReloadProjectileCoroutine());
     }
 
@@ -320,8 +336,17 @@ public abstract class ProjectileLauncher : MonoBehaviour
         // Customized reload delay - wait for different amount of time/different procedures.
         yield return ReloadProjectileCoroutine_WaitForSeconds();
 
+        // Force prevent reload from continuing (assuming that same thing will allow it to reload later on)
+        while(preventReloadFromFinishing)
+        {
+            yield return null;
+        }
+
         // Customized reload amount for each projectile launcher.
         yield return ReloadProjectileCoroutine_RefillAmmunitionCount(ammoToRefillPerReload);
+
+        // Send event that reload has finished.
+        OnFinishReload?.Invoke();
 
         // Allowed to skip the rest of this coroutine, and skip into the next shoot/reload cycle.
         reloadProjectileCoroutine_CanStopEarly = true;

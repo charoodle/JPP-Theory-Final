@@ -14,6 +14,7 @@ public class Announcer_Tutorial : TalkWithInteractable
 {
     [SerializeField] PlayerController playerController;
     [SerializeField] PlayerTrigger jumpFenceTrigger;
+    [SerializeField] PlayerTrigger startShootingAreaTutorial;
 
     // Ability to remove it if needed.
     [SerializeField] GameObject fence;
@@ -31,12 +32,19 @@ public class Announcer_Tutorial : TalkWithInteractable
         playerCanInteractWith = false;
     }
 
+    private void OnEnable()
+    {
+        startShootingAreaTutorial.OnPlayerEnter += BeginTalk_Shooting;
+    }
+
     protected override void Start()
     {
         base.Start();
 
+        // Prevent all player controls, let tutorials enable one by one
+        //DisableAllPlayerControls();
         // Start tutorial on player load in
-        StartCoroutine(GameStartBeginTalk());
+        //StartCoroutine(GameStartBeginTalk());
     }
 
     protected IEnumerator GameStartBeginTalk()
@@ -44,7 +52,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         // Slight delay
         yield return new WaitForSeconds(2f);
 
-        BeginTalk();
+        BeginTalk_Movement();
     }
 
 #if UNITY_EDITOR
@@ -56,7 +64,7 @@ public class Announcer_Tutorial : TalkWithInteractable
             if (isRunning)
                 return;
             // Start talk
-            BeginTalk();
+            BeginTalk_Movement();
             // Turn off bool in inspector
             beginGame = false;
         }
@@ -66,20 +74,41 @@ public class Announcer_Tutorial : TalkWithInteractable
     /// <summary>
     /// Since no character, so just circumvent my poorly designed system and call the coroutine with a more verbose function name.
     /// </summary>
-    public void BeginTalk()
+    public void BeginTalk_Movement()
     {
         StartCoroutine(TalkWithCoroutine());
+    }
+
+    /// <summary>
+    /// Start the shooting tutorial.
+    /// </summary>
+    public void BeginTalk_Shooting()
+    {
+        // Event fired once, don't need anymore
+        startShootingAreaTutorial.OnPlayerEnter -= BeginTalk_Shooting;
+        startShootingAreaTutorial.Enable(false);
+
+        StartCoroutine(TalkWithCoroutine_Shooting());
+    }
+
+    protected void DisableAllPlayerControls()
+    {
+        // Disable player controls initially, tutorial will enable them one by one
+        playerController.canInputLook = false;
+        playerController.canInputMove = false;
+        playerController.canInputJump = false;
+        playerController.canInputSprint = false;
+        // Disable player weapon controls; will be unlocked in the shooting tutorial
+        playerController.canSwitchToPistol = false;
+        playerController.canSwitchToRocketLauncher = false;
+        //playerController.canSwitchToUnarmed = false;  // Faster movespeed tutorial/function not implemented yet
     }
 
     protected override IEnumerator TalkWithCoroutine()
     {
         yield return StartTalk();
 
-        // Disable player controls initially, tutorial will enable them one by one
-        playerController.canInputLook = false;
-        playerController.canInputMove = false;
-        playerController.canInputJump = false;
-        playerController.canInputSprint = false;
+        DisableAllPlayerControls();
 
         yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
         yield return TextBox("This is your first time here, right? Let me teach you the basics.");
@@ -89,12 +118,186 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilCharacterJumpsOverFence(playerController, jumpFenceTrigger));
         yield return TextBox("Hold [LEFT SHIFT] to run.", waitCondition: WaitUntilCharacterRuns(playerController));
         yield return TextBox("Fairly standard FPS shooter controls.");
-        yield return TextBox("Run on ahead to the shooting range to learn more about weapons.");
+        yield return TextBox("Follow the path to the shooting range.");
 
         //yield return TextBox("Use the top-row number keys 1-2-3 to switch your weapons between pistol, rocket launcher, and unarmed.");
         //yield return TextBox("You will move faster and jump higher when you're unarmed.");
 
         yield return EndTalk();
+    }
+
+    protected IEnumerator TalkWithCoroutine_Shooting()
+    {
+        playerController.canSwitchToPistol = false;
+        playerController.canSwitchToRocketLauncher = false;
+        playerController.canSwitchToUnarmed = false;
+
+        yield return StartTalk();
+
+        yield return TextBox("Voice", "It's time to teach you about weapons.");
+
+        yield return TextBox("Press [1] to switch to your pistol.", waitCondition: WaitUntilPlayerPullsPistolOut(playerController));
+
+        playerController.canFireWeaponInHand = false;
+        yield return TextBox("Now press Mouse0 to fire your weapon in hand. Aim a little high, because the projectiles will always be pulled down by gravity.");
+        {
+            playerController.canFireWeaponInHand = true;
+        }
+        yield return WaitUntilPlayerFiresCurrentWeapon(playerController);
+
+        const float secondsToAdmireGun = 2.5f;
+        yield return new WaitForSeconds(secondsToAdmireGun);
+
+        yield return TextBox("Keep firing until its empty. It will automatically start reloading by itself, the exact moment it's empty of bullets.", waitCondition: WaitUntilPlayersGunReloads(playerController));
+
+        // Prevent pistol from reloading fully, so player switches to rocket launcher
+        ProjectileLauncher pistol = playerController.GetCurrentWeapon();
+        {
+            pistol.preventReloadFromFinishing = true;
+            // Force player to switch to rocket launcher
+            playerController.canSwitchToPistol = false;
+        }
+
+        
+        yield return new WaitForSeconds(secondsToAdmireGun);
+
+        yield return TextBox("Now while that's automatically reloading, press [2] to switch to your rocket launcher.", waitCondition: WaitUntilPlayerPullsRocketLauncherOut(playerController));
+
+        {
+            playerController.canFireWeaponInHand = false;
+        }
+        yield return new WaitForSeconds(secondsToAdmireGun);
+        yield return TextBox("Use Mouse0 to fire it. Make sure to point it upwards a little.");
+        {
+            playerController.canFireWeaponInHand = true;
+        }
+        yield return WaitUntilPlayerFiresCurrentWeapon(playerController);
+        
+
+        yield return TextBox("This has an AOE on whatever it hits, it flies a little faster, but as a tradeoff it takes longer to reload.");
+
+        // Assumes rocket launcher is out
+        ProjectileLauncher rocketLauncher = playerController.GetCurrentWeapon();
+        {
+            rocketLauncher.preventReloadFromFinishing = true;
+        }
+
+        yield return new WaitForSeconds(secondsToAdmireGun);
+
+        yield return TextBox("In this land, you cannot manually reload weapons until they run out of their last bullet.");
+        yield return TextBox("However, on the plus side, every weapon has infinite reserve ammo. So fire away to your heart's content.");
+        {
+            playerController.canSwitchToPistol = true;
+        }
+
+        yield return TextBox("Now switch back to your pistol using [1], it should be fully reloaded with ammo again.", waitCondition:WaitUntilPlayerPullsPistolOut(playerController));
+
+        // Allow pistol to finish reload and display message
+        {
+            pistol.preventReloadFromFinishing = false;
+            rocketLauncher.preventReloadFromFinishing = false;
+            // Prevent player from firing 
+            playerController.canFireWeaponInHand = false;
+        }
+
+        yield return new WaitForSeconds(secondsToAdmireGun);
+        yield return TextBox("Keep practicing your shots until you're comfortable enough with both weapons.");
+        yield return TextBox("And when you're done, head on over to the next gate over. It's time to teach you how to use our ultimate weapon...", minAppearTime: 1f);
+        yield return TextBox("...the trebuchet.", minAppearTime: 2f);
+        {
+            playerController.canFireWeaponInHand = true;
+        }
+
+        yield return EndTalk();
+
+        #region Helper IEnumerators
+        /// Waits until player switches to pistol
+        IEnumerator WaitUntilPlayerPullsPistolOut(PlayerController player)
+        {
+            player.canSwitchToPistol = true;
+
+            bool playerSwitchedToPistol = false;
+
+            void OnPlayerSwitchWeapon(PlayerController.Weapon weapon)
+            {
+                if (weapon == PlayerController.Weapon.PISTOL)
+                    playerSwitchedToPistol = true;
+            }
+
+            player.OnWeaponSwitch += OnPlayerSwitchWeapon;
+
+            // Wait for player to switch to pistol
+            while (!playerSwitchedToPistol)
+            {
+                yield return null;
+            }
+
+            player.OnWeaponSwitch -= OnPlayerSwitchWeapon;
+        }
+
+        /// Waits until any of player's guns starts reloading
+        IEnumerator WaitUntilPlayersGunReloads(PlayerController player)
+        {
+            bool reloadStarted = false;
+            void OnReloadStarted()
+            {
+                reloadStarted = true;
+            }
+
+            player.OnWeaponReloadStart += OnReloadStarted;
+
+            // Wait for player start reloading weapon event
+            while(!reloadStarted)
+            {
+                yield return null;
+            }
+
+            player.OnWeaponReloadStart -= OnReloadStarted;
+        }
+
+        IEnumerator WaitUntilPlayerFiresCurrentWeapon(PlayerController player)
+        {
+            bool weaponFired = false;
+            void OnWeaponFired()
+            {
+                weaponFired = true;
+            }
+
+            player.OnWeaponLaunchProjectile += OnWeaponFired;
+
+            // Wait for player to fire weapon event
+            while (!weaponFired)
+            {
+                yield return null;
+            }
+
+            player.OnWeaponLaunchProjectile -= OnWeaponFired;
+        }
+
+        /// Waits until player switches to rocket launcher.
+        IEnumerator WaitUntilPlayerPullsRocketLauncherOut(PlayerController player)
+        {
+            player.canSwitchToRocketLauncher = true;
+
+            bool playerSwitchedToRocketLauncher = false;
+
+            void OnPlayerSwitchWeapon(PlayerController.Weapon weapon)
+            {
+                if (weapon == PlayerController.Weapon.RL)
+                    playerSwitchedToRocketLauncher = true;
+            }
+
+            player.OnWeaponSwitch += OnPlayerSwitchWeapon;
+
+            // Wait for player to switch to rocket launcher
+            while (!playerSwitchedToRocketLauncher)
+            {
+                yield return null;
+            }
+
+            player.OnWeaponSwitch -= OnPlayerSwitchWeapon;
+        }
+        #endregion
     }
 
     /// <summary>
@@ -263,6 +466,8 @@ public class Announcer_Tutorial : TalkWithInteractable
         bool playerLanded = false;
         bool playerOverFence = false;
 
+        bool playerSkippedFence = false;
+
         bool loopAgainSincePlayerJumpedButNotOverFence = false;
 
         // Keep track of how many times the player has failed the fence jump.
@@ -304,6 +509,7 @@ public class Announcer_Tutorial : TalkWithInteractable
                     yield return TextBox("Did you just skip the fence without jumping?");
                     yield return TextBox("Well, the movement system isn't perfect. But it works for now.");
                     yield return TextBox("Anyways...");
+                    playerSkippedFence = true;
                     break;
                 }
 
@@ -396,7 +602,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         }
 
         // Special ballpark of narrator being irritated and knows the player is doing this on purpose, but player successfully jumped over fence before narrator forces removal.
-        if (timesJumped >= 9 && timesJumped < 12)
+        if (timesJumped >= 9 && timesJumped < 12 && !playerSkippedFence)
         {
             yield return TextBox("Sheesh, finally.");
             yield return TextBox("Anyways, moving on from that...");
