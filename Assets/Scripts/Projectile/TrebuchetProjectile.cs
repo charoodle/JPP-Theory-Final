@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class TrebuchetProjectile : Projectile
 {
+    /// <summary>
+    /// Did the projectile land already?
+    /// </summary>
+    public bool hasLanded = false;
+
     [SerializeField] ParticleSystem particles;
     [SerializeField] ParticleSystem collision_dirtParticles;
     [SerializeField] GameObject embedIntoMaterialPrefab;
@@ -59,6 +64,9 @@ public class TrebuchetProjectile : Projectile
 
         // Disable any other collisions so it cannot take health away from anything else.
         allowCollisions = false;
+
+        // Mark flag to indicate to anyone looking at this value
+        hasLanded = true;
 
         // If touch anything, disable flying particles
         DisableParticles();

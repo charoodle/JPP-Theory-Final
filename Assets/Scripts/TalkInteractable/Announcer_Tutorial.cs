@@ -15,9 +15,22 @@ public class Announcer_Tutorial : TalkWithInteractable
     [SerializeField] PlayerController playerController;
     [SerializeField] PlayerTrigger jumpFenceTrigger;
     [SerializeField] PlayerTrigger startShootingAreaTutorial;
+    [SerializeField] PlayerTrigger startTrebuchetAreaTutorial;
 
     // Ability to remove it if needed.
     [SerializeField] GameObject fence;
+
+    // Remove when player finish shooting tutorial.
+    [SerializeField] GameObject gateToTrebuchet;
+
+    // Trebuchet + buttons
+    [SerializeField] Trebuchet trebuchet;
+    [SerializeField] Interactable trebuchetLaunchButton;
+    [SerializeField] GameObject trebuchetReloadButton;
+    [SerializeField] GameObject trebuchetWeightButton0;
+    [SerializeField] GameObject trebuchetWeightButton1;
+    [SerializeField] GameObject trebuchetTurnButton0;
+    [SerializeField] GameObject trebuchetTurnButton1;
 
 
 
@@ -35,6 +48,12 @@ public class Announcer_Tutorial : TalkWithInteractable
     private void OnEnable()
     {
         startShootingAreaTutorial.OnPlayerEnter += BeginTalk_Shooting;
+        startTrebuchetAreaTutorial.OnPlayerEnter += BeginTalk_Trebuchet;
+    }
+
+    private void OnDisable()
+    {
+        startShootingAreaTutorial.OnPlayerEnter -= BeginTalk_Shooting;
     }
 
     protected override void Start()
@@ -42,9 +61,16 @@ public class Announcer_Tutorial : TalkWithInteractable
         base.Start();
 
         // Prevent all player controls, let tutorials enable one by one
-        //DisableAllPlayerControls();
+        DisableAllPlayerControls();
         // Start tutorial on player load in
-        //StartCoroutine(GameStartBeginTalk());
+        StartCoroutine(GameStartBeginTalk());
+
+        // Trebuchet Tutorial - Disable all trebuchet buttons except launch button
+        trebuchetLaunchButton.playerCanInteractWith = false;        // Holds trebuchet rigidbody down physically, so can't just set inactive
+        trebuchetTurnButton0.SetActive(false);
+        trebuchetTurnButton1.SetActive(false);
+        trebuchetWeightButton0.SetActive(false);
+        trebuchetWeightButton1.SetActive(false);
     }
 
     protected IEnumerator GameStartBeginTalk()
@@ -91,6 +117,15 @@ public class Announcer_Tutorial : TalkWithInteractable
         StartCoroutine(TalkWithCoroutine_Shooting());
     }
 
+    public void BeginTalk_Trebuchet()
+    {
+        // Event fired once, don't need anymore
+        startTrebuchetAreaTutorial.OnPlayerEnter -= BeginTalk_Trebuchet;
+        startTrebuchetAreaTutorial.Enable(false);
+
+        StartCoroutine(TalkWithCoroutine_Trebuchet());
+    }
+
     protected void DisableAllPlayerControls()
     {
         // Disable player controls initially, tutorial will enable them one by one
@@ -132,11 +167,15 @@ public class Announcer_Tutorial : TalkWithInteractable
         playerController.canSwitchToRocketLauncher = false;
         playerController.canSwitchToUnarmed = false;
 
+        const float secondsToAdmireGun = 2.5f;
+
         yield return StartTalk();
 
         yield return TextBox("Voice", "It's time to teach you about weapons.");
 
         yield return TextBox("Press [1] to switch to your pistol.", waitCondition: WaitUntilPlayerPullsPistolOut(playerController));
+
+        yield return new WaitForSeconds(secondsToAdmireGun);
 
         playerController.canFireWeaponInHand = false;
         yield return TextBox("Now press Mouse0 to fire your weapon in hand. Aim a little high, because the projectiles will always be pulled down by gravity.");
@@ -145,7 +184,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         }
         yield return WaitUntilPlayerFiresCurrentWeapon(playerController);
 
-        const float secondsToAdmireGun = 2.5f;
+        
         yield return new WaitForSeconds(secondsToAdmireGun);
 
         yield return TextBox("Keep firing until its empty. It will automatically start reloading by itself, the exact moment it's empty of bullets.", waitCondition: WaitUntilPlayersGunReloads(playerController));
@@ -198,15 +237,38 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         yield return new WaitForSeconds(secondsToAdmireGun);
         yield return TextBox("Keep practicing your shots until you're comfortable enough with both weapons.");
-        
-        // TODO: Wait until player looks at gate
+
+        // Prevent player from looking & moving
+        playerController.canInputLook = false;
+        playerController.canInputMove = false;
+        // Get gate positional info
+        float origViewPitch = 0f;
+        float origViewYaw = 0f;
+        playerController.GetYawAndPitchDegrees(out origViewPitch, out origViewYaw);
+        // Gate is at 0 on y, so look up from its pos a bit
+        Vector3 gatePosition = gateToTrebuchet.transform.position + new Vector3(0f, 5f, 0f);
+        float gatePitch = 0f;
+        float gateYaw = 0f;
+        playerController.GetTargetPitchAndYawFrom(gatePosition, out gateYaw, out gatePitch);
+        // Make player look at gate
+        playerController.LookAtTargetPitchYaw(gatePitch, gateYaw, withinDegrees:0.1f);
+        // Make gate disappear
+        gateToTrebuchet.SetActive(false);
         yield return TextBox("And when you're done, head on over to the next gate over. It's time to teach you how to use our ultimate weapon...", minAppearTime: 1f);
+
+        // Make player look at trebuchet
+        playerController.LookAt(trebuchet.transform);
         yield return TextBox("...the trebuchet.", minAppearTime: 2f);
         {
             playerController.canFireWeaponInHand = true;
         }
 
         // Wait until player returns to original look position
+        yield return playerController.LookAtTargetPitchYawEnum(origViewPitch, origViewYaw, withinDegrees: 0.1f);
+
+        // Enable player look & move input again when cutscene ends
+        playerController.canInputLook = true;
+        playerController.canInputMove = true;
 
         yield return EndTalk();
 
@@ -300,6 +362,93 @@ public class Announcer_Tutorial : TalkWithInteractable
         #endregion
     }
 
+    protected IEnumerator TalkWithCoroutine_Trebuchet()
+    {
+        #region Helper Enumerators
+        IEnumerator WaitUntilPlayerPressesButton(GameObject buttonObjectThatCanBeSetActiveFalse)
+        {
+            // Wait until the becomes, thus launching the projectile
+            while (buttonObjectThatCanBeSetActiveFalse.activeInHierarchy == true)
+            {
+                yield return null;
+            }
+        }
+
+        IEnumerator WaitUntilRockLands(TrebuchetProjectile rock)
+        {
+            while(!rock.hasLanded)
+            {
+                yield return null;
+            }
+        }
+        #endregion
+
+        // All buttons should be disabled at first - they get disabled OnStart.
+
+        // Prevent player from firing gun on accident
+        playerController.canFireWeaponInHand = false;
+
+        yield return StartTalk();
+
+        yield return TextBox("Voice", "This is the ultimate siege weapon. The trebuchet.");
+
+        yield return TextBox("It works by letting an extremely heavy counterweight drop, which launches an extremely heavy projectile over long distances.");
+
+        // Let player interact with button again
+        trebuchetLaunchButton.playerCanInteractWith = true;
+
+        // Wait until trebuchet launches
+        yield return TextBox("To use it, go ahead and release the object that is restraining the long arm by pressing [E] on the white cube.", waitCondition:WaitUntilPlayerPressesButton(trebuchetLaunchButton.gameObject));
+        // Make player look at trebuchet projectile when they press the button
+        TrebuchetProjectile rock = FindObjectOfType<TrebuchetProjectile>();
+        if (rock)
+            playerController.LookAt(rock.transform, lookTime: 0.25f);
+
+        // Freeze player controls
+        playerController.canInputLook = false;
+        playerController.canInputMove = false;
+        playerController.canInputJump = false;
+
+        // Make player view follow trebuchet ball and wait for it to land
+        yield return WaitUntilRockLands(rock);
+        // Gap to let particles play
+        yield return new WaitForSeconds(1.5f);
+
+        // Make player stop looking at rock
+        playerController.LookAtStop();
+
+        // Let player move again
+        playerController.canInputLook = true;
+        playerController.canInputMove = true;
+        playerController.canInputJump = true;
+
+        // WaitCond: Wait until player presses reload button on trebuchet
+        yield return TextBox("In order to reload it, just press the white cube button that appears after the projectile is launched.", waitCondition:WaitUntilPlayerPressesButton(trebuchetReloadButton));
+
+        yield return TextBox("It will automatically start and complete the reload process by itself.");
+
+        yield return TextBox("When it's done reloading, all you need to do is release the cube on the long arm to launch it again.");
+
+        // Reenable the rest of the button functionality of trebuchet
+        trebuchetTurnButton0.SetActive(true);
+        trebuchetTurnButton1.SetActive(true);
+        trebuchetWeightButton0.SetActive(true);
+        trebuchetWeightButton1.SetActive(true);
+
+        yield return TextBox("There are additional things you can do. Check around the trebuchet again.");
+        yield return TextBox("You can adjust the amount of weight inside the counterweight heavier and lighter to make the rock fly further or shorter. It depends where your target is.");
+        yield return TextBox("And you can rotate the entire trebuchet left and right in fixed increments.");
+
+        yield return TextBox("Feel free to experiment with everything here, because that's the end of weapons training.");
+        
+        yield return TextBox("Now that I've shown you how to fight, it's up to you to put it to the test in a real battle.");
+
+        yield return EndTalk();
+
+        // Allow player to shoot gun again
+        playerController.canFireWeaponInHand = false;
+    }
+
     /// <summary>
     /// Detects whether the character has...
     ///     <list type="bullet">
@@ -313,6 +462,8 @@ public class Announcer_Tutorial : TalkWithInteractable
     {
         // Reenable character movement
         charController.canInputMove = true;
+        // Reenable character look so player doesn't think their mouse/look controls doesn't work
+        charController.canInputLook = true;
 
         #region Wait until player moves around
         float timeWentForward = 0f;

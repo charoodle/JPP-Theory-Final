@@ -637,9 +637,9 @@ namespace MyProject
         }
 
         /// <summary>
-        /// Converts the world position into a target yaw and pitch relative to character's head.
+        /// Converts the world position into a target yaw and pitch relative to this character's head.
         /// </summary>
-        protected void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
+        public void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
         {
             // Yaw and pitch degrees are relative to the world forward direction
             Vector3 worldForward = Vector3.forward;

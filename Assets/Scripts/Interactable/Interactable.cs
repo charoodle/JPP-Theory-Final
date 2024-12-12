@@ -28,7 +28,7 @@ public abstract class Interactable : MonoBehaviour
     public bool playerCanInteractWith
     {
         get { return _playerCanInteractWith; }
-        protected set
+        set
         {
             // If cannot interact with anymore, disable interact text.
             if (!value)
