@@ -145,11 +145,13 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         DisableAllPlayerControls();
 
-        yield return TextBox("Voice", $"Welcome! Press {advanceTextKey.ToString()} to advance text.");
+        yield return TextBox("Voice", $"Welcome! You can use {advanceTextKey.ToString()} to advance text, if you see a little black square in the bottom right.");
         yield return TextBox("This is your first time here, right? Let me teach you the basics.");
-        //// Longer wait time so player takes time to not skip through carelessly.
+        // Longer wait time so player takes time to not skip through carelessly.
         yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime: 2.5f);
         yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilCharacterMovesAndLooksAround(playerController));
+        // Player can run if they want to bug out tutorial
+        playerController.canInputSprint = true;
         yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilCharacterJumpsOverFence(playerController, jumpFenceTrigger));
         yield return TextBox("Hold [LEFT SHIFT] to run.", waitCondition: WaitUntilCharacterRuns(playerController));
         yield return TextBox("Fairly standard FPS shooter controls.");
@@ -187,7 +189,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         
         yield return new WaitForSeconds(secondsToAdmireGun);
 
-        yield return TextBox("Keep firing until its empty. It will automatically start reloading by itself, the exact moment it's empty of bullets.", waitCondition: WaitUntilPlayersGunReloads(playerController));
+        yield return TextBox("Keep firing until its empty. It will automatically start reloading by itself, the exact moment it's empty of bullets. There is no need to press [R] at all.", waitCondition: WaitUntilPlayersGunReloads(playerController));
 
         // Prevent pistol from reloading fully, so player switches to rocket launcher
         ProjectileLauncher pistol = playerController.GetCurrentWeapon();
@@ -446,7 +448,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return EndTalk();
 
         // Allow player to shoot gun again
-        playerController.canFireWeaponInHand = false;
+        playerController.canFireWeaponInHand = true;
     }
 
     /// <summary>
