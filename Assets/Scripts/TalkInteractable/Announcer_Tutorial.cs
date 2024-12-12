@@ -146,6 +146,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         DisableAllPlayerControls();
 
         yield return TextBox("Voice", $"Welcome! You can use {advanceTextKey.ToString()} to advance text, if you see a little black square in the bottom right.");
+
         yield return TextBox("This is your first time here, right? Let me teach you the basics.");
         // Longer wait time so player takes time to not skip through carelessly.
         yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime: 2.5f);
@@ -179,8 +180,9 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         yield return new WaitForSeconds(secondsToAdmireGun);
 
+        // Longer appear time if player fires weapon early; don't want them to skip box on accident
         playerController.canFireWeaponInHand = false;
-        yield return TextBox("Now press Mouse0 to fire your weapon in hand. Aim a little high, because the projectiles will always be pulled down by gravity.");
+        yield return TextBox("Now press Mouse0 to fire your weapon in hand. Aim a little high, because the projectiles will always be pulled down by gravity.", minAppearTime: 2f);
         {
             playerController.canFireWeaponInHand = true;
         }
@@ -189,7 +191,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         
         yield return new WaitForSeconds(secondsToAdmireGun);
 
-        yield return TextBox("Keep firing until its empty. It will automatically start reloading by itself, the exact moment it's empty of bullets. There is no need to press [R] at all.", waitCondition: WaitUntilPlayersGunReloads(playerController));
+        yield return TextBox("Keep firing until its empty. It will automatically start reloading by itself, at the exact moment it's empty of bullets. There is no button to manually reload.", waitCondition: WaitUntilPlayersGunReloads(playerController));
 
         // Prevent pistol from reloading fully, so player switches to rocket launcher
         ProjectileLauncher pistol = playerController.GetCurrentWeapon();
@@ -214,7 +216,8 @@ public class Announcer_Tutorial : TalkWithInteractable
         }
 
         yield return WaitUntilPlayerFiresCurrentWeapon(playerController);
-        yield return TextBox("This has an AOE on whatever it hits, it flies a little faster, but as a tradeoff it takes longer to reload.");
+        // Longer time if player accidentally trying out shooting rocket and skips box on accident
+        yield return TextBox("This has an AOE on whatever it hits, it flies a little faster, but as a tradeoff it takes longer to reload.", minAppearTime: 1.5f);
         // Assumes rocket launcher is out
         ProjectileLauncher rocketLauncher = playerController.GetCurrentWeapon();
         {
@@ -238,7 +241,9 @@ public class Announcer_Tutorial : TalkWithInteractable
         }
 
         yield return new WaitForSeconds(secondsToAdmireGun);
-        yield return TextBox("Keep practicing your shots until you're comfortable enough with both weapons.");
+
+        // Longer time in case player tried to fire pistol again after tut asked player to switch back to pistol
+        yield return TextBox("Keep practicing your shots until you're comfortable enough with both weapons.", minAppearTime:2f);
 
         // Prevent player from looking & moving
         playerController.canInputLook = false;
@@ -394,7 +399,7 @@ public class Announcer_Tutorial : TalkWithInteractable
 
         yield return TextBox("Voice", "This is the ultimate siege weapon. The trebuchet.");
 
-        yield return TextBox("It works by letting an extremely heavy counterweight drop, which launches an extremely heavy projectile over long distances.");
+        yield return TextBox("It works by letting an extremely heavy counterweight drop, which can launch an extremely heavy projectile over long distances.");
 
         // Let player interact with button again
         trebuchetLaunchButton.playerCanInteractWith = true;
@@ -438,7 +443,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         trebuchetWeightButton1.SetActive(true);
 
         yield return TextBox("There are additional things you can do. Check around the trebuchet again.");
-        yield return TextBox("You can adjust the amount of weight inside the counterweight heavier and lighter to make the rock fly further or shorter. It depends where your target is.");
+        yield return TextBox("You can adjust the amount of weight inside the counterweight heavier and lighter to make the projectile fly further or shorter. It depends on your target.");
         yield return TextBox("And you can rotate the entire trebuchet left and right in fixed increments.");
 
         yield return TextBox("Feel free to experiment with everything here, because that's the end of weapons training.");
