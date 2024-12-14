@@ -13,3 +13,6 @@ Render Knight - Fantasy Skybox FREE
 
 Toon RTS Units - Demo
 	https://assetstore.unity.com/packages/p/toon-rts-units-demo-69687
+
+Low Poly Simple Medieval Props
+	https://assetstore.unity.com/packages/3d/props/low-poly-simple-medieval-props-258397
