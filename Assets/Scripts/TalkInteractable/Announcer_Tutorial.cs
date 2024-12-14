@@ -25,12 +25,18 @@ public class Announcer_Tutorial : TalkWithInteractable
 
     // Trebuchet + buttons
     [SerializeField] Trebuchet trebuchet;
+    [SerializeField] Transform trebuchetLookAtPoint;
     [SerializeField] Interactable trebuchetLaunchButton;
     [SerializeField] GameObject trebuchetReloadButton;
     [SerializeField] GameObject trebuchetWeightButton0;
     [SerializeField] GameObject trebuchetWeightButton1;
     [SerializeField] GameObject trebuchetTurnButton0;
     [SerializeField] GameObject trebuchetTurnButton1;
+
+    // Debug tutorial Control
+    [SerializeField] bool allowMovementTutorial = true;
+    [SerializeField] bool allowShootingTutorial = true;
+    [SerializeField] bool allowTrebuchetTutorial = true;
 
 
 
@@ -60,17 +66,23 @@ public class Announcer_Tutorial : TalkWithInteractable
     {
         base.Start();
 
-        // Prevent all player controls, let tutorials enable one by one
-        DisableAllPlayerControls();
-        // Start tutorial on player load in
-        StartCoroutine(GameStartBeginTalk());
+        if (allowMovementTutorial)
+        {
+            // Prevent all player controls, let tutorials enable one by one
+            DisableAllPlayerControls();
+            // Start tutorial on player load in
+            StartCoroutine(GameStartBeginTalk());
+        }
 
-        // Trebuchet Tutorial - Disable all trebuchet buttons except launch button
-        trebuchetLaunchButton.playerCanInteractWith = false;        // Holds trebuchet rigidbody down physically, so can't just set inactive
-        trebuchetTurnButton0.SetActive(false);
-        trebuchetTurnButton1.SetActive(false);
-        trebuchetWeightButton0.SetActive(false);
-        trebuchetWeightButton1.SetActive(false);
+        if (allowTrebuchetTutorial)
+        {
+            // Trebuchet Tutorial - Disable all trebuchet buttons except launch button
+            trebuchetLaunchButton.playerCanInteractWith = false;        // Holds trebuchet rigidbody down physically, so can't just set inactive
+            trebuchetTurnButton0.SetActive(false);
+            trebuchetTurnButton1.SetActive(false);
+            trebuchetWeightButton0.SetActive(false);
+            trebuchetWeightButton1.SetActive(false);
+        }
     }
 
     protected IEnumerator GameStartBeginTalk()
@@ -102,6 +114,9 @@ public class Announcer_Tutorial : TalkWithInteractable
     /// </summary>
     public void BeginTalk_Movement()
     {
+        if (!allowMovementTutorial)
+            return;
+
         StartCoroutine(TalkWithCoroutine());
     }
 
@@ -110,6 +125,9 @@ public class Announcer_Tutorial : TalkWithInteractable
     /// </summary>
     public void BeginTalk_Shooting()
     {
+        if (!allowShootingTutorial)
+            return;
+
         // Event fired once, don't need anymore
         startShootingAreaTutorial.OnPlayerEnter -= BeginTalk_Shooting;
         startShootingAreaTutorial.Enable(false);
@@ -119,6 +137,9 @@ public class Announcer_Tutorial : TalkWithInteractable
 
     public void BeginTalk_Trebuchet()
     {
+        if (!allowTrebuchetTutorial)
+            return;
+
         // Event fired once, don't need anymore
         startTrebuchetAreaTutorial.OnPlayerEnter -= BeginTalk_Trebuchet;
         startTrebuchetAreaTutorial.Enable(false);
@@ -263,8 +284,8 @@ public class Announcer_Tutorial : TalkWithInteractable
         gateToTrebuchet.SetActive(false);
         yield return TextBox("And when you're done, head on over to the next gate over. It's time to teach you how to use our ultimate weapon...", minAppearTime: 1f);
 
-        // Make player look at trebuchet
-        playerController.LookAt(trebuchet.transform);
+        // Make player look at trebuchet lookat transform
+        playerController.LookAt(trebuchetLookAtPoint);
         yield return TextBox("...the trebuchet.", minAppearTime: 2f);
         {
             playerController.canFireWeaponInHand = true;

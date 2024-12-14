@@ -36,7 +36,7 @@ public class Health : MonoBehaviour
 
     protected virtual void Start()
     {
-        health = startingHealth;
+        RefillHealthToFull();
     }
 
     public virtual void TakeDamage(float value)
@@ -54,5 +54,10 @@ public class Health : MonoBehaviour
     protected virtual void DestroyObject()
     {
         Destroy(gameObject);
+    }
+
+    protected void RefillHealthToFull()
+    {
+        health = startingHealth;
     }
 }
