@@ -26,6 +26,7 @@ public class Announcer_Tutorial : TalkWithInteractable
     // Trebuchet + buttons
     [SerializeField] Trebuchet trebuchet;
     [SerializeField] Transform trebuchetLookAtPoint;
+    [SerializeField] Transform castleEntranceLookAtPoint;
     [SerializeField] Interactable trebuchetLaunchButton;
     [SerializeField] GameObject trebuchetReloadButton;
     [SerializeField] GameObject trebuchetWeightButton0;
@@ -269,16 +270,16 @@ public class Announcer_Tutorial : TalkWithInteractable
         // Prevent player from looking & moving
         playerController.canInputLook = false;
         playerController.canInputMove = false;
-        // Get gate positional info
+        // Save player view info
         float origViewPitch = 0f;
         float origViewYaw = 0f;
         playerController.GetYawAndPitchDegrees(out origViewPitch, out origViewYaw);
-        // Gate is at 0 on y, so look up from its pos a bit
-        Vector3 gatePosition = gateToTrebuchet.transform.position + new Vector3(0f, 5f, 0f);
+        // Get gate positional info
+        Vector3 gatePosition = castleEntranceLookAtPoint.transform.position;
         float gatePitch = 0f;
         float gateYaw = 0f;
         playerController.GetTargetPitchAndYawFrom(gatePosition, out gateYaw, out gatePitch);
-        // Make player look at gate
+        // Make player look at gate entrance
         playerController.LookAtTargetPitchYaw(gatePitch, gateYaw, withinDegrees:0.1f);
         // Make gate disappear
         gateToTrebuchet.SetActive(false);
