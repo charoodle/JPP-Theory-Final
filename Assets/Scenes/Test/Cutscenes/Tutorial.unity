@@ -880,7 +880,7 @@ MonoBehaviour:
   trebuchetTurnButton1: {fileID: 1303809265}
   allowMovementTutorial: 0
   allowShootingTutorial: 1
-  allowTrebuchetTutorial: 1
+  allowTrebuchetTutorial: 0
   beginGame: 0
 --- !u!1 &96300394
 GameObject:
@@ -3189,7 +3189,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 960448032645375312, guid: 94b7d43479119c440ac678035cf7d94c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 568.9
+      value: 551.4
       objectReference: {fileID: 0}
     - target: {fileID: 960448032645375312, guid: 94b7d43479119c440ac678035cf7d94c, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4813,6 +4813,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5697485465898583389, guid: cc428f72264c34348b52a07877256470, type: 3}
+      propertyPath: m_Positions.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8793822764226564647, guid: cc428f72264c34348b52a07877256470, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -6084,7 +6092,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 960448032645375312, guid: 94b7d43479119c440ac678035cf7d94c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 283.54
+      value: 266.04
       objectReference: {fileID: 0}
     - target: {fileID: 960448032645375312, guid: 94b7d43479119c440ac678035cf7d94c, type: 3}
       propertyPath: m_LocalPosition.y
@@ -6838,15 +6846,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1748824564828138171, guid: 49f8900bad9dbfa4e9497b2c4bd10274, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 64.84509
+      value: 67.845
       objectReference: {fileID: 0}
     - target: {fileID: 1748824564828138171, guid: 49f8900bad9dbfa4e9497b2c4bd10274, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5
+      value: 18.5
       objectReference: {fileID: 0}
     - target: {fileID: 1748824564828138171, guid: 49f8900bad9dbfa4e9497b2c4bd10274, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 99.99994
+      value: 0.9999237
       objectReference: {fileID: 0}
     - target: {fileID: 1748824564828138171, guid: 49f8900bad9dbfa4e9497b2c4bd10274, type: 3}
       propertyPath: m_LocalRotation.w
@@ -7359,7 +7367,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 960448032645375312, guid: 94b7d43479119c440ac678035cf7d94c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 290
+      value: 272.75
       objectReference: {fileID: 0}
     - target: {fileID: 960448032645375312, guid: 94b7d43479119c440ac678035cf7d94c, type: 3}
       propertyPath: m_LocalPosition.y

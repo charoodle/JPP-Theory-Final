@@ -43,11 +43,23 @@ public class Trebuchet : ProjectileLauncher
 
         base.Start();
 
-        // TEMP
-        tetherCoroutine = StartCoroutine(TestRopeTetherToProjectile());
-
         // Get counterweight's starting position (local)
         counterWeightLocalRestingPosition = counterweightRb.transform.localPosition;
+
+        StartCoroutine(Start_LoadProjectile());
+    }
+
+    /// <summary>
+    /// Load an initial projectile to start with.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator Start_LoadProjectile()
+    {
+        // Load another projectile into it
+        yield return LoadProjectile();
+
+        // Hold down the long arm end from launching the projectile
+        yield return HoldDownArmFromLaunching();
     }
 
     private IEnumerator TestRopeTetherToProjectile()
@@ -69,7 +81,12 @@ public class Trebuchet : ProjectileLauncher
     private IEnumerator TestRopeDetachFromProjectile()
     {
         if(tetherCoroutine != null)
+        {
+            Debug.Log("Stop coroutine");
             StopCoroutine(tetherCoroutine);
+        }
+
+        Debug.Log("Detached  projectile");
 
         rope.positionCount = 0;
 

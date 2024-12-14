@@ -207,6 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbabb2d96503d57489858a2a7fdd36ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  preventReloadFromFinishing: 0
   _projectilePrefab: {fileID: 1289639807328802742, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
   shootPoint: {fileID: 0}
   reloadingText: {fileID: 1320785288293469827}
@@ -3742,9 +3743,7 @@ LineRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Positions:
-  - {x: 0, y: 1.7451067, z: -11.42683}
-  - {x: 0, y: 1.27, z: 0.0030002594}
+  m_Positions: []
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -4495,7 +4494,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1289639807328802742, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8549793355473524904, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
       propertyPath: m_ConnectedBody
