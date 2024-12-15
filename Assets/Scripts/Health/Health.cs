@@ -7,6 +7,10 @@ public class Health : MonoBehaviour
     public delegate void HealthChangedAction(float health);
     public event HealthChangedAction OnHealthSet;
 
+#if UNITY_EDITOR
+    [SerializeField] protected bool debugGodMode = false;
+#endif
+
     [SerializeField] protected float _startingHealth = 3f;
     [SerializeField] public float startingHealth
     {
@@ -41,6 +45,12 @@ public class Health : MonoBehaviour
 
     public virtual void TakeDamage(float value)
     {
+#if UNITY_EDITOR
+        // Debug - don't take damage if inspector says so
+        if (debugGodMode)
+            return;
+#endif
+
         health -= value;
         if (health <= 0)
             Die();

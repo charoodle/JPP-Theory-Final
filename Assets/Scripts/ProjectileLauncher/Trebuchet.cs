@@ -82,11 +82,8 @@ public class Trebuchet : ProjectileLauncher
     {
         if(tetherCoroutine != null)
         {
-            Debug.Log("Stop coroutine");
             StopCoroutine(tetherCoroutine);
         }
-
-        Debug.Log("Detached  projectile");
 
         rope.positionCount = 0;
 

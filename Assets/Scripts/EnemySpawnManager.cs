@@ -8,16 +8,80 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] protected BoxCollider spawnBox;
     [SerializeField] protected GameObject enemySpawnParticles;
 
+    // How many seconds between enemies
+    public float secondsBetweenEnemySpawn = 2f;
+    [SerializeField] float secondsBetweenSpawnRateIncrease = 25f;
+    [SerializeField] float minSecondsBetweenEnemySpawn = 0.25f;
+
+    DialogueManager dialogueManager;
+
 #if UNITY_EDITOR
     [SerializeField] protected bool isDebugSpawner;
     [SerializeField] protected int maxSpawnEnemies = 1;
     [SerializeField] protected int enemiesSpawned = 0;
 #endif
 
-    protected void Start()
+
+
+    private void Start()
     {
-        InvokeRepeating("SpawnEnemy", 3.0f, 2.0f);
+        dialogueManager = FindObjectOfType<DialogueManager>();
+        StartCoroutine(ManageEnemySpawnThroughoutGameCoroutine());
     }
+
+    protected IEnumerator ManageEnemySpawnThroughoutGameCoroutine()
+    {
+        // Game start, initial delay
+        yield return new WaitForSeconds(3f);
+
+        // Game start, timer before enemy spawns are increased
+        StartCoroutine(IncreaseEnemySpawnAfterSeconds(secondsBetweenSpawnRateIncrease));
+
+        // Spawn an enemy every x second, seconds can be modified
+        float timer = 0f;
+        while(true)
+        {
+            // Spawn enemy every x seconds
+            if(timer >= secondsBetweenEnemySpawn)
+            {
+                SpawnEnemy();
+                // Reset timer
+                timer = 0f;
+            }
+            else
+                timer += Time.deltaTime;
+
+            yield return null;
+        }
+    }
+
+    protected IEnumerator IncreaseEnemySpawnAfterSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        Debug.LogWarning("Increasing enemy spawn rates!");
+
+        // x2 spawn rate after each time
+        secondsBetweenEnemySpawn /= 2f;
+
+        // Clamp enemy spawn rate; not too low
+        float maxSec = 10f;
+        float orig = secondsBetweenEnemySpawn;
+        secondsBetweenEnemySpawn = Mathf.Clamp(secondsBetweenEnemySpawn, minSecondsBetweenEnemySpawn, maxSec);
+
+        // Move the spawn position back a few units
+        spawnBox.gameObject.transform.position += (-spawnBox.transform.forward * 5f);
+
+        // If min spawn rate reached, don't have to loop again
+        if (secondsBetweenEnemySpawn <= minSecondsBetweenEnemySpawn)
+        {
+            Debug.Log("Min spawn rate has been reached.");
+            yield break;
+        }
+
+        // Loop with same timer
+        StartCoroutine(IncreaseEnemySpawnAfterSeconds(seconds));
+    }
+
 
     protected void SpawnEnemy()
     {
