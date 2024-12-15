@@ -63,11 +63,16 @@ public class RocketProjectileExplosion : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Damage enemies (enemies or castles) in radius once. Check root, in case of compound colliders.
-        GameObject rootObj = other.transform.root.gameObject;
-        if(Utils.IsEnemy(rootObj) && !AlreadyDidDamageTo(rootObj))
+        // Damage enemies (enemies or castles) in radius once. Check the object that has the health component to determine if already did damage
+        Health health = other.GetComponent<Health>();
+        if (!health)
+            return;
+
+        GameObject enemy = health.gameObject;
+        if(Utils.IsEnemy(enemy) && !AlreadyDidDamageTo(enemy))
         {
-            TakeHealthAwayFrom(rootObj);
+            Debug.Log("Doing damage to: " + other.gameObject);
+            TakeHealthAwayFrom(enemy);
         }
 
         // Add explosion forces to any rigidbodies in explosion
