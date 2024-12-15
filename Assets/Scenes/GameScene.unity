@@ -11781,6 +11781,7 @@ MonoBehaviour:
   enemyCastle: {fileID: 1813548856}
   castleAnims: {fileID: 8367180960689920738}
   gameManager: {fileID: 551722156}
+  playerHealthBar: {fileID: 1791709564}
 --- !u!4 &463918034 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6382267599755501001, guid: 07d5302a36b0ae247894a77fe0d97472, type: 3}
@@ -12124,6 +12125,7 @@ MonoBehaviour:
   enemyCastle: {fileID: 0}
   castleAnims: {fileID: 0}
   gameManager: {fileID: 0}
+  playerHealthBar: {fileID: 0}
 --- !u!4 &544902824 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6382267599755501001, guid: 07d5302a36b0ae247894a77fe0d97472, type: 3}
@@ -16481,6 +16483,11 @@ Transform:
   - {fileID: 545458873}
   m_Father: {fileID: 659177867}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1791709564 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5230469688611834519, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
+  m_PrefabInstance: {fileID: 215085428}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1807242310
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17281,6 +17288,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136844122}
   m_CullTransparentMesh: 1
+--- !u!1 &2143200807 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3723559629044975191, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+  m_PrefabInstance: {fileID: 8367180960689920737}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2145443116 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4252307818712528023, guid: ad3b9d7b2a4f57c499650492afa4bae0, type: 3}
@@ -18021,6 +18033,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 552444895}
     m_Modifications:
+    - target: {fileID: 27601740247517463, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1253059604408327122, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3723559629044975191, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4886733922032955283, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5118907228450858749, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
@@ -18041,6 +18069,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8373722584410551854, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
+      propertyPath: castleBase
+      value: 
+      objectReference: {fileID: 2143200807}
     - target: {fileID: 9177073618542173261, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

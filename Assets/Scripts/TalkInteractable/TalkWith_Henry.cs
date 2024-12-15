@@ -7,6 +7,7 @@ public class TalkWith_Henry : TalkWithInteractable
     [SerializeField] GameObject enemyCastle;
     [SerializeField] CastleAnimations castleAnims;
     [SerializeField] GameManager gameManager;
+    [SerializeField] GameObject playerHealthBar;
 
     protected override IEnumerator TalkWithCoroutine()
     {
@@ -36,6 +37,10 @@ public class TalkWith_Henry : TalkWithInteractable
         Transform castle = enemyCastle.transform;
         // Make sure castle is active
         castle.gameObject.SetActive(true);
+        // Hide castle + ui
+        castleAnims.Appear(false);
+        castleAnims.AppearUI(false);
+        castleAnims.AppearCastleBase(false);
         SimultaneousCharacterLookAt(character, castle);
         yield return Pause(1.5f);
         SimultaneousCharacterLookAt(player, castle);
@@ -49,7 +54,14 @@ public class TalkWith_Henry : TalkWithInteractable
         #endregion
 
         yield return TextBox("I've heard they're not as well equipped, and rely on sending their infinite amount of mindless soldiers as their way of attacking.");
-        yield return TextBox("You've got quite the weaponry on your side, however it's quite a shame you're fending your castle by yourself today. Would be easier with comrades.");
+        yield return TextBox("You've got quite the weaponry on your side, however it's a shame you're fending your castle by yourself today. Would be easier with comrades.");
+        // Player look at healthbar to know what it means
+        yield return TextBox("Also, don't worry if you let a couple enemies into your castle, your guards inside will take care of them, but at the cost of your castle's overall health.");
+        SimultaneousCharacterLookAt(player, playerHealthBar.transform);
+        yield return TextBox("Speaking of castle's health, it's indicated by this giant green bar right here. If it reaches 0, you'll lose the battle.");
+
+        // Player look back at henry
+        SimultaneousCharacterLookAt(player, character.head);
         yield return TextBox("Let's not keep the game waiting any longer.");
         yield return TextBox("Don't forget, take down their castle, and defend your own!");
         yield return TextBox("Good luck! Let the battle commence!");
