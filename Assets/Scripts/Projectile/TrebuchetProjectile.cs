@@ -88,11 +88,20 @@ public class TrebuchetProjectile : Projectile
             // Make embed model have same rotation as surface normal
             Vector3 surfaceNormal = collision.GetContact(0).normal;
             embedObj.transform.up = surfaceNormal;
-            dirtParticles.transform.up = surfaceNormal; 
+            dirtParticles.transform.up = surfaceNormal;
 
-            // Parent embed model + rock to collided object's root object + don't modify how it looks (scale esp.)
-            embedObj.transform.SetParent(collision.transform.root, true);
-            transform.SetParent(collision.transform.root, true);
+            Transform parentTo = collision.transform;
+            // If has health, parent to whatever has health component (should be uniform 1,1,1 scale)
+            Health parentHealth = collision.gameObject.GetComponentInParent<Health>();
+            if(parentHealth)
+            {
+                // Assuming parent is uniform scale
+                Transform uniformScaleParent = parentHealth.transform;
+                parentTo = uniformScaleParent;
+            }
+            // Parent embed model + rock to collided surface + don't modify how it looks (scale esp.)
+            embedObj.transform.SetParent(parentTo, true);
+            transform.SetParent(parentTo, true);
 
             // Get single color of surface hit
             Color surfaceColor = Color.red + Color.white;
@@ -114,6 +123,7 @@ public class TrebuchetProjectile : Projectile
                 particleSysMain.startColor = surfaceColor;
             }
         }
+
 
         // If hit something with health, then take health away from it.
         if (TakeHealthAwayFrom(collision))

@@ -15112,8 +15112,8 @@ MonoBehaviour:
   spawnBox: {fileID: 1181745497}
   enemySpawnParticles: {fileID: 1589471957979294004, guid: b2d113623e51d6f41a5c1dfe4508c3bb, type: 3}
   secondsBetweenEnemySpawn: 2
-  secondsBetweenSpawnRateIncrease: 25
-  minSecondsBetweenEnemySpawn: 0.5
+  secondsBetweenSpawnRateIncrease: 60
+  minSecondsBetweenEnemySpawn: 1
   isDebugSpawner: 0
   maxSpawnEnemies: 1
   enemiesSpawned: 0
@@ -15517,7 +15517,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1703108056
 Transform:
   m_ObjectHideFlags: 0
