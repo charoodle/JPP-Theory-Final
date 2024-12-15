@@ -2675,12 +2675,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1914cf6ac57934646bad007442ff6724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  preventReloadFromFinishing: 0
   _projectilePrefab: {fileID: 1289639807328802742, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
   shootPoint: {fileID: 0}
   reloadingText: {fileID: 5884471569307765282}
   launchForce: 0
   reloadSeconds: 3
   _ammoCount: 0
+  onLaunch_ShakeSeconds: 0
+  onLaunch_ShakeIntensity: 0
   trebuchetLaunchPreventer: {fileID: 93269792039502407}
   trebuchetReloader: {fileID: 8123616604917847264}
   projectile: {fileID: 165223182175262255}
@@ -3653,7 +3656,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1289639807328802742, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8549793355473524904, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
       propertyPath: m_ConnectedBody
@@ -3661,15 +3664,15 @@ PrefabInstance:
       objectReference: {fileID: 6677789098704012577}
     - target: {fileID: 8549793355473524904, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
       propertyPath: m_ConnectedAnchor.x
-      value: 0.0000042915344
+      value: 0.0000076293945
       objectReference: {fileID: 0}
     - target: {fileID: 8549793355473524904, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
       propertyPath: m_ConnectedAnchor.y
-      value: 1.0665913
+      value: 1.0666103
       objectReference: {fileID: 0}
     - target: {fileID: 8549793355473524904, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
       propertyPath: m_ConnectedAnchor.z
-      value: -0.32964936
+      value: -0.32965547
       objectReference: {fileID: 0}
     - target: {fileID: 8747346412542866632, guid: 01bd4cb067e957e4eb26618547d1cc22, type: 3}
       propertyPath: m_LocalPosition.x
