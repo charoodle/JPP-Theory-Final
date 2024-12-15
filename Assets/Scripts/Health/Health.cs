@@ -6,10 +6,7 @@ public class Health : MonoBehaviour
 {
     public delegate void HealthChangedAction(float health);
     public event HealthChangedAction OnHealthSet;
-
-#if UNITY_EDITOR
-    [SerializeField] protected bool debugGodMode = false;
-#endif
+    public event HealthChangedAction OnDie;
 
     [SerializeField] protected float _startingHealth = 3f;
     [SerializeField] public float startingHealth
@@ -38,6 +35,21 @@ public class Health : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
+    [Header("Debug Options")]
+    [SerializeField] protected bool debugGodMode = false;
+    [SerializeField] protected bool debugDie = false;
+
+    private void OnValidate()
+    {
+        if (debugDie)
+        {
+            debugDie = false;
+            TakeDamage(health);
+        }
+    }
+#endif
+
     protected virtual void Start()
     {
         RefillHealthToFull();
@@ -58,6 +70,8 @@ public class Health : MonoBehaviour
 
     protected virtual void Die()
     {
+        // Tell listeners this object has died; dummy health value
+        OnDie?.Invoke(health);
         DestroyObject();
     }
 

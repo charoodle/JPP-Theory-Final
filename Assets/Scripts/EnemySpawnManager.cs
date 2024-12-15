@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class EnemySpawnManager : MonoBehaviour
 {
+    // Enemies parented to this for hierarchy cleanliness
+    [SerializeField] protected GameObject enemiesSpawnFolder;
+
     [SerializeField] protected GameObject[] enemyPrefabs;
     [SerializeField] protected BoxCollider spawnBox;
     [SerializeField] protected GameObject enemySpawnParticles;
@@ -95,7 +98,7 @@ public class EnemySpawnManager : MonoBehaviour
             if (enemiesSpawned >= maxSpawnEnemies)
             {
                 // Stop repeating spawning enemies.
-                CancelInvoke("SpawnEnemy");
+                StopAllCoroutines();
                 return;
             }
         }
@@ -137,7 +140,7 @@ public class EnemySpawnManager : MonoBehaviour
     protected GameObject SpawnRandomEnemy(Vector3 worldPos, Quaternion rotation)
     {
         int rand = Random.Range(0, enemyPrefabs.Length);
-        return Instantiate(enemyPrefabs[rand], worldPos, rotation);
+        return Instantiate(enemyPrefabs[rand], worldPos, rotation, enemiesSpawnFolder.transform);
     }
 
     protected static Vector3 GetRandomPosInBox(BoxCollider box)

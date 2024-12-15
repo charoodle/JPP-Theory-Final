@@ -6,8 +6,62 @@ public class TalkWith_Henry : TalkWithInteractable
 {
     [SerializeField] GameObject enemyCastle;
     [SerializeField] CastleAnimations castleAnims;
+    [SerializeField] GameManager gameManager;
 
     protected override IEnumerator TalkWithCoroutine()
+    {
+        // Make preparations to present the dialogue between player and this npc
+        yield return StartTalk();
+
+        yield return Talk();
+
+        // Make preparations to stop the dialogue between player and this npc
+        yield return EndTalk();
+
+        // Remove Henry
+        gameObject.SetActive(false);
+    }
+
+    protected IEnumerator Talk()
+    {
+        yield return TextBox("???", "Welcome to the arena!");
+        yield return TextBox("Henry", "My name is Henry, I'll be here to facilitate your battle.");
+        yield return TextBox("The rules of the arena are simple:");
+        yield return TextBox("Take down the enemy castle, and defend your own.");
+        yield return TextBox("Whichever castle stays standing wins.");
+        yield return TextBox("Are you ready? Your enemy is just about to arrive.");
+        
+        #region Wait and look at castle as it falls from sky
+        // Player+Henry tracks castle while its falling.
+        Transform castle = enemyCastle.transform;
+        // Make sure castle is active
+        castle.gameObject.SetActive(true);
+        SimultaneousCharacterLookAt(character, castle);
+        yield return Pause(1.5f);
+        SimultaneousCharacterLookAt(player, castle);
+        yield return castleAnims.CastleFallToGroundAnim();
+
+        // Look back at each other
+        yield return TextBox("Don't worry, they're total pushovers. I don't know even who signed off to let them in this tournament.");
+        SimultaneousCharacterLookAt(player, character.head);
+        yield return Pause(1.0f);
+        SimultaneousCharacterLookAt(character, player.head);
+        #endregion
+
+        yield return TextBox("I've heard they're not as well equipped, and rely on sending their infinite amount of mindless soldiers as their way of attacking.");
+        yield return TextBox("You've got quite the weaponry on your side, however it's quite a shame you're fending your castle by yourself today. Would be much easier with comrades.");
+        yield return TextBox("Let's not keep the game waiting any longer.");
+        yield return TextBox("Don't forget, take down their castle, and defend your own!");
+        yield return TextBox("Good luck! Let the battle commence!");
+
+        // Make player look at enemy caslte
+        yield return CharacterLookAt(player, castle);
+        // Begin game
+        gameManager.BeginGame();
+    }
+
+    #region Old
+    protected IEnumerator Old()
     {
         // Make preparations to present the dialogue between player and this npc
         yield return StartTalk();
@@ -64,4 +118,5 @@ public class TalkWith_Henry : TalkWithInteractable
         yield return TextBox("Do be careful, however. It's still experimental.");
         yield return TextBox("Good luck!");
     }
+    #endregion
 }

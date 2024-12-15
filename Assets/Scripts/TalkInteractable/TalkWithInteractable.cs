@@ -187,13 +187,20 @@ public abstract class TalkWithInteractable : Interactable
         return Input.GetKeyDown(advanceTextKey);
     }
 
+    /// <summary>
+    /// Turn off movement, look input from controlling character, and weapon firing/switching so player can focus on dialogue box.
+    /// </summary>
+    /// <param name="enabled"></param>
     protected void EnablePlayerCharacterControl(bool enabled)
     {
         PlayerController player = dialogue.Player as PlayerController;
-
-        // Turn off movement, look input from controlling character
         player.canInputMove = enabled;
         player.canInputLook = enabled;
+        player.canInputJump = enabled;
+        player.canFireWeaponInHand = enabled;
+        player.canSwitchToPistol = enabled;
+        player.canSwitchToRocketLauncher = enabled;
+        player.canSwitchToUnarmed = enabled;
     }
 
     /// <summary>
@@ -279,9 +286,10 @@ public abstract class TalkWithInteractable : Interactable
         dialogue.ToggleCutsceneBars();
 
         // Make player & character look at their original rotation from before looking at each other.
-        // TODO: Stop the other look coroutine from StartTalk()
-        SimultaneousCharacterLookAt(character, charYaw, charPitch);
-        yield return CharacterLookAt(player, playerPitch, playerYaw);
+        // Update: Unused, player looks targets the castle instead of previous look location.
+        //      This function would be more helpful like when talking to an NPC in town.
+        //SimultaneousCharacterLookAt(character, charYaw, charPitch);
+        //yield return CharacterLookAt(player, playerPitch, playerYaw);
 
         EnablePlayerCharacterControl(true);
 
