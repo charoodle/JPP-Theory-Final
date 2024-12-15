@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class CastleAnimations : MonoBehaviour
 {
+    protected CastleController castleController;
     protected Animator animator;
-    [SerializeField] ParticleSystem dustCloud;
-    [SerializeField] ParticleSystem groundExplosion;
+    [SerializeField] ParticleSystem dustCloudPrefab;
+    [SerializeField] ParticleSystem groundExplosionPrefab;
 
     private void Start()
     {
+        castleController = GetComponentInChildren<CastleController>();
         animator = GetComponent<Animator>();
     }
 
@@ -28,13 +30,17 @@ public class CastleAnimations : MonoBehaviour
 
     public IEnumerator CastleFallToGroundAnim()
     {
-        animator.Play("CastleFallFromSky");
+        // Controller updates character controller move; prevents animations
+        castleController.enabled = false;
 
+        animator.Play("CastleFallFromSky");
         float animationLength = 4.95f;
         yield return new WaitForSeconds(animationLength);
 
         yield return CastleTouchdownAnim();
 
+        // Reenable
+        castleController.enabled = true;
         yield break;
     }
 
@@ -53,7 +59,11 @@ public class CastleAnimations : MonoBehaviour
 
     public void PlayDustCloudParticles()
     {
+        ParticleSystem groundExplosion = Instantiate(groundExplosionPrefab, transform.position, groundExplosionPrefab.transform.rotation);
         groundExplosion.Play();
+
+        ParticleSystem dustCloud = Instantiate(dustCloudPrefab, transform.position, dustCloudPrefab.transform.rotation);
         dustCloud.Play();
+
     }
 }

@@ -8,6 +8,7 @@ public class EnemyController : MyProject.CharacterController
 
     protected bool isSprinting = false;
     public bool canMove = true;
+    public bool isAlliedNPC = false;
 
     protected override float walkSpeed
     { 
@@ -33,12 +34,15 @@ public class EnemyController : MyProject.CharacterController
         RandomizeBaseWalkSpeed(0.25f);
 
         // Make them look at player castle
-        GameObject playerCastle = GameObject.Find("PlayerCastle");
-        LookAt(playerCastle.transform);
+        if (!isAlliedNPC)
+        {
+            GameObject playerCastle = GameObject.Find("PlayerCastle");
+            LookAt(playerCastle.transform);
+        }
 
         // Make them start run
         knightAnimations = GetComponentInChildren<KnightAnimations>();
-        if(knightAnimations)
+        if(knightAnimations && !isAlliedNPC) // Allied NPC henry cannot move; so default to idle
             knightAnimations.Run();
 
         base.Start();
@@ -93,8 +97,8 @@ public class EnemyController : MyProject.CharacterController
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
         PlayerCastle playerCastle = hit.gameObject.GetComponentInParent<Castle>() as PlayerCastle;
-        // If touch player castle, decrease its health
-        if (playerCastle)
+        // If an enemy touchs player castle, decrease its health
+        if (playerCastle && !isAlliedNPC)
         {
             // Castle takes damage
             TakeHealthAwayFrom(hit);

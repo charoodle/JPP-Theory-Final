@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TalkWith_Henry : TalkWithInteractable
 {
+    [SerializeField] GameObject enemyCastle;
     [SerializeField] CastleAnimations castleAnims;
 
     protected override IEnumerator TalkWithCoroutine()
@@ -40,7 +41,9 @@ public class TalkWith_Henry : TalkWithInteractable
         yield return TextBox("Do you see that castle falling from the sky just over there?");
 
         // Player+Henry tracks castle while its falling.
-        Transform castle = GameObject.Find("EnemyCastle").transform;
+        Transform castle = enemyCastle.transform;
+        // Make sure castle is active
+        castle.gameObject.SetActive(true);
         SimultaneousCharacterLookAt(character, castle);
         yield return Pause(1.5f);
         SimultaneousCharacterLookAt(player, castle);
