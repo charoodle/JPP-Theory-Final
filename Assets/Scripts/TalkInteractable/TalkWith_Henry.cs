@@ -49,7 +49,7 @@ public class TalkWith_Henry : TalkWithInteractable
         #endregion
 
         yield return TextBox("I've heard they're not as well equipped, and rely on sending their infinite amount of mindless soldiers as their way of attacking.");
-        yield return TextBox("You've got quite the weaponry on your side, however it's quite a shame you're fending your castle by yourself today. Would be much easier with comrades.");
+        yield return TextBox("You've got quite the weaponry on your side, however it's quite a shame you're fending your castle by yourself today. Would be easier with comrades.");
         yield return TextBox("Let's not keep the game waiting any longer.");
         yield return TextBox("Don't forget, take down their castle, and defend your own!");
         yield return TextBox("Good luck! Let the battle commence!");

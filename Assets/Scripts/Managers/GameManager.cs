@@ -15,14 +15,18 @@ public class GameManager : MonoBehaviour
 
     private void OnEnable()
     {
-        if (playerCastle)   playerCastle.OnCastleDestroyed += OnCastleDestroyed;
-        if (enemyCastle)    enemyCastle.OnCastleDestroyed  += OnCastleDestroyed;
+        if (playerCastle)   
+            playerCastle.OnCastleDestroyed += OnCastleDestroyed;
+        if (enemyCastle)    
+            enemyCastle.OnCastleDestroyed  += OnCastleDestroyed;
     }
 
     private void OnDisable()
     {
-        if (playerCastle) playerCastle.OnCastleDestroyed -= OnCastleDestroyed;
-        if (enemyCastle)  enemyCastle.OnCastleDestroyed  -= OnCastleDestroyed;
+        if (playerCastle) 
+            playerCastle.OnCastleDestroyed -= OnCastleDestroyed;
+        if (enemyCastle)  
+            enemyCastle.OnCastleDestroyed  -= OnCastleDestroyed;
     }
 
     private void OnCastleDestroyed(Castle castle)
