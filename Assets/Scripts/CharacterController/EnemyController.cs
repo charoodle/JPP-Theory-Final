@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class EnemyController : MyProject.CharacterController
 {
+    KnightAnimations knightAnimations;
+
     protected bool isSprinting = false;
     public bool canMove = true;
 
@@ -33,6 +35,11 @@ public class EnemyController : MyProject.CharacterController
         // Make them look at player castle
         GameObject playerCastle = GameObject.Find("PlayerCastle");
         LookAt(playerCastle.transform);
+
+        // Make them start run
+        knightAnimations = GetComponentInChildren<KnightAnimations>();
+        if(knightAnimations)
+            knightAnimations.Run();
 
         base.Start();
     }
