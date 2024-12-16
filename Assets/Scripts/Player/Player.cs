@@ -7,5 +7,5 @@ using UnityEngine;
 /// </summary>
 public class Player : MonoBehaviour
 {
-    public GameObject pauseMenu;
+    public MenuController menus;
 }

@@ -10,7 +10,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] Castle playerCastle;
     [SerializeField] Castle enemyCastle;
 
-    public bool gamePaused { get; protected set; }
+    public bool isGamePaused { get; protected set; }
+    public bool isGameOver { get; protected set; }
+
+
 
     public void BeginGame()
     {
@@ -19,13 +22,14 @@ public class GameManager : MonoBehaviour
 
     public void ResumeGame()
     {
-        UnpauseGame();
+        UnpauseGameTime();
+        player.menus.pauseMenu.Disappear(unpauseGame: true);
     }
 
     public void RestartGame()
     {
         // Timescale = 1 again
-        UnpauseGame();
+        UnpauseGameTime();
 
         // Reload current scene; assuming its in build index
         int buildIndex = SceneManager.GetActiveScene().buildIndex;
@@ -35,7 +39,7 @@ public class GameManager : MonoBehaviour
     public void QuitMainMenu()
     {
         // Timescale = 1 again
-        UnpauseGame();
+        UnpauseGameTime();
 
         // Free mouse so player can menu around
         Cursor.lockState = CursorLockMode.None;
@@ -44,21 +48,12 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
-    private void Update()
-    {
-        if(Input.GetKeyDown(PlayerKeybinds.pause))
-        {
-            if (!gamePaused)
-                PauseGame();
-            else
-                UnpauseGame();
-        }
-    }
+
 
     private void OnEnable()
     {
         // Assume game starts unpaused
-        gamePaused = false;
+        isGamePaused = false;
 
         player = FindObjectOfType<Player>();
 
@@ -90,6 +85,8 @@ public class GameManager : MonoBehaviour
 
     private void EndGame(Castle winner)
     {
+        isGameOver = true;
+
         if(winner == playerCastle)
         {
             // Player won - Clear field of all enemies & stop spawning enemies
@@ -97,43 +94,56 @@ public class GameManager : MonoBehaviour
 
             // Display menu
             //  "You win!" - rematch, main menu, exit 
+            player.menus.gameOverMenu.Appear(setBannerText: "Game over - you win!", pauseGame: true);
 
             Debug.Log("GAME OVER - Player won!");
         }
         else if(winner == enemyCastle)
         {
+            // Player lost - Clear field of all enemies & stop spawning enemies
+            enemies.SetActive(false);
+
             // Enemy won - Let enemies stay on field
             // Display menu
             // You've fallen... - rematch, main menu, exit
+            player.menus.gameOverMenu.Appear(setBannerText: "You've fallen...", pauseGame: true);
 
             Debug.Log("GAME OVER - Enemy won...");
         }
     }
 
-    private void PauseGame()
+    /// <summary>
+    /// Freeze game time + unlock cursor.
+    /// </summary>
+    public void PauseGameTime()
     {
-        gamePaused = true;
+        isGamePaused = true;
         Time.timeScale = 0f;
 
-        // Bring up player's UI menu
-        if(player && player.pauseMenu)
-            player.pauseMenu.SetActive(true);
-       
+        CursorShowAndFree();
+    }
+
+    /// <summary>
+    /// Unfreeze game time to normal + lock cursor.
+    /// </summary>
+    public void UnpauseGameTime()
+    {
+        isGamePaused = false;
+        Time.timeScale = 1f;
+
+        CursorLock();
+    }
+
+    public void CursorLock()
+    {
+        // Hide + lock cursor for fps game
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    public void CursorShowAndFree()
+    {
         // Show mouse cursor + free movement
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-    }
-
-    private void UnpauseGame()
-    {
-        gamePaused = false;
-        Time.timeScale = 1f;
-
-        // Pause menu disappear
-        if(player && player.pauseMenu)
-            player.pauseMenu.SetActive(false);
-
-        // Hide + lock cursor for fps game
-        Cursor.lockState = CursorLockMode.Locked;
     }
 }

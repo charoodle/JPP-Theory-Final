@@ -188,7 +188,7 @@ public abstract class TalkWithInteractable : Interactable
     protected bool PlayerWantToProgressToNextTextbox()
     {
         // If game is paused, do not progress
-        if (gameManager && gameManager.gamePaused)
+        if (gameManager && gameManager.isGamePaused)
             return false;
 
         // TODO: Figure out when the player wants to progress to next text box. Bool that can check for on and then flip off here?
