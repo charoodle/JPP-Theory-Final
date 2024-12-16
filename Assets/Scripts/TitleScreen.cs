@@ -5,11 +5,35 @@ using UnityEngine.SceneManagement;
 
 public class TitleScreen : MonoBehaviour
 {
-    public const int DemoSceneBuildIdx = 1;
+    public const int TutorialBuildIdx = 1;
+    public const int GameSceneBuildIdx = 2;
 
-    public void StartDemoScene()
+    [SerializeField] GameObject exitGameButton;
+
+    private void Start()
     {
-        // build index 1 = demo scene
-        SceneManager.LoadScene(DemoSceneBuildIdx);
+#if UNITY_WEBGL
+        // No exiting in webgl
+        exitGameButton.SetActive(false);
+#endif
+    }
+
+    public void StartTutorial()
+    {
+        SceneManager.LoadScene(TutorialBuildIdx);
+    }
+
+    public void StartGameScene()
+    {
+        SceneManager.LoadScene(GameSceneBuildIdx);
+    }
+
+    public void ExitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.ExitPlaymode();
+#else
+        Application.Quit();
+#endif
     }
 }

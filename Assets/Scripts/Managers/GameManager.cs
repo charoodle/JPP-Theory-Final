@@ -1,20 +1,67 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    Player player;
     [SerializeField] GameObject enemies;
     [SerializeField] Castle playerCastle;
     [SerializeField] Castle enemyCastle;
+
+    public bool gamePaused { get; protected set; }
 
     public void BeginGame()
     {
         enemies.SetActive(true);
     }
 
+    public void ResumeGame()
+    {
+        UnpauseGame();
+    }
+
+    public void RestartGame()
+    {
+        // Timescale = 1 again
+        UnpauseGame();
+
+        // Reload current scene; assuming its in build index
+        int buildIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(buildIndex);
+    }
+
+    public void QuitMainMenu()
+    {
+        // Timescale = 1 again
+        UnpauseGame();
+
+        // Free mouse so player can menu around
+        Cursor.lockState = CursorLockMode.None;
+
+        // Idx = 0 = title screen
+        SceneManager.LoadScene(0);
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(PlayerKeybinds.pause))
+        {
+            if (!gamePaused)
+                PauseGame();
+            else
+                UnpauseGame();
+        }
+    }
+
     private void OnEnable()
     {
+        // Assume game starts unpaused
+        gamePaused = false;
+
+        player = FindObjectOfType<Player>();
+
         if (playerCastle)   
             playerCastle.OnCastleDestroyed += OnCastleDestroyed;
         if (enemyCastle)    
@@ -61,5 +108,31 @@ public class GameManager : MonoBehaviour
 
             Debug.Log("GAME OVER - Enemy won...");
         }
+    }
+
+    private void PauseGame()
+    {
+        gamePaused = true;
+        Time.timeScale = 0f;
+
+        // Bring up player's UI menu
+        if(player && player.pauseMenu)
+            player.pauseMenu.SetActive(true);
+       
+        // Show mouse cursor + free movement
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    private void UnpauseGame()
+    {
+        gamePaused = false;
+        Time.timeScale = 1f;
+
+        // Pause menu disappear
+        if(player && player.pauseMenu)
+            player.pauseMenu.SetActive(false);
+
+        // Hide + lock cursor for fps game
+        Cursor.lockState = CursorLockMode.Locked;
     }
 }

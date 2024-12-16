@@ -71,7 +71,6 @@ public class RocketProjectileExplosion : MonoBehaviour
         GameObject enemy = health.gameObject;
         if(Utils.IsEnemy(enemy) && !AlreadyDidDamageTo(enemy))
         {
-            Debug.Log("Doing damage to: " + other.gameObject);
             TakeHealthAwayFrom(enemy);
         }
 

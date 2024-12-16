@@ -6,7 +6,6 @@ public class TalkWith_Henry : TalkWithInteractable
 {
     [SerializeField] GameObject enemyCastle;
     [SerializeField] CastleAnimations castleAnims;
-    [SerializeField] GameManager gameManager;
     [SerializeField] GameObject playerHealthBar;
 
     protected override IEnumerator TalkWithCoroutine()

@@ -5,6 +5,8 @@ using CharacterController = MyProject.CharacterController;
 
 public abstract class TalkWithInteractable : Interactable
 {
+    protected GameManager gameManager;
+
     [SerializeField] protected KeyCode advanceTextKey = KeyCode.Mouse0;
 
     protected const float WAITAFTER_PREVTEXT_DISAPPEAR = 0.25f;
@@ -31,6 +33,8 @@ public abstract class TalkWithInteractable : Interactable
 
     protected override void Start()
     {
+        gameManager = FindObjectOfType<GameManager>();
+
         dialogue = FindObjectOfType<DialogueManager>();
         if(!dialogue)
         {
@@ -183,6 +187,10 @@ public abstract class TalkWithInteractable : Interactable
 
     protected bool PlayerWantToProgressToNextTextbox()
     {
+        // If game is paused, do not progress
+        if (gameManager && gameManager.gamePaused)
+            return false;
+
         // TODO: Figure out when the player wants to progress to next text box. Bool that can check for on and then flip off here?
         return Input.GetKeyDown(advanceTextKey);
     }
