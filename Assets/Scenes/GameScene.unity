@@ -11781,6 +11781,7 @@ MonoBehaviour:
   enemyCastle: {fileID: 1813548856}
   castleAnims: {fileID: 8367180960689920738}
   playerHealthBar: {fileID: 1791709564}
+  disappearParticles: {fileID: 4865138398059549778, guid: df00278911841744ea95cdf9d5d75b42, type: 3}
 --- !u!4 &463918034 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6382267599755501001, guid: 07d5302a36b0ae247894a77fe0d97472, type: 3}
@@ -12022,6 +12023,7 @@ MonoBehaviour:
   enemyCastle: {fileID: 0}
   castleAnims: {fileID: 0}
   playerHealthBar: {fileID: 0}
+  disappearParticles: {fileID: 0}
 --- !u!4 &544902824 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6382267599755501001, guid: 07d5302a36b0ae247894a77fe0d97472, type: 3}

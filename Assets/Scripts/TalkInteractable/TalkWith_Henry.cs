@@ -8,6 +8,9 @@ public class TalkWith_Henry : TalkWithInteractable
     [SerializeField] CastleAnimations castleAnims;
     [SerializeField] GameObject playerHealthBar;
 
+    // For henry to disappear at end of talk
+    [SerializeField] ParticleSystem disappearParticles;
+
     protected override IEnumerator TalkWithCoroutine()
     {
         // Make preparations to present the dialogue between player and this npc
@@ -18,8 +21,12 @@ public class TalkWith_Henry : TalkWithInteractable
         // Make preparations to stop the dialogue between player and this npc
         yield return EndTalk();
 
-        // Remove Henry
+        // Remove Henry; wait for particles to cover then remove henry
+        ParticleSystem particles = Instantiate(disappearParticles, gameObject.transform.position, disappearParticles.transform.rotation);
+        yield return new WaitForSeconds(0.3f);
         gameObject.SetActive(false);
+        // Destroy particles after done playing
+        Destroy(particles.gameObject, 1.5f);
     }
 
     protected IEnumerator Talk()
