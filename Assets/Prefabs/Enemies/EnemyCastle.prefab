@@ -385,6 +385,7 @@ GameObject:
   - component: {fileID: 7541914307676894508}
   - component: {fileID: 5118907228450858749}
   - component: {fileID: 8373722584410551854}
+  - component: {fileID: 9116410746227335640}
   m_Layer: 0
   m_Name: EnemyCastle
   m_TagString: Untagged
@@ -423,9 +424,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e34f9a4edb459ae4fb23ed62d26a5187, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugGodMode: 0
   _startingHealth: 500
   _health: 0
+  debugGodMode: 0
+  debugDie: 0
 --- !u!95 &5118907228450858749
 Animator:
   serializedVersion: 5
@@ -461,6 +463,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dustCloudPrefab: {fileID: 5583872652197279709, guid: 3626d00560e8b844ca7b9d5c92029c6b, type: 3}
   groundExplosionPrefab: {fileID: 714841628142392859, guid: d221a965d4eb9ff4db858f2b61ac58d2, type: 3}
+  castleSpawnParticles: {fileID: 4602977994611310408, guid: d6ffb8bab5f8b834398d85a40e75dbf6, type: 3}
+  castleBase: {fileID: 3723559629044975191}
+--- !u!114 &9116410746227335640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5857482965194778221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4de96ae175dba240b4ad54eac144657, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6001261440685583653
 GameObject:
   m_ObjectHideFlags: 0
@@ -849,6 +865,11 @@ PrefabInstance:
 --- !u!4 &1761514949933353146 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4343326367223915698, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
+  m_PrefabInstance: {fileID: 2608904501027499016}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3723559629044975191 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1700123235286215263, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
   m_PrefabInstance: {fileID: 2608904501027499016}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6515203879489034423

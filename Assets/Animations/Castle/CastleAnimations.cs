@@ -8,6 +8,7 @@ public class CastleAnimations : MonoBehaviour
     protected Animator animator;
     [SerializeField] ParticleSystem dustCloudPrefab;
     [SerializeField] ParticleSystem groundExplosionPrefab;
+    [SerializeField] ParticleSystem castleSpawnParticles;
 
     /// <summary>
     /// Makes castle appear connected to ground; esp for uneven terrain.
@@ -76,6 +77,13 @@ public class CastleAnimations : MonoBehaviour
         AppearCastleBase(false);
         AppearUI(false);
 
+        // Wait for castle animation to update to sky position
+        yield return new WaitForFixedUpdate();
+
+        // Play cloud spawn anim so castle doesn't just instantly appear; assumes particles play on awake.
+        //  Particles should destroy self at end of duration.
+        ParticleSystem spawnParticles = Instantiate(castleSpawnParticles, gameObject.transform.position, castleSpawnParticles.transform.rotation);
+
         // Wait for castle to fall from sky
         float animationLength = 4.95f;
         yield return new WaitForSeconds(animationLength);
@@ -88,6 +96,7 @@ public class CastleAnimations : MonoBehaviour
 
         // Reenable
         castleController.enabled = true;
+
         yield break;
     }
 
@@ -106,11 +115,13 @@ public class CastleAnimations : MonoBehaviour
 
     public void PlayDustCloudParticles()
     {
+        // Assumes destroy self by end of particle duration
         ParticleSystem groundExplosion = Instantiate(groundExplosionPrefab, transform.position, groundExplosionPrefab.transform.rotation);
         groundExplosion.Play();
 
-        ParticleSystem dustCloud = Instantiate(dustCloudPrefab, transform.position, dustCloudPrefab.transform.rotation);
-        dustCloud.Play();
+        // No dust cloud animation atm
+        //ParticleSystem dustCloud = Instantiate(dustCloudPrefab, transform.position, dustCloudPrefab.transform.rotation);
+        //dustCloud.Play();
 
     }
 }

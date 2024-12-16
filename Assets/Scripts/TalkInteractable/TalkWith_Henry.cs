@@ -21,12 +21,11 @@ public class TalkWith_Henry : TalkWithInteractable
         // Make preparations to stop the dialogue between player and this npc
         yield return EndTalk();
 
-        // Remove Henry; wait for particles to cover then remove henry
+        // Henry disappears after talk; Wait for particles to cover henry
         ParticleSystem particles = Instantiate(disappearParticles, gameObject.transform.position, disappearParticles.transform.rotation);
         yield return new WaitForSeconds(0.3f);
+        // Remove henry
         gameObject.SetActive(false);
-        // Destroy particles after done playing
-        Destroy(particles.gameObject, 1.5f);
     }
 
     protected IEnumerator Talk()
@@ -51,7 +50,6 @@ public class TalkWith_Henry : TalkWithInteractable
         yield return Pause(1.5f);
         SimultaneousCharacterLookAt(player, castle);
         yield return castleAnims.CastleFallToGroundAnim();
-
         // Look back at each other
         yield return TextBox("Don't worry, they're total pushovers. I don't know even who signed off to let them in this tournament.");
         SimultaneousCharacterLookAt(player, character.head);
