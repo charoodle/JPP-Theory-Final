@@ -352,6 +352,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6049916896872057537, guid: db363cc330f0ac94a82f6575615dc394, type: 3}
   m_PrefabInstance: {fileID: 36827115}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &36827118 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2972211652162572637, guid: db363cc330f0ac94a82f6575615dc394, type: 3}
+  m_PrefabInstance: {fileID: 36827115}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &195438002
 GameObject:
   m_ObjectHideFlags: 0
@@ -468,7 +473,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11a7f8abee16f3845874f9d312b3c6fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  exitGameButton: {fileID: 0}
+  exitGameButton: {fileID: 36827118}
 --- !u!1 &410531308
 GameObject:
   m_ObjectHideFlags: 0

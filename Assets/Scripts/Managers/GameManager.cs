@@ -120,6 +120,7 @@ public class GameManager : MonoBehaviour
             player.pauseMenu.SetActive(true);
        
         // Show mouse cursor + free movement
+        Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
 
