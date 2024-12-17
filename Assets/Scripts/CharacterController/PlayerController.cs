@@ -260,8 +260,8 @@ public class PlayerController : MyProject.CharacterController
     protected override Vector2 ProcessLookInput(Vector2 lookInput)
     {
         // Adjust by sensitivity
-        lookInput.x *= Time.deltaTime * lookXSens;
-        lookInput.y *= Time.deltaTime * lookYSens;
+        lookInput.x *= lookXSens;
+        lookInput.y *= lookYSens;
 
         // Invert look if desired
         if (invertLookX)

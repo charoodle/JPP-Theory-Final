@@ -1439,8 +1439,8 @@ MonoBehaviour:
   characterLayer:
     serializedVersion: 2
     m_Bits: 64
-  lookXSens: 750
-  lookYSens: 750
+  lookXSens: 5
+  lookYSens: 5
   invertLookX: 0
   invertLookY: 0
   weapons:
