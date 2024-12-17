@@ -18,6 +18,8 @@ public class MenuController : MonoBehaviour
         protected set { _gameOverMenu = value; }
     }
 
+    public Menu currentMenu;
+
 
 
     private void OnEnable()
@@ -27,12 +29,26 @@ public class MenuController : MonoBehaviour
 
     protected void Update()
     {
-        if (Input.GetKeyDown(PlayerKeybinds.pause) && !gameManager.isGameOver)
+        if (Input.GetKeyDown(PlayerKeybinds.pause))
         {
-            if (!gameManager.isGamePaused)
-                pauseMenu.Appear(pauseGame: true);
+            // Game over; don't register keypresses
+            if (gameManager.isGameOver)
+                return;
+
+            // If not paused, make pause screen appear
+            if(!gameManager.isGamePaused)
+            {
+                pauseMenu.Appear();
+            }
+            // If already paused (there should be an active currentMenu); then close current menu, return to last menu if there is one
             else
-                pauseMenu.Disappear(unpauseGame: true);
+            {
+                // Exit out of currently active Menu; return to parent Menu before it (if no parent, just disable self then and resume game time)
+                //  Pause menu will specifically unpause game when it disappears
+                Menu parentMenu = currentMenu.Disappear();
+                if (parentMenu)
+                    parentMenu.Appear();
+            }
         }
     }
 }
