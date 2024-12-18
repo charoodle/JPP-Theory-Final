@@ -723,6 +723,10 @@ namespace MyProject
         #region Character Control
         protected virtual void Update()
         {
+            // If game is paused, player cannot move, or look
+            if (Time.timeScale == 0)
+                return;
+
             // Update input
             UpdateInputs(ref _moveInput, ref _lookInput, ref _jumpInput, ref _sprintInput);
 

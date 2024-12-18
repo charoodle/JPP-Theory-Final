@@ -5,8 +5,8 @@ using UnityEngine;
 public class PlayerController : MyProject.CharacterController
 {
     [Header("Sensitivity & Mouse Settings")]
-    [SerializeField] float lookXSens = 750f;
-    [SerializeField] float lookYSens = 750f;
+    [SerializeField] public float lookXSens = 5f;
+    [SerializeField] public float lookYSens = 5f;
     [SerializeField] bool invertLookX = false;
     [SerializeField] bool invertLookY = false;
     public const float interactRange = 5f;
@@ -107,6 +107,10 @@ public class PlayerController : MyProject.CharacterController
 
     protected override void Update()
     {
+        // If game is paused, player cannot move, switch weapons, input, etc.
+        if (Time.timeScale == 0)
+            return;
+
         // Fire weapon in hand, if input allows
         if (Input.GetKeyDown(fireWeaponKey) && canFireWeaponInHand)
         {
