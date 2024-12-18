@@ -34,6 +34,41 @@ public class CameraShaker : MonoBehaviour
 
     protected CinemachineVirtualCamera cinemachineVCam;
 
+    [SerializeField]
+    [Range(0f, 1f)]
+    float screenShakeMultiplier;
+
+    #region Debug
+    [Header("Debug")]
+    [SerializeField] private bool shakeScreen_pistol;
+    [SerializeField] private bool shakeScreen_rocket;
+    [SerializeField] private bool shakeScreen_trebuchet;
+
+    private void OnValidate()
+    {
+        if (!Application.isPlaying)
+            return;
+
+        // Note: Hardcoded values; values may not be accurate.
+        if(shakeScreen_pistol)
+        {
+            Shake(0.15f, 7f);
+            shakeScreen_pistol = false;
+        }
+        else if(shakeScreen_rocket)
+        {
+            Shake(0.25f, 15f);
+            shakeScreen_rocket = false;
+        }
+        else if(shakeScreen_trebuchet)
+        {
+            Shake(2f, 7f);
+            shakeScreen_trebuchet = false;
+        }
+
+    }
+    #endregion
+
     protected virtual void Start()
     {
         camera = Camera.main;
@@ -70,6 +105,8 @@ public class CameraShaker : MonoBehaviour
     /// </summary>
     protected IEnumerator ShakeCoroutineCM(float seconds, float intensity)
     {
+        intensity *= screenShakeMultiplier;
+
         CinemachineBasicMultiChannelPerlin cinemachineBMCP =
             cinemachineVCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
 
