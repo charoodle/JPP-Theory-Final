@@ -37,6 +37,9 @@ public class SensitivitySetting : MonoBehaviour
         // Slider init
         slider.minValue = LOOKSENS_MIN;
         slider.maxValue = LOOKSENS_MAX;
+
+        // With updated value, update the UI values to match properly
+        UpdateUIValues();
     }
 
     public void SetSensitivityFromInputField()
