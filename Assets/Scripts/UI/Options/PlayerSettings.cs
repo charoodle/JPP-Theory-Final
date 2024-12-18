@@ -50,7 +50,9 @@ public class PlayerSettings : MonoBehaviour
     }
 
     private static PlayerSettings _instance;
-    private float _lookSensitivity;
+    /// Note: Player Settings should be initialized on game start, so default value here is just temporary until can figure out persisting data between game sessions.
+    ///     so it doesnt start me off at the minimum sensitivity each time.
+    private float _lookSensitivity = SensitivitySetting.LOOKSENS_DEFAULT;
 
     private void Awake()
     {

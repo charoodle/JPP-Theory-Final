@@ -15,6 +15,7 @@ public abstract class Interactable : MonoBehaviour
 
     /// <summary>
     /// Force the text to be on and off, especially during dialogue.
+    /// TODO: This is kind of a bad idea, with scene changes? Find better way to manage?
     /// </summary>
     public static bool showInteractTextOnScreen = true;
 

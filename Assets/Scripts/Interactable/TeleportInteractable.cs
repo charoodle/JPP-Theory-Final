@@ -17,7 +17,6 @@ public class TeleportInteractable : UnityEventInteractable
 
     public void TeleportPlayerToLocation()
     {
-        Debug.Log("Teleporting.");
         CharacterController cc = player.GetComponent<CharacterController>();
 
         cc.enabled = false;

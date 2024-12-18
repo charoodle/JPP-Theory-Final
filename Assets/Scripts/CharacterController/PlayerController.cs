@@ -42,6 +42,18 @@ public class PlayerController : MyProject.CharacterController
     }
 
 
+    private void Awake()
+    {
+        // On player awake, read current look sensitivity settings
+        float mouseSens = PlayerSettings.instance.lookSensitivity;
+        lookXSens = mouseSens;
+        lookYSens = mouseSens;
+
+        // Each time player loads into a new scene (assuming loading in for each scene), reset this bool to default (true)
+        //  to let player interact again, throughout scene changes.
+        Interactable.showInteractTextOnScreen = true;
+    }
+
     private void OnEnable()
     {
         foreach(ProjectileLauncher launcher in weapons)

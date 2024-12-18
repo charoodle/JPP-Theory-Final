@@ -31,8 +31,6 @@ public class SensitivitySetting : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("AWAKE");
-
         // Read current lookSensitivity from PlayerSettings
         ReadCurrentPlayerSettingsSensitivityValue();
 
@@ -107,8 +105,6 @@ public class SensitivitySetting : MonoBehaviour
     /// </summary>
     protected void ReadCurrentPlayerSettingsSensitivityValue()
     {
-        Debug.Log("Current player look sens: " + PlayerSettings.instance.lookSensitivity);
-
         lookSensitivity = PlayerSettings.instance.lookSensitivity;
         UpdateUIValues();
     }
