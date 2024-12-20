@@ -8,11 +8,15 @@ using TMPro;
 /// </summary>
 public abstract class ProjectileLauncher : MonoBehaviour
 {
+    #region (Public) Events
     public delegate void ProjectileLauncherAction();
     public ProjectileLauncherAction OnProjectileLaunch;
     public ProjectileLauncherAction OnStartReload;
     public ProjectileLauncherAction OnFinishReload;
+    #endregion
 
+
+    #region (Public) Fields & Properties
     /// <summary>
     /// Set to true to "jam" the weapon just before it is about to finish reloading. Make sure to set it back to false when you can allow it to reload again.
     /// </summary>
@@ -32,124 +36,17 @@ public abstract class ProjectileLauncher : MonoBehaviour
             _projectilePrefab = value;
         }
     }
-
-    /// <summary>
-    /// Is the launcher reloading right now?
-    /// </summary>
-    protected bool isReloading
-    {
-        get
-        {
-            // Stop coroutine if coroutine says it can be stopped early (ex: early shoot/reload)
-            if (reloadProjectileCoroutine_CanStopEarly)
-                ReloadProjectileCoroutine_StopEarly();
-
-            return reloadCoroutine != null;
-        }
-    }
-
-    /// <summary>
-    /// How many projectiles get refilled per reload cycle.
-    /// </summary>
-    protected int ammoToRefillPerReload
-    {
-        get
-        {
-            return _ammoToRefillPerReload;
-        }
-        set
-        {
-            if (value <= 0)
-                Debug.LogError($"Ammo to refill per reload cannot be <= 0. value={value}");
-            _ammoToRefillPerReload = value;
-        }
-    }
-
-    /// <summary>
-    /// (Backing Field + Inspector Field) The projectile prefab to be launched.
-    /// </summary>
-    [SerializeField] protected GameObject _projectilePrefab;
-
-    /// <summary>
-    /// (Backing Field) How much ammo to refill per reload.
-    /// </summary>
-    private int _ammoToRefillPerReload;
-
-    [SerializeField] protected Transform shootPoint;
-
-    [SerializeField] protected TextMeshProUGUI reloadingText;
-
-    /// <summary>
-    /// How much force the projectile should be launched with.
-    /// </summary>
-    [SerializeField] protected float launchForce;
-
-    /// <summary>
-    /// How long it should take to reload the launcher.
-    /// </summary>
-    [SerializeField] protected float reloadSeconds = 3f;
-
-    /// <summary>
-    /// How much ammo that is currently loaded in the magazine.
-    /// </summary>
-    protected int ammoCount
-    {
-        get
-        {
-            return _ammoCount;
-        }
-        set
-        {
-            if(value < 0)
-            {
-                Debug.LogError($"Cannot set ammoCount to < 0. value={value}");
-                return;
-            }
-
-            _ammoCount = value;
-        }
-    }
-
-    [SerializeField] protected int _ammoCount;
-
-    protected Coroutine reloadCoroutine;
-
-    /// <summary>
-    /// How long the UI pops up "Done reloading!" after reloading.
-    /// </summary>
-    private float doneReloadPopupTime = 0.5f;
-
-    /// <summary>
-    /// Can the ReloadProjectileCoroutine be stopped early?
-    /// </summary>
-    protected bool reloadProjectileCoroutine_CanStopEarly = false;
-
-    /// <summary>
-    /// Has the derived class initialized this launcher with appropriate values?
-    /// </summary>
-    protected bool isInit;
-
-    protected MeshRenderer[] weaponModels;
-
-    /// <summary>
-    /// Camera shake duration on projectile launch.
-    /// </summary>
-    [SerializeField] protected float onLaunch_ShakeSeconds;
-
-    /// <summary>
-    /// Camera shake intensity on projectile launch.
-    /// </summary>
-    [SerializeField] protected float onLaunch_ShakeIntensity;
+    #endregion
 
 
-
+    #region (Public) Functions
     /// <summary>
     /// Show and hide the weapon from view. Monobehavior is enabled/disabled to allow coroutines to run in the background (ex reloading).
     /// </summary>
     public virtual void EquipWeapon(bool wantToEquip)
     {
-        if(weaponModels == null)
-             weaponModels = GetComponentsInChildren<MeshRenderer>();
+        if (weaponModels == null)
+            weaponModels = GetComponentsInChildren<MeshRenderer>();
 
         if (!gameObject.activeInHierarchy)
             gameObject.SetActive(true);
@@ -157,60 +54,6 @@ public abstract class ProjectileLauncher : MonoBehaviour
         ShowWeapon(wantToEquip);
         this.enabled = wantToEquip;
     }
-
-    /// <summary>
-    /// Enable/disable the weapon's mesh renderers.
-    /// </summary>
-    protected virtual void ShowWeapon(bool shown)
-    {
-        if(weaponModels == null)
-        {
-            Debug.LogError("No mesh renderers on weapon. Cannot show weapon.", gameObject);
-            return;
-        }
-
-        // Enable/disable all mesh renderers
-        if (weaponModels.Length >= 1)
-        {
-            foreach(MeshRenderer weaponModel in weaponModels)
-            {
-                weaponModel.enabled = shown;
-            }
-        }
-
-        // Enable/disable all canvases
-        Canvas[] canvases = GetComponentsInChildren<Canvas>();
-        foreach(Canvas canvas in canvases)
-        {
-            canvas.enabled = shown;
-        }
-    }
-
-    protected virtual void Init(float doneReloadPopupTime = 0.5f, int ammoToRefillPerReload = 1)
-    {
-        this.doneReloadPopupTime = doneReloadPopupTime;
-        this.ammoToRefillPerReload = ammoToRefillPerReload;
-        isInit = true;
-    }
-
-    protected virtual void Start()
-    {
-        // Disable any gun UI
-        GunUICanvasEnabled(false);
-        // Refill ammo to full
-        StartCoroutine(ReloadProjectileCoroutine_RefillAmmunitionCount(ammoToRefillPerReload));
-    }
-
-    protected void Update()
-    {
-        //if (CheckForLaunchInput())
-        //    LaunchProjectile();
-    }
-
-    /// <summary>
-    /// If true, launches the projectile.
-    /// </summary>
-    protected abstract bool CheckForLaunchInput();
 
     public virtual void LaunchProjectile()
     {
@@ -239,6 +82,21 @@ public abstract class ProjectileLauncher : MonoBehaviour
         // If out of ammo, start reload coroutine
         if (ammoCount <= 0)
             ReloadProjectile();
+    }
+
+    public virtual void ReloadProjectile()
+    {
+        // Do not reload again if coroutine already running
+        if (isReloading)
+        {
+            return;
+        }
+
+        // Send event that reload has started.
+        OnStartReload?.Invoke();
+
+        // Start the reload.
+        reloadCoroutine = StartCoroutine(ReloadProjectileCoroutine());
     }
 
     public static Vector3 GetPlayersCenterCameraTarget_Position(ref bool targetFound, float maxRange = 500f)
@@ -272,6 +130,186 @@ public abstract class ProjectileLauncher : MonoBehaviour
 
         targetFound = false;
         return null;
+    }
+    #endregion
+
+
+
+    #region Lifecycle Functions
+    protected virtual void Start()
+    {
+        // Disable any gun UI
+        GunUICanvasEnabled(false);
+        // Refill ammo to full
+        StartCoroutine(ReloadProjectileCoroutine_RefillAmmunitionCount(ammoToRefillPerReload));
+    }
+
+    protected void Update()
+    {
+        //if (CheckForLaunchInput())
+        //    LaunchProjectile();
+    }
+    #endregion
+
+
+
+    #region (Protected) Properties
+    /// <summary>
+    /// Is the launcher reloading right now?
+    /// </summary>
+    protected bool isReloading
+    {
+        get
+        {
+            // Stop coroutine if coroutine says it can be stopped early (ex: early shoot/reload)
+            if (reloadProjectileCoroutine_CanStopEarly)
+                ReloadProjectileCoroutine_StopEarly();
+
+            return reloadCoroutine != null;
+        }
+    }
+
+    /// <summary>
+    /// How many projectiles get refilled per reload cycle.
+    /// </summary>
+    protected int ammoToRefillPerReload
+    {
+        get
+        {
+            return _ammoToRefillPerReload;
+        }
+        set
+        {
+            if (value <= 0)
+                Debug.LogError($"Ammo to refill per reload cannot be <= 0. value={value}");
+            _ammoToRefillPerReload = value;
+        }
+    }
+
+    /// <summary>
+    /// How much ammo that is currently loaded in the magazine.
+    /// </summary>
+    protected int ammoCount
+    {
+        get
+        {
+            return _ammoCount;
+        }
+        set
+        {
+            if (value < 0)
+            {
+                Debug.LogError($"Cannot set ammoCount to < 0. value={value}");
+                return;
+            }
+
+            _ammoCount = value;
+        }
+    }
+    #endregion
+
+
+    #region (Protected/Private) Fields
+    /// <summary>
+    /// (Backing Field + Inspector Field) The projectile prefab to be launched.
+    /// </summary>
+    [SerializeField] protected GameObject _projectilePrefab;
+
+    [SerializeField] protected Transform shootPoint;
+
+    [SerializeField] protected TextMeshProUGUI reloadingText;
+
+    [Header("Current State")]
+    /// <summary>
+    /// (Backing field)
+    /// </summary>
+    [SerializeField] protected int _ammoCount;
+
+    [Header("Settings")]
+    /// <summary>
+    /// How much force the projectile should be launched with.
+    /// </summary>
+    [SerializeField] protected float launchForce;
+    /// <summary>
+    /// How long it should take to reload the launcher.
+    /// </summary>
+    [SerializeField] protected float reloadSeconds = 3f;
+
+    [Header("Camera Shake Settings")]
+    /// <summary>
+    /// Camera shake duration on projectile launch.
+    /// </summary>
+    [SerializeField] protected float onLaunch_ShakeSeconds;
+    /// <summary>
+    /// Camera shake intensity on projectile launch.
+    /// </summary>
+    [SerializeField] protected float onLaunch_ShakeIntensity;
+
+    protected Coroutine reloadCoroutine;
+
+    /// <summary>
+    /// Can the ReloadProjectileCoroutine be stopped early?
+    /// </summary>
+    protected bool reloadProjectileCoroutine_CanStopEarly = false;
+
+    /// <summary>
+    /// Has the derived class initialized this launcher with appropriate values?
+    /// </summary>
+    protected bool isInit;
+
+    protected MeshRenderer[] weaponModels;
+
+    /// <summary>
+    /// (Backing Field) How much ammo to refill per reload.
+    /// </summary>
+    protected int _ammoToRefillPerReload;
+
+    /// <summary>
+    /// How long the UI pops up "Done reloading!" after reloading.
+    /// </summary>
+    private float doneReloadPopupTime = 0.5f;
+    #endregion
+
+
+    #region (Protected) Functions
+    /// <summary>
+    /// Enable/disable the weapon's mesh renderers.
+    /// </summary>
+    protected virtual void ShowWeapon(bool shown)
+    {
+        if (weaponModels == null)
+        {
+            Debug.LogError("No mesh renderers on weapon. Cannot show weapon.", gameObject);
+            return;
+        }
+
+        // Enable/disable all mesh renderers
+        if (weaponModels.Length >= 1)
+        {
+            foreach (MeshRenderer weaponModel in weaponModels)
+            {
+                weaponModel.enabled = shown;
+            }
+        }
+
+        // Enable/disable all canvases
+        Canvas[] canvases = GetComponentsInChildren<Canvas>();
+        foreach (Canvas canvas in canvases)
+        {
+            canvas.enabled = shown;
+        }
+    }
+
+    /// <summary>
+    /// If true, launches the projectile. Currently unused, since PlayerController manually fires on mouse 0 clicked.
+    /// </summary>
+    protected abstract bool CheckForLaunchInput();
+
+    protected virtual void Init(float doneReloadPopupTime = 0.5f, int ammoToRefillPerReload = 1)
+    {
+        this.doneReloadPopupTime = doneReloadPopupTime;
+        this.ammoToRefillPerReload = ammoToRefillPerReload;
+        isInit = true;
     }
 
     protected virtual bool LaunchProjectile_Validation()
@@ -307,21 +345,6 @@ public abstract class ProjectileLauncher : MonoBehaviour
     {
         Vector3 toTarget = target - gameObject.transform.position;
         projectile.transform.forward = toTarget;
-    }
-
-    public virtual void ReloadProjectile()
-    {
-        // Do not reload again if coroutine already running
-        if (isReloading)
-        {
-            return;
-        }
-
-        // Send event that reload has started.
-        OnStartReload?.Invoke();
-
-        // Start the reload.
-        reloadCoroutine = StartCoroutine(ReloadProjectileCoroutine());
     }
 
     protected virtual IEnumerator ReloadProjectileCoroutine()
@@ -427,4 +450,5 @@ public abstract class ProjectileLauncher : MonoBehaviour
     {
         reloadingText.SetText(text);
     }
+    #endregion
 }
