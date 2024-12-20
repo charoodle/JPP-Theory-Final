@@ -22,6 +22,15 @@ public class MenuController : MonoBehaviour
 
 
 
+    public void CloseCurrentMenu()
+    {
+        // Exit out of currently active Menu; return to parent Menu before it (if no parent, just disable self then and resume game time)
+        //  Pause menu will specifically unpause game when it disappears
+        Menu parentMenu = currentMenu.Disappear();
+        if (parentMenu)
+            parentMenu.Appear();
+    }
+
     private void OnEnable()
     {
         gameManager = FindObjectOfType<GameManager>();
@@ -43,11 +52,7 @@ public class MenuController : MonoBehaviour
             // If already paused (there should be an active currentMenu); then close current menu, return to last menu if there is one
             else
             {
-                // Exit out of currently active Menu; return to parent Menu before it (if no parent, just disable self then and resume game time)
-                //  Pause menu will specifically unpause game when it disappears
-                Menu parentMenu = currentMenu.Disappear();
-                if (parentMenu)
-                    parentMenu.Appear();
+                CloseCurrentMenu();
             }
         }
     }
