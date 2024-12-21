@@ -3330,16 +3330,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 953106692192090136}
+    - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ResumeGame
+      value: CloseCurrentMenu
       objectReference: {fileID: 0}
     - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: GameManager, Assembly-CSharp
+      value: MenuController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -4514,16 +4518,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 953106692192090136}
+    - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ResumeGame
+      value: CloseCurrentMenu
       objectReference: {fileID: 0}
     - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: GameManager, Assembly-CSharp
+      value: MenuController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1928269662278652720, guid: 5b25bfece58d872428dc71f624ffe4b5, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
