@@ -10,6 +10,11 @@ public class EnemyController : MyProject.CharacterController
     public bool canMove = true;
     public bool isAlliedNPC = false;
 
+    /// <summary>
+    /// TEMP. To be used to walk towards a castle. Currently used to target either enemy castle or player castle.
+    /// </summary>
+    public string castleTargetName;
+
     protected override float walkSpeed
     { 
         get => base.walkSpeed;
@@ -33,10 +38,10 @@ public class EnemyController : MyProject.CharacterController
         // Vary move speed for each enemy
         RandomizeBaseWalkSpeed(0.25f);
 
-        // Make them look at player castle
+        // Make them look at opposite enemy's castle
         if (!isAlliedNPC)
         {
-            GameObject playerCastle = GameObject.Find("PlayerCastle");
+            GameObject playerCastle = GameObject.Find(castleTargetName);
             LookAt(playerCastle.transform);
         }
 

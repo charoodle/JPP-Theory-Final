@@ -18,6 +18,9 @@ public class EnemySpawnManager : MonoBehaviour
 
     DialogueManager dialogueManager;
 
+    // TEMP: Make these enemies target a specific castle
+    [SerializeField] string castleTargetName;
+
 #if UNITY_EDITOR
     [SerializeField] protected bool isDebugSpawner;
     [SerializeField] protected int maxSpawnEnemies = 1;
@@ -118,6 +121,9 @@ public class EnemySpawnManager : MonoBehaviour
         // Spawn enemy
         GameObject enemyGO = SpawnRandomEnemy(enemySpawnPos, spawnBox.transform.rotation);
         EnemyController enemyCtrl = enemyGO.GetComponent<EnemyController>();
+        enemyCtrl.castleTargetName = castleTargetName;
+        if(string.IsNullOrEmpty(castleTargetName))
+            Debug.LogError("No castle target name assigned.");
         if(!enemyCtrl)
             yield break;
 

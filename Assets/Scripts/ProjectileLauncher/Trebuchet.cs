@@ -142,8 +142,8 @@ public class Trebuchet : ProjectileLauncher
         IEnumerator DetachBall()
         {
             // Camera shake
-            CameraShaker.instance.Shake(onLaunch_ShakeSeconds, onLaunch_ShakeIntensity);
-
+            ShakeCamera();
+                
             // Send event that projectile has launched.
             OnProjectileLaunch?.Invoke();
 
@@ -157,6 +157,11 @@ public class Trebuchet : ProjectileLauncher
             trebuchetReloader.SetActive(true);
             yield break;
         }
+    }
+
+    protected virtual void ShakeCamera()
+    {
+        CameraShaker.instance.Shake(onLaunch_ShakeSeconds, onLaunch_ShakeIntensity);
     }
 
     private void AttachRopeSlingToProjectile(Projectile projectile)

@@ -43,7 +43,13 @@ public class AutoTrebuchet : Trebuchet
             yield return new WaitForSeconds(1f);
         }
 
-        
+        // Titlescreen: Adjust weight randomly between each shot
+        counterweightRb.mass += Random.Range(-50f, 50f);
+        counterweightRb.mass = Mathf.Clamp(counterweightRb.mass, 230f, 320f);
+        // Titlescreen: Delay a random amt of seconds before next shot so not all active trebuchets shots are desync'd
+        float sec = Random.Range(2f, 7f);
+        yield return new WaitForSeconds(sec);
+
         StartCoroutine(HandleLaunching());
         yield break;
     }
@@ -90,5 +96,14 @@ public class AutoTrebuchet : Trebuchet
         // Calculate a random point after 1 to release for some randomness
         //float dotOffset = Random.Range(0, maxRandomDotProductOffset);
         return dotProductOfProjectileToWorldUp < 1;
+    }
+
+    protected override void ShakeCamera()
+    {
+        // TEMP - Don't shake camera for auto trebuchet.
+        //  Temporary solution for title screen auto trebuchet.
+        //  Currentl only player's trebuchet should shake screen
+        //  TODO: Make a better solution: check if player closer enough to shake their camera
+        return;
     }
 }

@@ -122,6 +122,11 @@ public class TrebuchetProjectile : Projectile
                 var particleSysMain = dirtParticles.main;
                 particleSysMain.startColor = surfaceColor;
             }
+
+            // Destroy trebuchet && embed model after a couple minutes
+            float lifetime = 200f;
+            Destroy(embedObj, lifetime);
+            Destroy(gameObject, lifetime);
         }
 
 

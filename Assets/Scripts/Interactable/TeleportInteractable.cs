@@ -12,7 +12,15 @@ public class TeleportInteractable : UnityEventInteractable
     {
         base.Start();
 
-        player = FindObjectOfType<PlayerController>().gameObject;
+        // TEMP: For title screen, to clear out errors for now (no player in title screen)
+        try
+        {
+            player = FindObjectOfType<PlayerController>().gameObject;
+        }
+        catch(System.Exception e)
+        {
+
+        }
     }
 
     public void TeleportPlayerToLocation()
