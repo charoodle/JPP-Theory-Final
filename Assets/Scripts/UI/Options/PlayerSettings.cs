@@ -35,8 +35,6 @@ public class PlayerSettings : MonoBehaviour
         get { return _lookSensitivity; }
         set 
         {
-            Debug.Log("Setting look sensitivity to " + value);
-
             _lookSensitivity = value;
 
             // TODO: Update player controller settings

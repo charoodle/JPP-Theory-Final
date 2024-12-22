@@ -79,7 +79,7 @@ public abstract class ProjectileLauncher : MonoBehaviour
         // Shake player camera
         CameraShaker.instance.Shake(onLaunch_ShakeSeconds, onLaunch_ShakeIntensity);
 
-        // If out of ammo, start reload coroutine
+        // If out of ammo, automatically start reload coroutine
         if (ammoCount <= 0)
             ReloadProjectile();
     }

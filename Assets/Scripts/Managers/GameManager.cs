@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
 
     public void BeginGame()
     {
+        // Enemies will start spawning when script turns on
         enemies.SetActive(true);
     }
 

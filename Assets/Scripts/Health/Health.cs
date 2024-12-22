@@ -42,7 +42,7 @@ public class Health : MonoBehaviour
 
     private void OnValidate()
     {
-        if (debugDie)
+        if (debugDie && Application.isPlaying)
         {
             debugDie = false;
             TakeDamage(health);
