@@ -12115,6 +12115,7 @@ MonoBehaviour:
   secondsBetweenEnemySpawn: 2
   secondsBetweenSpawnRateIncrease: 25
   minSecondsBetweenEnemySpawn: 0.25
+  castleTargetName: 
   isDebugSpawner: 1
   maxSpawnEnemies: 2
   enemiesSpawned: 0
@@ -15422,6 +15423,7 @@ MonoBehaviour:
   secondsBetweenEnemySpawn: 2
   secondsBetweenSpawnRateIncrease: 60
   minSecondsBetweenEnemySpawn: 1
+  castleTargetName: PlayerCastle
   isDebugSpawner: 0
   maxSpawnEnemies: 1
   enemiesSpawned: 0
