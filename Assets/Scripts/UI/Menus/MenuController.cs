@@ -38,7 +38,7 @@ public class MenuController : MonoBehaviour
 
     protected void Update()
     {
-        if (Input.GetKeyDown(PlayerKeybinds.pause))
+        if (Input.GetKeyDown(PlayerKeybinds.pauseAlt))
         {
             // Game over; don't register keypresses
             if (gameManager.isGameOver)
