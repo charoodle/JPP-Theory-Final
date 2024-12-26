@@ -45,7 +45,7 @@ public class PlayerController : MyProject.CharacterController
     private void Awake()
     {
         // On player awake, read current look sensitivity settings
-        float mouseSens = PlayerSettings.instance.lookSensitivity;
+        float mouseSens = PlayerSettings.instance.playerSettings.lookSensitivity;
         lookXSens = mouseSens;
         lookYSens = mouseSens;
 

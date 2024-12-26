@@ -36,7 +36,7 @@ public class CameraShaker : MonoBehaviour
 
     [SerializeField]
     [Range(0f, 1f)]
-    float screenShakeMultiplier;
+    public float screenShakeMultiplier;
 
     #region Debug
     [Header("Debug")]
@@ -73,6 +73,9 @@ public class CameraShaker : MonoBehaviour
     {
         camera = Camera.main;
         cinemachineVCam = GetComponent<CinemachineVirtualCamera>();
+
+        // Read player settings for player's options data.
+        screenShakeMultiplier = PlayerSettings.instance.playerSettings.cameraShakeIntensity;
     }
 
     public void Shake(float seconds, float intensity)

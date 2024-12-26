@@ -97,7 +97,7 @@ public class SensitivitySetting : MonoBehaviour
         lookSensitivity = newLookSensitivity;
 
         // Change the look sensitivity in dontdestroyonload
-        PlayerSettings.instance.lookSensitivity = newLookSensitivity;
+        PlayerSettings.instance.playerSettings.lookSensitivity = newLookSensitivity;
 
         // Update related UI values
         UpdateUIValues();
@@ -108,7 +108,7 @@ public class SensitivitySetting : MonoBehaviour
     /// </summary>
     protected void ReadCurrentPlayerSettingsSensitivityValue()
     {
-        lookSensitivity = PlayerSettings.instance.lookSensitivity;
+        lookSensitivity = PlayerSettings.instance.playerSettings.lookSensitivity;
         UpdateUIValues();
     }
 
