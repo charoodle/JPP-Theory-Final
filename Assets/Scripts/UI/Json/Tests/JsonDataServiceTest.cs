@@ -76,7 +76,9 @@ public class JsonDataServiceTest : MonoBehaviour
 
 
 
-
+    /// <summary>
+    /// Test class for data serialization.
+    /// </summary>
     [System.Serializable]
     public class PlayerSettings1
     {

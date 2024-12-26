@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Text;
 
 /// <summary>
-/// Save and load a serializable to disk.
+/// Save and load a serializable object to disk into some filename, in JSON format.
 /// </summary>
 public static class JsonDataService
 {
@@ -15,15 +15,15 @@ public static class JsonDataService
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="obj">The serializable object to save to a file in JSON format.</param>
-    /// <param name="relativePath">Use "\" to indicate folder hierarchy. Make sure to include file extension too.
-    ///     <para>Example: "\player_settings.json"</para>
+    /// <param name="relativePath">Relative path to a game file contained in the persistent data path. Use "/" to indicate folder hierarchies. Make sure to include file extension too.
+    ///     <para>Example: "/player_settings.json"</para>
     ///     </param>
     /// <param name="prettyIndent">Leave false, better processing(?). True for pretty file indent for debugging.</param>
     /// <returns>Filepath where it saved the object.</returns>
     public static string Save<T>(T obj, string relativePath, bool prettyIndent = false)
     {
         // Get file's path.
-        string filepath = Application.persistentDataPath + relativePath;
+        string filepath = GetFilePath(relativePath);
 
         try
         {
@@ -34,31 +34,18 @@ public static class JsonDataService
             // If file doesn't exist, create it.
             if (!File.Exists(filepath))
             {
-                Debug.LogWarning("File doesn't exist, creating a new file.");
-
+                // Create file.
                 FileStream filestream = File.Create(filepath);
-
-                // Filestream works in byte arrays.
-                byte[] bytes = Encoding.ASCII.GetBytes(serialized);
-
-                // Write byte object to file.
-                filestream.Write(bytes);
-
-                // Close filestream.
+                // Close filestream; using a different method of write instead of filestream.
+                //  Alt method: convert to byte array with Encoding.ASCII.GetBytes & use filestream; but don't want to waste time doing that.
                 filestream.Close();
-
-                // Return filepath.
-                return filepath;
             }
-            // Else if file exists, overwrite it.
-            else
-            {
-                // Write string object to file.
-                File.WriteAllText(filepath, serialized);
 
-                // Return filepath.
-                return filepath;
-            }
+            // File exists now. Write string object to file.
+            File.WriteAllText(filepath, serialized);
+
+            // Return filepath.
+            return filepath;
         }
         // Something went wrong trying to save object into user's file.
         catch(System.Exception e)
@@ -71,19 +58,18 @@ public static class JsonDataService
     /// Load an object from a json formatted file.
     /// </summary>
     /// <typeparam name="T">Object type to load the json file into.</typeparam>
-    /// <inheritdoc cref="Save"/>
     /// <returns></returns>
+    /// <inheritdoc cref="Save"/>
     public static T Load<T>(string relativePath)
     {
         // Read serialized object from filepath
-        string filepath = Application.persistentDataPath + relativePath;
+        string filepath = GetFilePath(relativePath);
 
         try
         {
             // File must exist.
             if (!File.Exists(filepath))
-                throw new FileNotFoundException();
-                //throw new System.Exception($"Cannot load. File does not exist at: {filepath}");
+                throw new System.Exception($"Cannot load. File does not exist at: {filepath}");
 
             // Read file at path.
             string serialized = File.ReadAllText(filepath);
@@ -101,11 +87,16 @@ public static class JsonDataService
         }
     }
 
+    /// <summary>
+    /// Delete a file at the relative path.
+    /// </summary>
+    /// <returns></returns>
+    /// <inheritdoc cref="Save"/>
     public static void DeleteFile(string relativePath)
     {
         try
         {
-            string filepath = Application.persistentDataPath + relativePath;
+            string filepath = GetFilePath(relativePath);
 
             // File must exist
             if (!File.Exists(filepath))
@@ -121,9 +112,16 @@ public static class JsonDataService
         }
     }
 
-    //protected string GetFilePath(string relativePath)
-    //{
-    //    // Use persistent data path to get file path.
-    //    return Application.persistentDataPath + relativePath;
-    //}
+
+
+    /// <summary>
+    /// Combines the game's persistent data folder with the relative file path provided.
+    /// </summary>
+    /// <returns>Complete path of a game folder (persistent data path + relative).</returns>
+    /// <inheritdoc cref="Save"/>
+    private static string GetFilePath(string relativePath)
+    {
+        // Use persistent data path to get file path.
+        return Application.persistentDataPath + relativePath;
+    }
 }

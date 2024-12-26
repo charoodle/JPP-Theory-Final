@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
 
-
+/// <summary>
+/// Test what json things can be saved/not saved.
+/// </summary>
 public class JsonSaveLoadTest : MonoBehaviour
 {
     [SerializeField] bool saveInfo;
@@ -15,7 +17,7 @@ public class JsonSaveLoadTest : MonoBehaviour
 
     public class TestObjectSerialization
     {
-        // Serializable
+        // Serializable; will be saved.
         public string playerName = "asdf";
         public float lookSens = 1.45f;
         public float screenShakeMultiplier = 0.5f;
@@ -33,7 +35,7 @@ public class JsonSaveLoadTest : MonoBehaviour
             );
 
         
-        // Nonserializable
+        // Nonserializable; will not be saved.
         protected float num_float_prot = 3f;
         [SerializeField]
         protected float num_float_prot_serializefield = 3f;
