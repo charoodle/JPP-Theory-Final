@@ -122,6 +122,54 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &293445166
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 293445168}
+  - component: {fileID: 293445167}
+  m_Layer: 0
+  m_Name: Player Settings Save Load
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &293445167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293445166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f68ceb2b15c617542b2793985593444b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveObject: 0
+  playerSettings:
+    lookSensitivity: 0
+    cameraShake: 0
+--- !u!4 &293445168
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293445166}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &694528254
 GameObject:
   m_ObjectHideFlags: 0
@@ -225,7 +273,7 @@ GameObject:
   - component: {fileID: 756477563}
   - component: {fileID: 756477564}
   m_Layer: 0
-  m_Name: JSON
+  m_Name: JSONTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -258,7 +306,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72a89fd221e4d964a88f8072165a76cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  info: 
+  saveInfo: 0
+  wouldBeOnDisk: 
 --- !u!1 &912502628
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,3 +409,4 @@ SceneRoots:
   - {fileID: 694528257}
   - {fileID: 912502630}
   - {fileID: 756477563}
+  - {fileID: 293445168}
