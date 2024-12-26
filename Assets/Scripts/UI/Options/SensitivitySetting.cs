@@ -39,7 +39,14 @@ public class SensitivitySetting : MonoBehaviour
         slider.maxValue = LOOKSENS_MAX;
 
         // With updated value, update the UI values to match properly
-        UpdateUIValues();
+        //UpdateUIValues();
+    }
+
+    private void OnEnable()
+    {
+        // Whenever the options menu appears, make sure to have the most updated reading
+        //  For some reason, have to double up alongside Awake.
+        ReadCurrentPlayerSettingsSensitivityValue();
     }
 
     public void SetSensitivityFromInputField()

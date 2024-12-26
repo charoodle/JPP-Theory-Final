@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Persist player's settings (ex: sensitivity) throughout scene changes and game sessions.
@@ -41,6 +42,11 @@ public class PlayerSettings : MonoBehaviour
     [System.Serializable]
     public class PlayerSettingsData
     {
+        // To let options menu determine if player changed a setting or not. Manually call for each changed setting below.
+        public delegate void SettingChangedAction();
+        [JsonIgnore]
+        public SettingChangedAction OnAnySettingChanged;
+
         /// <summary>
         /// Mouse sensitivity.
         /// </summary>
@@ -49,6 +55,11 @@ public class PlayerSettings : MonoBehaviour
             get { return _lookSensitivity; }
             set
             {
+                // No changes
+                if (_lookSensitivity == value)
+                    return;
+
+                OnAnySettingChanged?.Invoke();
                 _lookSensitivity = value;
 
                 // TODO: Update player controller settings
@@ -69,6 +80,10 @@ public class PlayerSettings : MonoBehaviour
             get { return _cameraShakeIntensity; }
             set
             {
+                if (_cameraShakeIntensity == value)
+                    return;
+
+                OnAnySettingChanged?.Invoke();
                 _cameraShakeIntensity = value;
 
                 // TODO: Update camera shake settings
@@ -121,7 +136,7 @@ public class PlayerSettings : MonoBehaviour
 
 
 
-    public void SaveCurrentValuesToFile()
+    public bool SaveCurrentValuesToFile()
     {
 #if UNITY_WEBGL
         // TODO: Test WebGL for persistent data?
@@ -129,8 +144,10 @@ public class PlayerSettings : MonoBehaviour
 #endif
 
         Debug.Log("Saving...");
-        JsonDataService.Save(playerSettings, relativeFilePath, true);
-        Debug.Log("Save successful!");
+        bool success = JsonDataService.Save(playerSettings, relativeFilePath, true);
+        if(success)
+            Debug.Log("Save successful!");
+        return success;
     }
 
     public void LoadCurrentValuesFromFile()

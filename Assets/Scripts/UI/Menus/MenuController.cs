@@ -31,6 +31,8 @@ public class MenuController : MonoBehaviour
             parentMenu.Appear();
     }
 
+
+
     private void OnEnable()
     {
         gameManager = FindObjectOfType<GameManager>();

@@ -33,7 +33,7 @@ public class Menu : MonoBehaviour
 
     
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         if(!gameManager)
             gameManager = FindObjectOfType<GameManager>();
