@@ -151,8 +151,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f68ceb2b15c617542b2793985593444b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  saveObject: 0
-  playerSettings:
+  savePlayerSettings: 0
+  loadPlayerSettings: 0
+  deletePlayerSettings_file: 0
+  saveWithPrettyIndent: 0
+  clearPlayerSettings_inspector: 0
+  currentPlayerSettings:
     lookSensitivity: 0
     cameraShake: 0
 --- !u!4 &293445168

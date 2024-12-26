@@ -67,14 +67,58 @@ public static class JsonDataService
         }
     }
 
+    /// <summary>
+    /// Load an object from a json formatted file.
+    /// </summary>
+    /// <typeparam name="T">Object type to load the json file into.</typeparam>
+    /// <inheritdoc cref="Save"/>
+    /// <returns></returns>
     public static T Load<T>(string relativePath)
     {
-        throw new System.NotImplementedException();
+        // Read serialized object from filepath
+        string filepath = Application.persistentDataPath + relativePath;
+
+        try
+        {
+            // File must exist.
+            if (!File.Exists(filepath))
+                throw new FileNotFoundException();
+                //throw new System.Exception($"Cannot load. File does not exist at: {filepath}");
+
+            // Read file at path.
+            string serialized = File.ReadAllText(filepath);
+
+            // Turn it into an object.
+            T obj = JsonConvert.DeserializeObject<T>(serialized);
+
+            // Return the loaded object.
+            return obj;
+        }
+        // Something went wrong trying to read object from user's file.
+        catch(System.Exception e)
+        {
+            throw e;
+        }
     }
 
     public static void DeleteFile(string relativePath)
     {
-        throw new System.NotImplementedException();
+        try
+        {
+            string filepath = Application.persistentDataPath + relativePath;
+
+            // File must exist
+            if (!File.Exists(filepath))
+                throw new System.Exception($"Cannot delete. File at {filepath} doesn't exist!");
+
+            // Delete the file
+            File.Delete(filepath);
+        }
+        catch(System.Exception e)
+        {
+            // Something went wrong while deleting the file.
+            throw e;
+        }
     }
 
     //protected string GetFilePath(string relativePath)
