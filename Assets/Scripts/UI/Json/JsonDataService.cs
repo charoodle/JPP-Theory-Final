@@ -19,8 +19,8 @@ public static class JsonDataService
     ///     <para>Example: "/player_settings.json"</para>
     ///     </param>
     /// <param name="prettyIndent">Leave false, better processing(?). True for pretty file indent for debugging.</param>
-    /// <returns>Filepath where it saved the object.</returns>
-    public static string Save<T>(T obj, string relativePath, bool prettyIndent = false)
+    /// <returns>True if successfully saved data, false if could not.</returns>
+    public static bool Save<T>(T obj, string relativePath, bool prettyIndent = false)
     {
         // Get file's path.
         string filepath = GetFilePath(relativePath);
@@ -44,13 +44,14 @@ public static class JsonDataService
             // File exists now. Write string object to file.
             File.WriteAllText(filepath, serialized);
 
-            // Return filepath.
-            return filepath;
+            // Save successful.
+            return true;
         }
         // Something went wrong trying to save object into user's file.
         catch(System.Exception e)
         {
-            throw e;
+            Debug.LogException(e);
+            return false;
         }
     }
 

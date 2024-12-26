@@ -52,8 +52,8 @@ public class JsonDataServiceTest : MonoBehaviour
     protected void SavePlayerSettings()
     {
         Debug.Log("Saving player settings...");
-        string path = JsonDataService.Save(currentPlayerSettings, playerSettingsFilePath, saveWithPrettyIndent);
-        Debug.Log($"Successully saved player settings to: {path}.");
+        JsonDataService.Save(currentPlayerSettings, playerSettingsFilePath, saveWithPrettyIndent);
+        Debug.Log($"Successully saved player settings.");
         Debug.Log(separator);
     }
 
