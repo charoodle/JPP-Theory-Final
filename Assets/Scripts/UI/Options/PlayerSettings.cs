@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 /// <summary>
 /// Persist player's settings (ex: sensitivity) throughout scene changes and game sessions.
 /// Updates player controller (if exists) if there is an update to its sensitivity value.
+/// 
+/// Can look at current values using the Inspector's "Debug" toggle to view private fields.
 /// </summary>
 public class PlayerSettings : MonoBehaviour
 {   
@@ -94,17 +96,16 @@ public class PlayerSettings : MonoBehaviour
 
         /// Note: Player Settings should be initialized on game start, so default value here is just temporary until can figure out persisting data between game sessions.
         ///     so it doesnt start me off at the minimum sensitivity each time.
-        /// TODO: Default values list if no values can be loaded from file?
+        /// TODO: Separate default values list stored somewhere if loading from file fails? Do not keep here?
         private float _lookSensitivity = SensitivitySetting.LOOKSENS_DEFAULT;
         private float _cameraShakeIntensity = CAMSHAKE_INTENSITY_DEFAULT;
 
         private const float CAMSHAKE_INTENSITY_DEFAULT = 1.0f;
     }
 
+    /// <summary> Uses the persistent data path </summary>
     private const string relativeFilePath = "/player-settings.json";
     private static PlayerSettings _instance;
-
-
 
     private void Awake()
     {
@@ -127,6 +128,7 @@ public class PlayerSettings : MonoBehaviour
     [SerializeField] bool saveSettings;
     private void OnValidate()
     {
+        // Debug: Manual save (inspector button)
         if(saveSettings)
         {
             saveSettings = false;
@@ -159,18 +161,46 @@ public class PlayerSettings : MonoBehaviour
 
         try
         {
-            // Load values from file
-            Debug.Log("Loading...");
-            playerSettings = JsonDataService.Load<PlayerSettingsData>(relativeFilePath);
-            Debug.Log("Loading successful!");
+            Helper_LoadSettingsFromDefaultPath();
 
-            // Update all things that use those settings, if they exist
+            // TODO?: Update all things that use those settings, if they exist
         }
         catch(System.Exception e)
         {
-            // TODO: If file doesn't exist exception, create a new one with default values.
+            // If file doesn't exist still, try to create a new one with default values.
+            //  Happened when debugging in-editor.
 
-            throw e;
+            Debug.LogWarning("Save file doesn't exist, creating a new one...");
+
+            // Try to save and load default settings values.
+            try
+            {
+                // Create PlayerSettingsData with default values
+                PlayerSettingsData defaultSettings = new PlayerSettingsData();
+                playerSettings = defaultSettings;
+
+                // Save that as a new file
+                SaveCurrentValuesToFile();
+                Helper_LoadSettingsFromDefaultPath();
+            }
+            catch (System.Exception f)
+            {
+                // Can't save/load.
+                // Use default settings
+                Debug.LogError("Cannot save/load player settings successfully. Using default player settings values. See exception on next line:");
+
+                // TODO: No idea what this could possibly say. Out of storage space on drive? Idk.
+                //  If no storage space... how can they install the game? Should include the file within the download "budget"?
+                throw f;
+            }
         }
+    }
+
+    private void Helper_LoadSettingsFromDefaultPath()
+    {
+        // Load values from file
+        Debug.Log("Loading...");
+        playerSettings = JsonDataService.Load<PlayerSettingsData>(relativeFilePath);
+        Debug.Log("Loading successful!");
     }
 }

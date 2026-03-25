@@ -171,7 +171,7 @@ public class DialogueManager : MonoBehaviour
     {
         if(cutsceneBarsAreEnabled)
             ToggleCutsceneBars();
-
+         
         PlayerController player = _player as PlayerController;
         if (player)
         {

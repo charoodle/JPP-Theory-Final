@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class JsonDataServiceTest : MonoBehaviour
 {
+    [Header("Buttons (Saves/Load from file)")]
     public bool savePlayerSettings;
     public bool loadPlayerSettings;
     public bool deletePlayerSettings_file;
+
+    [Header("Buttons (More Options)")]
     public bool saveWithPrettyIndent = false;
 
     [Header("Current Settings")]

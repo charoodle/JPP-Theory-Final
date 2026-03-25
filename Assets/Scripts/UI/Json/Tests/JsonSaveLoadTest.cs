@@ -34,7 +34,15 @@ public class JsonSaveLoadTest : MonoBehaviour
                 }
             );
 
-        
+
+        private float _propertyFloat = 10.0f;
+        public float propertyFloat
+        {
+            get { return _propertyFloat; }
+            set { _propertyFloat = value; }
+        }
+
+
         // Nonserializable; will not be saved.
         protected float num_float_prot = 3f;
         [SerializeField]
