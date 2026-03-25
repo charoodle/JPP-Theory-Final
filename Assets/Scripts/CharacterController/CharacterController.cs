@@ -221,7 +221,7 @@ namespace MyProject
         protected float lookAt_lastYawVel = 0f;
         protected float lookAt_lastPitchVel = 0f;
 
-        // Param constants
+        // Parameter constants
         protected const float LOOKTIME = 0.5f;
         protected const float LOOKTIME_LERP = 1f;
         protected const float INITIAL_LOOKVEL = 0.5f;
