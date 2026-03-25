@@ -4,9 +4,17 @@ using UnityEngine;
 
 /// <summary>
 /// TODO:
-///     Port all functions as-is with same names.
+///     [ ] Port all functions as-is with same names and functions.
+///     [ ] Make sure it works with a psuedo head/body, like how an enemy should behave.
+///         
+///  TODO when done porting:
 ///     Rename and clean up functions for a single generic object. Not just for a character-controller lookaround.
-///         May need to rework the detached head/body situation.
+///     Rework the detached head/body situation.
+///     Make into a portable, reusable script.
+///     
+///  TODO when done making portable and reusable:
+///     Refactor CharacterController to use the portable script instead.
+///     Refactor CharacterController to use in BulletPain project.
 ///  
 ///  See <see cref="MyProject.CharacterController.LookAt"/> and start there.
 /// </summary>
@@ -18,8 +26,10 @@ public class RotationLookAt : MonoBehaviour
     [SerializeField] Transform rotateFreedHead;
 
     [Header("Settings")]
-    private float maxPitchDegreesDown;
-    private float maxPitchDegreesUp;
+    /// <summary> How many degrees can look rotate head upwards </summary>
+    private float maxPitchDegreesDown = -90f;
+    /// <summary> How many degrees can look rotate head downwards </summary>
+    private float maxPitchDegreesUp = 90f;
 
     /// <summary>
     /// Make the character game object look around
@@ -47,7 +57,8 @@ public class RotationLookAt : MonoBehaviour
 
     protected void LateUpdate()
     {
-        
+        // Look-around character
+        CharacterLookAround(ref yawDegrees, ref pitchDegrees, rotateFreedHead, rotateBody);
     }
 
     /// <summary>
