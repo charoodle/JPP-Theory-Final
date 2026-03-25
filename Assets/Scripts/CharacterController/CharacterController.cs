@@ -870,7 +870,7 @@ namespace MyProject
         }
 
         /// <summary>
-        /// Make the character game object move around
+        /// Make the character game object look around
         /// </summary>
         /// <param name="yawDegrees">Euler degrees to pitch the yaw around.</param>
         /// <param name="pitchDegrees">Euler degrees to pitch the character around.</param>
