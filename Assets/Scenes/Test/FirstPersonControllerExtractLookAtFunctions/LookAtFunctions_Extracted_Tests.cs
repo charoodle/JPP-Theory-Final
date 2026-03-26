@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// For testing out <see cref="RotationLookAt"/> functions while extracting them out from <see cref="CharacterController"/>.
+/// For testing out <see cref="RotationLookAt"/> functions while extracting them out from <see cref="MyProject.CharacterController"/>.
 /// </summary>
 public class LookAtFunctions_Extracted_Tests : MonoBehaviour
 {
@@ -31,7 +31,8 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         //obj.LookAt(target.transform);
         //obj.LookAtUntilWithinDegrees(target.transform, LookAt_WithinDegreesAmt);
         //obj.LookAtTargetForSeconds(target.transform, 1f, LookAt_WithinDegreesAmt);
-        StartCoroutine(LookAtTargetForSecondsThenSwitchToRandomTarget(target));
+        //StartCoroutine(LookAtTargetForSecondsThenSwitchToRandomTarget(target));
+        obj.LookAtTargetPitchYaw(30f, 180f);
     }
 
     protected IEnumerator LookAtTargetForSecondsThenSwitchToRandomTarget(GameObject target)

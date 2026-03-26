@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// TODO:
 ///     [ ] Port all functions as-is with same names and functions.
-///     [ ] Make sure it works with a psuedo head/body, like how an enemy should behave.
+///     [ ] Make sure it all works with a psuedo head/body, like how an enemy should behave.
 ///         
 ///  TODO when done porting:
 ///     Rename and clean up functions for a single generic object. Not just for a character-controller lookaround.
@@ -42,10 +42,10 @@ public class RotationLookAt : MonoBehaviour
     /// <summary> The head that rotates around (pitch + yaw). </summary>
     [SerializeField] Transform rotateFreedHead;
 
+    /// <summary> How many degrees can look rotate head upwards. </summary>
     [Header("Settings")]
-    /// <summary> How many degrees can look rotate head upwards </summary>
     private float maxPitchDegreesDown = -90f;
-    /// <summary> How many degrees can look rotate head downwards </summary>
+    /// <summary> How many degrees can look rotate head downwards. </summary>
     private float maxPitchDegreesUp = 90f;
     #endregion
 
@@ -82,7 +82,15 @@ public class RotationLookAt : MonoBehaviour
 
 
     #region LookAt Functions (aka stoppable midway) - not tested
-    
+    /// <summary>
+    /// Look towards a pitch/yaw value. Can get the current pitch/yaw value to use this method later with <see cref="GetYawAndPitchDegrees(out float, out float)"/>.
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetPitchYawCoroutine(float, float, float, float, float)"/>
+    public void LookAtTargetPitchYaw(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        currentLookAt = StartCoroutine(LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel));
+    }
     #endregion
 
 
@@ -115,6 +123,32 @@ public class RotationLookAt : MonoBehaviour
     {
         StopLookAtCoroutine(currentLookAt);
         currentLookAt = StartCoroutine(LookAtTargetForSecondsEnum(target, timePeriod, withinDegrees, lookTime, initialLookVel));
+    }
+
+    /// <summary>
+    /// Stop the current pausable LookAt coroutine. Does not work with any of the "LookAt___Enum" versions, since those must be played out until their conditions are satisfied.
+    /// </summary>
+    public void LookAtStop()
+    {
+        // No couroutine exists.
+        if (currentLookAt == null)
+        {
+            Debug.LogWarning("Nothing to stop looking at.", this.gameObject);
+            return;
+        }
+
+        StopLookAtCoroutine(currentLookAt);
+    }
+
+    /// <summary>
+    /// Get the character controller's current pitch/yaw rotation in degrees.
+    /// </summary>
+    /// <param name="pitch">X axis rotation of character view. Goes from <see cref="maxPitchDegreesDown"/> to <see cref="maxPitchDegreesUp"/>. </param>
+    /// <param name="yaw">Y axis rotation of character view. Goes from -180f - 180f. (Based on <see cref="Quaternion.Euler"/>)</param>
+    public void GetYawAndPitchDegrees(out float pitch, out float yaw)
+    {
+        pitch = pitchDegrees;
+        yaw = yawDegrees;
     }
     #endregion
 
@@ -302,6 +336,45 @@ public class RotationLookAt : MonoBehaviour
             timer += Time.deltaTime;
             yield return null;
         }
+    }
+
+    /// <summary>
+    /// Make the character controller rotate to look at a target pitch and yaw roughly within <paramref name="lookTime"/> seconds.
+    /// </summary>
+    /// <param name="targetPitch">Target pitch degrees to look at.</param>
+    /// <param name="targetYaw">Target yaw degrees to look at.</param>
+    /// <inheritdoc cref="LookAtTargetForSecondsCoroutine(Transform, float, float, float, float)"/>
+    protected virtual IEnumerator LookAtTargetPitchYawCoroutine(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        // Cannot have negative look time.
+        if (lookTime < 0)
+        {
+            Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
+            yield break;
+        }
+
+        // Cannot divide by 0 in lerp function. Skips loop.
+        if (lookTime == 0)
+        {
+            this.pitchDegrees = targetPitch;
+            this.yawDegrees = targetYaw;
+            yield break;
+        }
+
+        float yawVel = initialLookVel;
+        float pitchVel = initialLookVel;
+
+        // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+
+        while (!LookDegreesIsCloseEnough(yawDegrees, targetYaw, withinDegrees) || !LookDegreesIsCloseEnough(pitchDegrees, targetPitch, withinDegrees))
+        {
+            SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
+            yield return null;
+        }
+
+        // When done, make sure to snap character rotation to target rotation.
+        pitchDegrees = targetPitch;
+        yawDegrees = targetYaw;
     }
     #endregion
 
