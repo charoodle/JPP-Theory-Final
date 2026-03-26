@@ -4,11 +4,13 @@ using UnityEngine;
 
 /// <summary>
 /// TODO:
-///     [ ] Port all functions as-is with same names and functions.
+///     [x] Port all functions as-is with same names and functions.
 ///     [ ] Make sure it all works with a psuedo head/body, like how an enemy should behave.
 ///         
 ///  TODO when done porting:
-///     Rename and clean up functions for a single generic object. Not just for a character-controller lookaround.
+///     Rename and clean up functions for a single generic object. Not just for a character-controller lookaround. 
+///         - [ ] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
+///         - [ ] Rename LookAt functions to be easier to differentiate. Use underscores, like: "LookAt_X" / "LookAt_Y."
 ///     Rework the detached head/body situation.
 ///     Make into a portable, reusable script.
 ///     
@@ -155,6 +157,16 @@ public class RotationLookAt : MonoBehaviour
     }
 
     /// <summary>
+    /// Look towards a target for <paramref name="timePeriod"/> seconds total. Time starts ticking the moment the function is called.
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetForSecondsCoroutine(Transform, float, float, float, float)"></inheritdoc>
+    public void LookTowardUntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        currentLookAt = StartCoroutine(LookTowardUntilTimePeriodCoroutine(target, timePeriod, lookTime, initialLookVel, useSavedYawPitchVelocity: false));
+    }
+
+    /// <summary>
     /// Converts the world position into a target yaw and pitch relative to this character's head.
     /// 
     /// TODO: Make the <see cref="rotateFreedHead"/> a passed-in parameter, Not a hardcoded value.
@@ -183,7 +195,8 @@ public class RotationLookAt : MonoBehaviour
 
 
     #region LookAt IEnum Functions (aka unstoppable midway)
-    /// <summary> Public coroutine version of <see cref="LookAtTargetForSeconds"/>.
+    /// <summary>
+    /// Public coroutine version of <see cref="LookAtTargetForSeconds"/>.
     /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
     /// </summary>
     /// <inheritdoc cref="LookAtTargetForSeconds"/>
@@ -191,6 +204,51 @@ public class RotationLookAt : MonoBehaviour
     {
         StopLookAtCoroutine(currentLookAt);
         yield return LookAtTargetForSecondsCoroutine(target, timePeriod, withinDegrees, lookTime, initialLookVel);
+    }
+
+    /// <summary>
+    /// Public coroutine version of <see cref="LookAtUntilWithinDegrees"/>
+    /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
+    /// </summary>
+    /// <inheritdoc cref="LookAtUntilWithinDegrees"/>
+    public IEnumerator LookAtUntilWithinDegreesEnum(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        yield return LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel);
+    }
+
+    /// <summary>
+    /// Public coroutine version of <see cref="LookTowardUntilTimePeriod"/>
+    /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
+    /// </summary>
+    /// <inheritdoc cref="LookTowardUntilTimePeriod"/>
+    public IEnumerator LookTowardUntilTimePeriodEnum(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        yield return LookTowardUntilTimePeriodCoroutine(target, timePeriod, lookTime, initialLookVel, useSavedYawPitchVelocity: false);
+    }
+
+    /// <summary>
+    /// Public coroutine version of <see cref="LookAtTargetPitchYaw(float, float, float, float, float)"/>
+    /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetPitchYaw"/>
+    public IEnumerator LookAtTargetPitchYawEnum(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        yield return LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel);
+    }
+
+    /// <summary>
+    /// Public coroutine version of <see cref="LookAtTargetPitchYaw(float, float, float, float, float)"/>
+    /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
+    /// </summary>
+    /// <param name="lookTime">The exact time in seconds to Lerp towards the target pitch/yaw.</param>
+    /// <inheritdoc cref="LookAtTargetPitchYaw"/>
+    public IEnumerator LookAtTargetPitchYaw_LerpEnum(float targetPitch, float targetYaw, float lookTime)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        yield return LookAtTargetPitchYawLerpCoroutine(targetPitch, targetYaw, lookTime);
     }
     #endregion
 
