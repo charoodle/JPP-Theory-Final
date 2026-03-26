@@ -77,13 +77,20 @@ public class RotationLookAt : MonoBehaviour
             // Head
             Debug.DrawRay(rotateFreedHead.transform.position, rotateFreedHead.transform.forward * debugRayMaxDistance_FreedHead, debugRayColor);
         }
-
     }
     #endregion
 
 
     #region LookAt Functions (aka stoppable midway) - not tested
-
+    /// <summary>
+    /// Look at a target until the pitch/yaw degrees reach a certain degrees.
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetForSecondsCoroutine"/>
+    public void LookAtUntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        currentLookAt = StartCoroutine(LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel));
+    }
     #endregion
 
 
@@ -125,7 +132,7 @@ public class RotationLookAt : MonoBehaviour
     }
 
 
-    #region Main LookAt Coroutines
+    #region (Protected) LookAt Coroutines
     /// <summary>
     /// Make the character controller permanently look at a target (until manually stopped) or this coroutine is called again.
     /// Uses the look rotation's pitch and yaw system to get a target pitch/yaw to smoothly rotate towards the target transform.
@@ -159,6 +166,46 @@ public class RotationLookAt : MonoBehaviour
             SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
             yield return null;
         }
+    }
+
+    /// <summary>
+    /// Make the character controller's view move towards a target for a time period (in seconds).
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetForSecondsCoroutine(Transform, float, float, float, float)"></inheritdoc>
+    protected IEnumerator LookAtUntilWithinDegreesCoroutine(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        // Degrees should be positive
+        withinDegrees = Mathf.Abs(withinDegrees);
+
+        // Cannot have negative look time.
+        if (lookTime < 0)
+        {
+            Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
+            yield break;
+        }
+
+        float yawVel = initialLookVel;
+        float pitchVel = initialLookVel;
+
+        // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+
+        // Get target pitch and yaw from a world position for char to look at
+        GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+
+        while (!LookDegreesIsCloseEnough(yawDegrees, targetYaw, withinDegrees) || !LookDegreesIsCloseEnough(pitchDegrees, targetPitch, withinDegrees))
+        {
+            // Target doesn't exist anymore; break out.
+            if (!target)
+                yield break;
+
+            // Update target pitch and yaw, since target can be moving
+            GetTargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
+            SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
+            yield return null;
+        }
+
+        // Keep current yaw/pitch velocity and pass it out in case there's a LookAtForTimePeriod coroutine chained after this that needs it.
+        LookAt_SaveCurrentYawPitchVelocity(yawVel, pitchVel);
     }
     #endregion
 
@@ -273,6 +320,21 @@ public class RotationLookAt : MonoBehaviour
             }
         }
         return yawDegrees;
+    }
+
+    /// <returns>True if the degree difference between yaw and targetYaw is within the degree gap. False if too big.</returns>
+    protected bool LookDegreesIsCloseEnough(float yawDegrees, float targetYawDegrees, float degreesGap = 0.1f)
+    {
+        return Mathf.Abs(targetYawDegrees - yawDegrees) <= Mathf.Abs(degreesGap);
+    }
+
+    /// <summary>
+    /// Cache the yawVel and pitchVel. Should be used when chaining coroutine LookAtForTimePeriod after LookAtUntilWithinDegrees.
+    /// </summary>
+    protected void LookAt_SaveCurrentYawPitchVelocity(float yawVel, float pitchVel)
+    {
+        lookAt_lastYawVel = yawVel;
+        lookAt_lastPitchVel = pitchVel;
     }
     #endregion
 }

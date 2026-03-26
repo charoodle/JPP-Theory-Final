@@ -8,13 +8,11 @@ using UnityEngine;
 public class LookAtFunctions_Extracted_Tests : MonoBehaviour
 {
     [SerializeField] RotationLookAt obj;
-
     public List<GameObject> targets;
-
     public KeyCode nextTargetKey = KeyCode.Space;
-
-
     protected int lastTargetIdx;
+
+    public float LookAt_WithinDegreesAmt = 5f;
 
     void Update()
     {
@@ -28,9 +26,10 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         {
             Debug.LogError("Target is null.");
             return;
-        }    
+        }
 
-        obj.LookAt(target.transform);
+        //obj.LookAt(target.transform);
+        obj.LookAtUntilWithinDegrees(target.transform, LookAt_WithinDegreesAmt);
     }
 
     protected GameObject GetRandomTarget()
