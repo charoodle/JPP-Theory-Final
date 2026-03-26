@@ -29,8 +29,6 @@ public class RotationLookAt : MonoBehaviour
     [SerializeField] protected float debugRayMaxDistance_FreedHead = 50f;
     [SerializeField] protected Color debugRayColor = Color.red;
 
-
-
     [Header("Fields")]
     /// <summary> Current yaw rotation. </summary>
     [SerializeField] protected float yawDegrees;
@@ -81,19 +79,6 @@ public class RotationLookAt : MonoBehaviour
     #endregion
 
 
-    #region LookAt Functions (aka stoppable midway) - not tested
-    /// <summary>
-    /// Look towards a pitch/yaw value. Can get the current pitch/yaw value to use this method later with <see cref="GetYawAndPitchDegrees(out float, out float)"/>.
-    /// </summary>
-    /// <inheritdoc cref="LookAtTargetPitchYawCoroutine(float, float, float, float, float)"/>
-    public void LookAtTargetPitchYaw(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-    {
-        StopLookAtCoroutine(currentLookAt);
-        currentLookAt = StartCoroutine(LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel));
-    }
-    #endregion
-
-
     #region LookAt Functions (aka stoppable midway) - tested
     /// <summary>
     /// Look at a target forever until another LookAt function is called or <see cref="LookAtStop"/> is called.
@@ -126,6 +111,24 @@ public class RotationLookAt : MonoBehaviour
     }
 
     /// <summary>
+    /// Look towards a pitch/yaw value. Can get the current pitch/yaw value to use this method later with <see cref="GetYawAndPitchDegrees(out float, out float)"/>.
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetPitchYawCoroutine(float, float, float, float, float)"/>
+    public void LookAtTargetPitchYaw(float targetPitch, float targetYaw, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        currentLookAt = StartCoroutine(LookAtTargetPitchYawCoroutine(targetPitch, targetYaw, withinDegrees, lookTime, initialLookVel));
+    }
+
+    /// <summary>Make the character look towards a target pitch/yaw within <paramref name="lookTime"/> seconds exactly (uses Lerp instead of SmoothDamp).</summary>
+    /// <inheritdoc cref="LookAtTargetPitchYawLerpCoroutine"/>
+    public void LookAtTargetPitchYaw_Lerp(float targetPitch, float targetYaw, float lookTime)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        currentLookAt = StartCoroutine(LookAtTargetPitchYawLerpCoroutine(targetPitch, targetYaw, lookTime));
+    }
+
+    /// <summary>
     /// Stop the current pausable LookAt coroutine. Does not work with any of the "LookAt___Enum" versions, since those must be played out until their conditions are satisfied.
     /// </summary>
     public void LookAtStop()
@@ -149,6 +152,32 @@ public class RotationLookAt : MonoBehaviour
     {
         pitch = pitchDegrees;
         yaw = yawDegrees;
+    }
+
+    /// <summary>
+    /// Converts the world position into a target yaw and pitch relative to this character's head.
+    /// 
+    /// TODO: Make the <see cref="rotateFreedHead"/> a passed-in parameter, Not a hardcoded value.
+    /// </summary>
+    /// 
+    public void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
+    {
+        // Yaw and pitch degrees are relative to the world forward direction
+        Vector3 worldForward = Vector3.forward;
+        Vector3 headPosition = rotateFreedHead.transform.position;
+        Vector3 toDirection = worldPosition - headPosition;
+        Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
+
+        // Assign eulers out
+        yaw = quat.eulerAngles.y;
+        pitch = quat.eulerAngles.x;
+
+        // If look object goes above head object, euler X will wrap around from 1* to 360*.
+        if (quat.eulerAngles.x > 180f)
+            pitch = quat.eulerAngles.x - 360f;
+
+        // Make sure target yaw is within yaw system's degrees.
+        KeepYawBetween180(ref yaw);
     }
     #endregion
 
@@ -376,36 +405,50 @@ public class RotationLookAt : MonoBehaviour
         pitchDegrees = targetPitch;
         yawDegrees = targetYaw;
     }
+
+    /// <summary>
+    /// Make the character controller rotate to look at a target pitch and yaw exactly within <paramref name="lookTime"/> seconds.
+    /// </summary>
+    /// <param name="lookTime">Exactly how many seconds until character's look direction will match target direction.</param>
+    /// <inheritdoc cref="LookAtTargetPitchYawCoroutine(float, float, float, float, float)"/>
+    protected virtual IEnumerator LookAtTargetPitchYawLerpCoroutine(float targetPitch, float targetYaw, float lookTime = LOOKTIME_LERP)
+    {
+        // Cannot have negative look time.
+        if (lookTime < 0)
+        {
+            Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
+            yield break;
+        }
+
+        // Cannot divide by 0 in lerp function. Skips loop.
+        if (lookTime == 0)
+        {
+            this.pitchDegrees = targetPitch;
+            this.yawDegrees = targetYaw;
+            yield break;
+        }
+
+        // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+
+        float timer = 0f;
+        float startYaw = yawDegrees;
+        float startPitch = pitchDegrees;
+        while (timer <= lookTime)
+        {
+            float pct = timer / lookTime;
+            LerpYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, startYaw, startPitch, pct);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        // When done, make sure to snap character rotation to target rotation.
+        pitchDegrees = targetPitch;
+        yawDegrees = targetYaw;
+    }
     #endregion
 
 
     #region LookAt Helper Functions
-    /// <summary>
-    /// Converts the world position into a target yaw and pitch relative to this character's head.
-    /// 
-    /// TODO: Make the <see cref="rotateFreedHead"/> a passed-in parameter, Not a hardcoded value.
-    /// </summary>
-    /// 
-    public void GetTargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
-    {
-        // Yaw and pitch degrees are relative to the world forward direction
-        Vector3 worldForward = Vector3.forward;
-        Vector3 headPosition = rotateFreedHead.transform.position;
-        Vector3 toDirection = worldPosition - headPosition;
-        Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
-
-        // Assign eulers out
-        yaw = quat.eulerAngles.y;
-        pitch = quat.eulerAngles.x;
-
-        // If look object goes above head object, euler X will wrap around from 1* to 360*.
-        if (quat.eulerAngles.x > 180f)
-            pitch = quat.eulerAngles.x - 360f;
-
-        // Make sure target yaw is within yaw system's degrees.
-        KeepYawBetween180(ref yaw);
-    }
-
     /// <summary>
     /// Stop the current LookAt coroutine.
     /// </summary>
@@ -439,6 +482,26 @@ public class RotationLookAt : MonoBehaviour
         // SmoothDamp current yaw and pitch towards target yaw/pitch
         this.yawDegrees = Mathf.SmoothDamp(currentYaw, targetYaw, ref yawVel, lookTime);
         this.pitchDegrees = Mathf.SmoothDamp(currentPitch, targetPitch, ref pitchVel, lookTime);
+
+        // Convert to -180 to 180 for pitch system
+        KeepYawBetween180(ref yawDegrees);
+        // Pitch - Clamp from -90 to 90
+        pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
+    }
+
+    /// <param name="pct">Lerp percent (0f-1f).</param>
+    /// <inheritdoc cref="SmoothDampYawAndPitchToTarget(ref float, ref float, float, float, ref float, ref float, float)"/>
+    protected void LerpYawAndPitchToTarget(ref float yawDegrees, ref float pitchDegrees, float targetYaw, float targetPitch, float startYaw, float startPitch, float pct)
+    {
+        // Make sure the target angle has same system as this cc's yaw system.
+        KeepYawBetween180(ref targetYaw);
+
+        // Must use opposite version of yawDegrees angle if yawDegrees --> targetYaw crosses over from -180 to 180 (and vice versa).
+        startYaw = DetectIfYawPassesOver180(startYaw, targetYaw);
+
+        // Lerp current yaw and pitch towards target yaw/pitch
+        this.yawDegrees = Mathf.Lerp(startYaw, targetYaw, pct);
+        this.pitchDegrees = Mathf.Lerp(startPitch, targetPitch, pct);
 
         // Convert to -180 to 180 for pitch system
         KeepYawBetween180(ref yawDegrees);

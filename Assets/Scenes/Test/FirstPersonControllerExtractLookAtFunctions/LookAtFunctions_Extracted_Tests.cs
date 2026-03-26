@@ -32,7 +32,8 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         //obj.LookAtUntilWithinDegrees(target.transform, LookAt_WithinDegreesAmt);
         //obj.LookAtTargetForSeconds(target.transform, 1f, LookAt_WithinDegreesAmt);
         //StartCoroutine(LookAtTargetForSecondsThenSwitchToRandomTarget(target));
-        obj.LookAtTargetPitchYaw(30f, 180f);
+        //obj.LookAtTargetPitchYaw(30f, 180f);
+        obj.LookAtTargetPitchYaw_Lerp(30f, 180f, 5f);
     }
 
     protected IEnumerator LookAtTargetForSecondsThenSwitchToRandomTarget(GameObject target)
