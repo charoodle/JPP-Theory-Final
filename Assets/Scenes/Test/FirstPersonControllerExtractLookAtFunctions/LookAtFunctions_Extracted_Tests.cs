@@ -29,7 +29,16 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         }
 
         //obj.LookAt(target.transform);
-        obj.LookAtUntilWithinDegrees(target.transform, LookAt_WithinDegreesAmt);
+        //obj.LookAtUntilWithinDegrees(target.transform, LookAt_WithinDegreesAmt);
+        //obj.LookAtTargetForSeconds(target.transform, 1f, LookAt_WithinDegreesAmt);
+        StartCoroutine(LookAtTargetForSecondsThenSwitchToRandomTarget(target));
+    }
+
+    protected IEnumerator LookAtTargetForSecondsThenSwitchToRandomTarget(GameObject target)
+    {
+        yield return obj.LookAtTargetForSecondsEnum(target.transform, 1f, LookAt_WithinDegreesAmt);
+
+        obj.LookAt(GetRandomTarget().transform);
     }
 
     protected GameObject GetRandomTarget()
@@ -43,6 +52,8 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
             idx = Random.Range(0, targets.Count);
         }
 
+        // Update last target to prevent duplicate for next time
+        lastTargetIdx = idx;
         return targets[idx];
     }
 }

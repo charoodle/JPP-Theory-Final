@@ -82,15 +82,7 @@ public class RotationLookAt : MonoBehaviour
 
 
     #region LookAt Functions (aka stoppable midway) - not tested
-    /// <summary>
-    /// Look at a target until the pitch/yaw degrees reach a certain degrees.
-    /// </summary>
-    /// <inheritdoc cref="LookAtTargetForSecondsCoroutine"/>
-    public void LookAtUntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-    {
-        StopLookAtCoroutine(currentLookAt);
-        currentLookAt = StartCoroutine(LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel));
-    }
+    
     #endregion
 
 
@@ -103,6 +95,39 @@ public class RotationLookAt : MonoBehaviour
     {
         StopLookAtCoroutine(currentLookAt);
         currentLookAt = StartCoroutine(LookAtPermanentlyCoroutine(target, lookTime, initialLookVel));
+    }
+
+    /// <summary>
+    /// Look at a target until the pitch/yaw degrees reach a certain degrees.
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetForSecondsCoroutine"/>
+    public void LookAtUntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        currentLookAt = StartCoroutine(LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel));
+    }
+
+    /// <summary>
+    /// Look toward a target until pitch/yaw of view is <paramref name="withinDegrees"/> of target.
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetForSecondsCoroutine"/>
+    public void LookAtTargetForSeconds(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        currentLookAt = StartCoroutine(LookAtTargetForSecondsEnum(target, timePeriod, withinDegrees, lookTime, initialLookVel));
+    }
+    #endregion
+
+
+    #region LookAt IEnum Functions (aka unstoppable midway)
+    /// <summary> Public coroutine version of <see cref="LookAtTargetForSeconds"/>.
+    /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
+    /// </summary>
+    /// <inheritdoc cref="LookAtTargetForSeconds"/>
+    public IEnumerator LookAtTargetForSecondsEnum(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        StopLookAtCoroutine(currentLookAt);
+        yield return LookAtTargetForSecondsCoroutine(target, timePeriod, withinDegrees, lookTime, initialLookVel);
     }
     #endregion
 
@@ -206,6 +231,77 @@ public class RotationLookAt : MonoBehaviour
 
         // Keep current yaw/pitch velocity and pass it out in case there's a LookAtForTimePeriod coroutine chained after this that needs it.
         LookAt_SaveCurrentYawPitchVelocity(yawVel, pitchVel);
+    }
+
+    /// <summary>
+    /// Make the character controller look towards a target until its within a certain degrees, keeps looking towards it for x seconds, and then stops.
+    /// </summary>
+    /// <param name="target">Target transform to look at.</param>
+    /// <param name="timePeriod">How many seconds to maintain look at target.</param>
+    /// <param name="withinDegrees">The minimum degree difference where it is considered acceptable enough to be "looking" at the target (SmoothDamp can take a long time to reach exact degrees).</param>
+    /// <param name="lookTime">Roughly how many seconds until character's look direction matches to target direction.</param>
+    /// <param name="initialLookVel">How fast the character look speed initially is.</param>
+    protected virtual IEnumerator LookAtTargetForSecondsCoroutine(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        // Look at the object
+        yield return LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel);
+
+        // Hold look there for a time period
+        bool usePreviousLookAtVelocity = true;
+        yield return LookTowardUntilTimePeriodCoroutine(target, timePeriod, lookTime, initialLookVel, usePreviousLookAtVelocity);
+    }
+
+    /// <summary>
+    /// Make the character controller's view move towards a target for a time period (in seconds).
+    /// </summary>
+    /// <param name="timePeriod">How many seconds to move view towards target, no matter the current view yaw/pitch.</param>
+    /// <inheritdoc cref="LookAtTargetForSecondsCoroutine(Transform, float, float, float, float)"/>
+    protected IEnumerator LookTowardUntilTimePeriodCoroutine(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, bool useSavedYawPitchVelocity = false)
+    {
+        // Cannot have negative look time.
+        if (lookTime < 0)
+        {
+            Debug.LogWarning("LookAtCoroutine: Look time cannot be negative.");
+            yield break;
+        }
+
+        // Dont need to run through this code.
+        if (lookTime == 0)
+        {
+            yield break;
+        }
+
+        float yawVel;
+        float pitchVel;
+        if (useSavedYawPitchVelocity)
+        {
+            yawVel = lookAt_lastYawVel;
+            pitchVel = lookAt_lastPitchVel;
+        }
+        else
+        {
+            yawVel = initialLookVel;
+            pitchVel = initialLookVel;
+        }
+
+        // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
+
+        // Get target pitch and yaw from a world position for char to look at
+        GetTargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+
+        float timer = 0f;
+        while (timer < timePeriod)
+        {
+            // Target doesn't exist anymore; break out.
+            if (!target)
+                yield break;
+
+            // Update target pitch and yaw, since target can be moving
+            GetTargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
+            SmoothDampYawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
+            timer += Time.deltaTime;
+            yield return null;
+        }
     }
     #endregion
 
