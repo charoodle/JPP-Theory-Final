@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// For testing out <see cref="RotationLookAt"/> functions while extracting them out from <see cref="MyProject.CharacterController"/>.
@@ -10,19 +13,24 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
     [SerializeField] RotationLookAt obj;
     public List<GameObject> targets;
     public KeyCode nextTargetKey = KeyCode.Space;
+    public KeyCode test_IEnums_Key = KeyCode.I;
     protected int lastTargetIdx;
-
     public float LookAt_WithinDegreesAmt = 5f;
+
+    Coroutine coroutine;
 
     void Update()
     {
         if (Input.GetKeyDown(nextTargetKey))
-            LookAt(GetRandomTarget());
+            Test_LookAt(GetRandomTarget());
+
+        if (Input.GetKeyDown(test_IEnums_Key))
+            Test_LookAt_IEnums();
     }
 
-    protected void LookAt(GameObject target)
+    protected void Test_LookAt(GameObject lookAtTarget)
     {
-        if(target == null)
+        if (lookAtTarget == null)
         {
             Debug.LogError("Target is null.");
             return;
@@ -33,7 +41,91 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         //obj.LookAtTargetForSeconds(target.transform, 1f, LookAt_WithinDegreesAmt);
         //StartCoroutine(LookAtTargetForSecondsThenSwitchToRandomTarget(target));
         //obj.LookAtTargetPitchYaw(30f, 180f);
-        obj.LookAtTargetPitchYaw_Lerp(30f, 180f, 5f);
+        //obj.LookAtTargetPitchYaw_Lerp(30f, 180f, 5f);
+    }
+
+
+    protected void Test_LookAt_IEnums()
+    {
+        if(coroutine != null)
+            StopCoroutine(coroutine);
+        coroutine = StartCoroutine(Test_LookAt_IEnums_CR());
+    }
+
+    protected IEnumerator Test_LookAt_IEnums_CR()
+    {
+        Transform target = GetRandomTarget().transform;
+
+        //// LookAtTargetForSeconds Enum
+        //DebugPrintLine();
+        //Debug.Log("Starting LookAtTargetForSecondsEnum...");
+        //float startTime = Time.time;
+        //yield return obj.LookAtTargetForSecondsEnum(target, 3f);
+        //Debug.Log($"Finished! Total time elapsed: {GetTimeElapsed(startTime)}");
+        //yield return obj.LookAtTargetPitchYawEnum(startPitch, startYaw, withinDegrees:0.05f);
+
+        //// LookAtTargetUntilWithinDegrees Enum
+        //DebugPrintLine();
+        //Debug.Log("Starting LookAtTargetForSecondsEnum...");
+
+        yield return Test_LookAtIEnumFunction(() => obj.LookAtTargetForSecondsEnum(target, 3f), "LookAtTargetForSecondsEnum");
+
+        target = GetRandomTarget().transform;
+        yield return Test_LookAtIEnumFunction(() => obj.LookAtUntilWithinDegreesEnum(target, 1f), "LookAtUntilWithinDegreesEnum");
+
+        yield return Test_LookAtIEnumFunction(() => obj.LookTowardUntilTimePeriodEnum(target, 5f), "LookTowardUntilTimePeriodEnum");
+
+        target = GetRandomTarget().transform;
+        float yaw, pitch;
+        obj.GetTargetPitchAndYawFrom(target.position, out yaw, out pitch);
+        yield return Test_LookAtIEnumFunction(() => obj.LookAtTargetPitchYaw_LerpEnum(pitch, yaw, 5f), "LookAtTargetPitchYaw_LerpEnum");
+
+        yield return Test_LookAtIEnumFunction(() => obj.LookAtTargetPitchYawEnum(pitch, yaw), "LookAtTargetPitchYaw");
+
+        Debug.Log("(Done) Finished all tests!");
+
+        yield break;
+
+
+        // Tests various LookAtEnum functions for timing
+        IEnumerator Test_LookAtIEnumFunction(Func<IEnumerator> lookAtFunction, string funcName)
+        {
+            float startPitch = 0f;
+            float startYaw = 0f;
+            obj.GetYawAndPitchDegrees(out startPitch, out startYaw);
+
+            yield return new WaitForSeconds(1f);
+
+            // Keep track of timer
+            Debug.Log($"(START) {funcName}");
+            float startTime = Time.time;
+            
+            // Run the LookAt function provided
+            yield return lookAtFunction();
+
+            // What is the final pitch/yaw?
+            float pitch, yaw = 0;
+            obj.GetYawAndPitchDegrees(out pitch, out yaw);
+
+            // How long did it take
+            Debug.Log($"(FINISHED!) Time elapsed: {GetTimeElapsed(startTime)} " +
+                $"\nFinal Pitch: {pitch}d | Final Yaw: {yaw}d");
+
+            // Return to beginning pitch/yaw values
+            yield return obj.LookAtTargetPitchYawEnum(startPitch, startYaw, withinDegrees: 0.05f);
+
+            DebugPrintLine();
+        }
+        
+        static string GetTimeElapsed(float startTime, int decimalPlaces = 2)
+        {
+            return (Mathf.Round((Time.time - startTime) * Mathf.Pow(10, decimalPlaces)) / Mathf.Pow(10, decimalPlaces) + " seconds");
+        }
+
+        void DebugPrintLine()
+        {
+            Debug.Log("----------------------------------------------");
+        }
     }
 
     protected IEnumerator LookAtTargetForSecondsThenSwitchToRandomTarget(GameObject target)
@@ -49,7 +141,7 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
             return null;
 
         int idx = Random.Range(0, targets.Count);
-        while(targets.Count > 1 && idx == lastTargetIdx)
+        while (targets.Count > 1 && idx == lastTargetIdx)
         {
             idx = Random.Range(0, targets.Count);
         }
@@ -59,3 +151,5 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         return targets[idx];
     }
 }
+
+
