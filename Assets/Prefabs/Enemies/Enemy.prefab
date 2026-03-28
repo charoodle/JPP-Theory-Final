@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 2424105798403699081}
   - component: {fileID: 4912844305923083565}
   - component: {fileID: 154378166530389889}
+  - component: {fileID: 1464603638047049381}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
@@ -117,12 +118,9 @@ MonoBehaviour:
   playerVelocity: {x: 0, y: 0, z: 0}
   _walkSpeed: 3
   sprintSpeedMultiplier: 2
+  rot: {fileID: 1464603638047049381}
   rotateBody: {fileID: 6382267599755501001}
   rotateFreedHead: {fileID: 3643293438439803783}
-  yawDegrees: 0
-  pitchDegrees: 0
-  maxPitchDegreesUp: 90
-  maxPitchDegreesDown: -90
   jumpHeight: 3
   _isGrounded: 0
   currentMovingGroundSurface: {fileID: 0}
@@ -132,6 +130,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   canMove: 1
+  isAlliedNPC: 0
+  castleTargetName: 
 --- !u!114 &4912844305923083565
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -146,6 +146,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _startingHealth: 3
   _health: 0
+  debugGodMode: 0
+  debugDie: 0
 --- !u!54 &154378166530389889
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -173,6 +175,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!114 &1464603638047049381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441229949222502572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 905fac7de6d8e314fba232eac046e362, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugRayVisible: 0
+  debugRayMaxDistance_FreedHead: 50
+  debugRayColor: {r: 1, g: 0, b: 0, a: 1}
+  yawDegrees: 0
+  pitchDegrees: 0
 --- !u!1 &2208434775185217470
 GameObject:
   m_ObjectHideFlags: 0

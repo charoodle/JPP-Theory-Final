@@ -273,27 +273,27 @@ public class Announcer_Tutorial : TalkWithInteractable
         // Save player view info
         float origViewPitch = 0f;
         float origViewYaw = 0f;
-        playerController.GetYawAndPitchDegrees(out origViewPitch, out origViewYaw);
+        playerController.rot.GetYawAndPitchDegrees(out origViewPitch, out origViewYaw);
         // Get gate positional info
         Vector3 gatePosition = castleEntranceLookAtPoint.transform.position;
         float gatePitch = 0f;
         float gateYaw = 0f;
-        playerController.GetTargetPitchAndYawFrom(gatePosition, out gateYaw, out gatePitch);
+        playerController.rot.GetTargetPitchAndYawFrom(gatePosition, out gateYaw, out gatePitch);
         // Make player look at gate entrance
-        playerController.LookAtTargetPitchYaw(gatePitch, gateYaw, withinDegrees:0.1f);
+        playerController.rot.LookAtTargetPitchYaw(gatePitch, gateYaw, withinDegrees:0.1f);
         // Make gate disappear
         gateToTrebuchet.SetActive(false);
         yield return TextBox("And when you're done, head on over to the next gate over. It's time to teach you how to use our ultimate weapon...", minAppearTime: 1f);
 
         // Make player look at trebuchet lookat transform
-        playerController.LookAt(trebuchetLookAtPoint);
+        playerController.rot.LookAt(trebuchetLookAtPoint);
         yield return TextBox("...the trebuchet.", minAppearTime: 2f);
         {
             playerController.canFireWeaponInHand = true;
         }
 
         // Wait until player returns to original look position
-        yield return playerController.LookAtTargetPitchYawEnum(origViewPitch, origViewYaw, withinDegrees: 0.1f);
+        yield return playerController.rot.LookAtTargetPitchYawEnum(origViewPitch, origViewYaw, withinDegrees: 0.1f);
 
         // Enable player look & move input again when cutscene ends
         playerController.canInputLook = true;
@@ -431,7 +431,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         // Make player look at trebuchet projectile when they press the button
         TrebuchetProjectile rock = FindObjectOfType<TrebuchetProjectile>();
         if (rock)
-            playerController.LookAt(rock.transform, lookTime: 0.25f);
+            playerController.rot.LookAt(rock.transform, lookTime: 0.25f);
 
         // Freeze player controls
         playerController.canInputLook = false;
@@ -444,7 +444,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return new WaitForSeconds(1.5f);
 
         // Make player stop looking at rock
-        playerController.LookAtStop();
+        playerController.rot.LookAtStop();
 
         // Let player move again
         playerController.canInputLook = true;

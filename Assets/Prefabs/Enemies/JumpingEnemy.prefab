@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 2786712072430458263}
   - component: {fileID: 9045228633002940702}
   - component: {fileID: 5197361451691109916}
+  - component: {fileID: 6591504705997294599}
   m_Layer: 6
   m_Name: JumpingEnemy
   m_TagString: Untagged
@@ -117,12 +118,9 @@ MonoBehaviour:
   playerVelocity: {x: 0, y: 0, z: 0}
   _walkSpeed: 3
   sprintSpeedMultiplier: 2
+  rot: {fileID: 0}
   rotateBody: {fileID: 6622066922929996405}
   rotateFreedHead: {fileID: 2278507912291983282}
-  yawDegrees: 0
-  pitchDegrees: 0
-  maxPitchDegreesUp: 90
-  maxPitchDegreesDown: -90
   jumpHeight: 3
   _isGrounded: 0
   currentMovingGroundSurface: {fileID: 0}
@@ -132,6 +130,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   canMove: 1
+  isAlliedNPC: 0
+  castleTargetName: 
   wantsToJump: 0
   jumpCooldownSecondsLeft: 0
 --- !u!114 &9045228633002940702
@@ -148,6 +148,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _startingHealth: 3
   _health: 0
+  debugGodMode: 0
+  debugDie: 0
 --- !u!54 &5197361451691109916
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -175,6 +177,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!114 &6591504705997294599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4532908670143493318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 905fac7de6d8e314fba232eac046e362, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugRayVisible: 0
+  debugRayMaxDistance_FreedHead: 50
+  debugRayColor: {r: 1, g: 0, b: 0, a: 1}
+  yawDegrees: 0
+  pitchDegrees: 0
 --- !u!1 &5354945729792749577
 GameObject:
   m_ObjectHideFlags: 0

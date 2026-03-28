@@ -32,18 +32,8 @@ public class EnemyController : MyProject.CharacterController
 
     protected override void Start()
     {
-        // Make enemy rotation retain same way they are facing on game start.
-        yawDegrees = transform.rotation.eulerAngles.y;
-
         // Vary move speed for each enemy
         RandomizeBaseWalkSpeed(0.25f);
-
-        // Make them look at opposite enemy's castle
-        if (!isAlliedNPC)
-        {
-            GameObject playerCastle = GameObject.Find(castleTargetName);
-            LookAt(playerCastle.transform);
-        }
 
         // Make them start run
         knightAnimations = GetComponentInChildren<KnightAnimations>();
@@ -51,6 +41,14 @@ public class EnemyController : MyProject.CharacterController
             knightAnimations.Run();
 
         base.Start();
+
+        // Make them look at opposite enemy's castle. Must do this after base.Start() because the rot get initialized there.
+        if (!isAlliedNPC)
+        {
+            GameObject playerCastle = GameObject.Find(castleTargetName);
+            if (playerCastle)
+                rot.LookAt(playerCastle.transform);
+        }
     }
 
     /// <summary>Deviate walk speed by +- a percent of their current walk speed.</summary>

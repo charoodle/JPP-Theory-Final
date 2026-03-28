@@ -26,20 +26,20 @@ public class RotationLookAt : MonoBehaviour
 {
     #region Exposed Fields
     [Header("Debug")]
-    [SerializeField] protected bool debugRayVisible = true;
+    [SerializeField] protected bool debugRayVisible = false;
     [SerializeField] protected float debugRayMaxDistance_FreedHead = 50f;
     [SerializeField] protected Color debugRayColor = Color.red;
 
+    /// <summary> Current yaw rotation (for the head + body). </summary>
     [Header("Fields")]
-    /// <summary> Current yaw rotation. </summary>
-    [SerializeField] protected float yawDegrees;
+    [SerializeField] public float yawDegrees;
     /// <summary> Current pitch rotation (for the head). </summary>
-    [SerializeField] protected float pitchDegrees;
+    [SerializeField] public float pitchDegrees;
 
     /// <summary> The body that rotates around (yaw only). </summary>
-    [SerializeField] Transform rotateBody;
+    private Transform rotateBody;
     /// <summary> The head that rotates around (pitch + yaw). </summary>
-    [SerializeField] Transform rotateFreedHead;
+    private Transform rotateFreedHead;
 
     /// <summary> How many degrees can look rotate head upwards. </summary>
     [Header("Settings")]
@@ -64,7 +64,7 @@ public class RotationLookAt : MonoBehaviour
     protected Coroutine currentLookAt;
     #endregion
 
-
+    
     #region LifeCycle Functions
     protected void LateUpdate()
     {
@@ -103,6 +103,58 @@ public class RotationLookAt : MonoBehaviour
         if (body)
             body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
     }
+
+
+    #region Init Functions
+    /// <summary>
+    /// Must have a body assigned (atm).
+    /// </summary>
+    /// <param name="body"></param>
+    public void AssignBody(Transform body)
+    {
+        if (!body)
+        {
+            Debug.LogError("Body is null.", this.gameObject);
+            return;
+        }
+        rotateBody = body;
+    }
+
+    /// <summary>
+    /// Must have a head assigned to work (atm).
+    /// </summary>
+    /// <param name="head"></param>
+    public void AssignHead(Transform head)
+    {
+        if (!head)
+        {
+            Debug.LogError("Head is null.", this.gameObject);
+            return;
+        }
+        rotateFreedHead = head;
+    }
+
+    public void SetMaxPitchUp(float value)
+    {
+        maxPitchDegreesUp = value;
+    }
+
+    public void SetMaxPitchDown(float value)
+    {
+        maxPitchDegreesDown = value;
+    }
+
+    /// <summary>
+    /// For use in Start() to make the object face the same orientation (from editor placement) on game start.
+    /// </summary>
+    /// <param name="startYaw"></param>
+    /// <param name="startPitch"></param>
+    public void InitializeStartingRotation(float startYaw, float startPitch = 0f)
+    {
+        yawDegrees = startYaw;
+        pitchDegrees = startPitch;
+    }
+    #endregion
 
 
     #region LookAt Functions (aka stoppable midway) - tested
@@ -507,6 +559,19 @@ public class RotationLookAt : MonoBehaviour
 
     #region LookAt Helper Functions
     /// <summary>
+    /// Since using Vector3.Euler seems to put the character's Y rotation (yaw) from [-180, 180]. This yaw system constrains itself to that.
+    /// </summary>
+    /// <param name="yaw">Any angle to convert to between [-180,180].</param>
+    public void KeepYawBetween180(ref float yaw)
+    {
+        /// TODO: What if yaw is way bigger than 360? 540? Use modulo? Don't use hardcoded number like 360?
+        if (yaw > 180f)
+            yaw -= 360f; // get the equivalent negative version
+        else if (yaw < -180f)
+            yaw += 360f; // get the equivalent positive version
+    }
+
+    /// <summary>
     /// Stop the current LookAt coroutine.
     /// </summary>
     protected void StopLookAtCoroutine(Coroutine coroutine)
@@ -564,19 +629,6 @@ public class RotationLookAt : MonoBehaviour
         KeepYawBetween180(ref yawDegrees);
         // Pitch - Clamp from -90 to 90
         pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
-    }
-
-    /// <summary>
-    /// Since using Vector3.Euler seems to put the character's Y rotation (yaw) from [-180, 180]. This yaw system constrains itself to that.
-    /// </summary>
-    /// <param name="yaw">Any angle to convert to between [-180,180].</param>
-    protected void KeepYawBetween180(ref float yaw)
-    {
-        /// TODO: What if yaw is way bigger than 360? 540? Use modulo? Don't use hardcoded number like 360?
-        if (yaw > 180f)
-            yaw -= 360f; // get the equivalent negative version
-        else if (yaw < -180f)
-            yaw += 360f; // get the equivalent positive version
     }
 
     /// <summary>

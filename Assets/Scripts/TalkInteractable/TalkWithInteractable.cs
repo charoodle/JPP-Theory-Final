@@ -218,7 +218,7 @@ public abstract class TalkWithInteractable : Interactable
     /// <param name="target">Transform for character to look towards.</param>
     protected void SimultaneousCharacterLookAt(CharacterController character, Transform target)
     {
-        character.LookAt(target);
+        character.rot.LookAt(target);
     }
 
     /// <inheritdoc cref="SimultaneousCharacterLookAt(CharacterController, Transform)"/>
@@ -241,7 +241,7 @@ public abstract class TalkWithInteractable : Interactable
         if (!character)
             throw new System.Exception("Character is null.");
 
-        yield return character.LookAtTargetForSecondsEnum(target, timePeriod:duration, withinDegrees:2f);
+        yield return character.rot.LookAtTargetForSecondsEnum(target, timePeriod:duration, withinDegrees:2f);
     }
 
     /// <inheritdoc cref="CharacterLookAt(CharacterController, Transform)"/>
@@ -251,12 +251,12 @@ public abstract class TalkWithInteractable : Interactable
         if (!character)
             throw new System.Exception("Character is null.");
 
-        yield return character.LookAtTargetPitchYawEnum(pitch, yaw, withinDegrees: 0.1f);
+        yield return character.rot.LookAtTargetPitchYawEnum(pitch, yaw, withinDegrees: 0.1f);
     }
 
     protected void GetCharacterLookRotation(CharacterController character, out float yaw, out float pitch)
     {
-        character.GetYawAndPitchDegrees(out yaw, out pitch);
+        character.rot.GetYawAndPitchDegrees(out yaw, out pitch);
     }
 
     // Save initial character and player rotations.
@@ -273,8 +273,8 @@ public abstract class TalkWithInteractable : Interactable
         Interactable.showInteractTextOnScreen = false;
 
         // Save the character's rotations
-        character.GetYawAndPitchDegrees(out charYaw, out charPitch);
-        player.GetYawAndPitchDegrees(out playerYaw, out playerPitch);
+        character.rot.GetYawAndPitchDegrees(out charYaw, out charPitch);
+        player.rot.GetYawAndPitchDegrees(out playerYaw, out playerPitch);
 
         // Turn on cutscene bars.
         dialogue.ToggleCutsceneBars();

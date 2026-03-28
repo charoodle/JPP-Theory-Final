@@ -3825,6 +3825,7 @@ GameObject:
   - component: {fileID: 1150662073357140179}
   - component: {fileID: 4189486101769705112}
   - component: {fileID: 1721779114702215116}
+  - component: {fileID: 6706291931533276560}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -3896,12 +3897,9 @@ MonoBehaviour:
   playerVelocity: {x: 0, y: 0, z: 0}
   _walkSpeed: 3
   sprintSpeedMultiplier: 2
+  rot: {fileID: 6706291931533276560}
   rotateBody: {fileID: 6984526295620345917}
   rotateFreedHead: {fileID: 2415866197391681030}
-  yawDegrees: 0
-  pitchDegrees: 0
-  maxPitchDegreesUp: 90
-  maxPitchDegreesDown: -90
   jumpHeight: 3
   _isGrounded: 0
   currentMovingGroundSurface: {fileID: 0}
@@ -3949,6 +3947,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!114 &6706291931533276560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8326966991488198015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 905fac7de6d8e314fba232eac046e362, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugRayVisible: 0
+  debugRayMaxDistance_FreedHead: 50
+  debugRayColor: {r: 1, g: 0, b: 0, a: 1}
+  yawDegrees: 0
+  pitchDegrees: 0
 --- !u!1 &8406904135005399038
 GameObject:
   m_ObjectHideFlags: 0

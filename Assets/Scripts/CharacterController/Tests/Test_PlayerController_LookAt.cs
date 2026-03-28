@@ -20,37 +20,37 @@ public class Test_PlayerController_LookAt : PlayerController
         // J: Look at target for some seconds
         if(Input.GetKeyDown(KeyCode.J))
         {
-            LookAtTargetForSeconds(target, 2f);
+            rot.LookAtTargetForSeconds(target, 2f);
         }
 
         // K: Look towards target for seconds
         if (Input.GetKeyDown(KeyCode.K))
         {
-            LookTowardUntilTimePeriod(target, 3f);
+            rot.LookTowardUntilTimePeriod(target, 3f);
         }
 
         // L: Look at target permanently
         if(Input.GetKeyDown(KeyCode.L))
         {
-            LookAt(target);
+            rot.LookAt(target);
         }
 
         // I: Look to the right 90*
         if(Input.GetKeyDown(KeyCode.I))
         {
-            LookAtTargetPitchYaw(0f, 90f);
+            rot.LookAtTargetPitchYaw(0f, 90f);
         }
 
         // O: Look at target until within degrees
         if(Input.GetKeyDown(KeyCode.O))
         {
-            LookAtUntilWithinDegrees(target, 0.1f);
+            rot.LookAtUntilWithinDegrees(target, 0.1f);
         }
 
         // P: Stop look at.
         if(Input.GetKeyDown(KeyCode.P))
         {
-            LookAtStop();
+            rot.LookAtStop();
         }
 
         //if (Input.GetKeyDown(KeyCode.L))
