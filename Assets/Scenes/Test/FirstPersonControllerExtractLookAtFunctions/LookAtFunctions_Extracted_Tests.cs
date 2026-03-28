@@ -41,7 +41,7 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         //obj.LookAtTargetForSeconds(target.transform, 1f, LookAt_WithinDegreesAmt);
         //StartCoroutine(LookAtTargetForSecondsThenSwitchToRandomTarget(target));
         //obj.LookAtTargetPitchYaw(30f, 180f);
-        //obj.LookAtTargetPitchYaw_Lerp(30f, 180f, 5f);
+        obj.LookAtTargetPitchYaw_Lerp(30f, 180f, 5f);
     }
 
 
@@ -55,18 +55,6 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
     protected IEnumerator Test_LookAt_IEnums_CR()
     {
         Transform target = GetRandomTarget().transform;
-
-        //// LookAtTargetForSeconds Enum
-        //DebugPrintLine();
-        //Debug.Log("Starting LookAtTargetForSecondsEnum...");
-        //float startTime = Time.time;
-        //yield return obj.LookAtTargetForSecondsEnum(target, 3f);
-        //Debug.Log($"Finished! Total time elapsed: {GetTimeElapsed(startTime)}");
-        //yield return obj.LookAtTargetPitchYawEnum(startPitch, startYaw, withinDegrees:0.05f);
-
-        //// LookAtTargetUntilWithinDegrees Enum
-        //DebugPrintLine();
-        //Debug.Log("Starting LookAtTargetForSecondsEnum...");
 
         yield return Test_LookAtIEnumFunction(() => obj.LookAtTargetForSecondsEnum(target, 3f), "LookAtTargetForSecondsEnum");
 
@@ -87,7 +75,7 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         yield break;
 
 
-        // Tests various LookAtEnum functions for timing
+        /// Tests various LookAtEnum functions for timing
         IEnumerator Test_LookAtIEnumFunction(Func<IEnumerator> lookAtFunction, string funcName)
         {
             float startPitch = 0f;
@@ -103,7 +91,7 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
             // Run the LookAt function provided
             yield return lookAtFunction();
 
-            // What is the final pitch/yaw?
+            // Output the final pitch/yaw
             float pitch, yaw = 0;
             obj.GetYawAndPitchDegrees(out pitch, out yaw);
 

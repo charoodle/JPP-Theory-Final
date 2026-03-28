@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// TODO:
 ///     [x] Port all functions as-is with same names and functions.
-///     [ ] Make sure it all works with a psuedo head/body, like how an enemy should behave.
+///     [x] Make sure it all works with a psuedo head/body, like how an enemy should behave.
 ///         
 ///  TODO when done porting:
 ///     Rename and clean up functions for a single generic object. Not just for a character-controller lookaround. 
@@ -79,6 +79,31 @@ public class RotationLookAt : MonoBehaviour
         }
     }
     #endregion
+
+
+    /// <summary>
+    /// Make the character game object look around
+    /// </summary>
+    /// <param name="yawDegrees">Euler degrees to pitch the yaw around.</param>
+    /// <param name="pitchDegrees">Euler degrees to pitch the character around.</param>
+    /// <param name="detachedHead">Rotates around the y *and* x axis. So it should be on a separate gameobject than the body (ex camera).</param>
+    /// <param name="body">Rotates around the y axis.</param>
+    protected void CharacterLookAround(ref float yawDegrees, ref float pitchDegrees, Transform detachedHead, Transform body)
+    {
+        // Clamp up and down rotation
+        pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
+
+        // Keep look rotation within -180 to +180. If goes over 180 or less than -180, wrap it by 360* and change the sign.
+        KeepYawBetween180(ref yawDegrees);
+
+        // Rotate camera - assumes its on a separate object from character that follow's character's body
+        if (detachedHead)
+            detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
+
+        // Rotate player body to match camera view rotation
+        if (body)
+            body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
+    }
 
 
     #region LookAt Functions (aka stoppable midway) - tested
@@ -253,31 +278,6 @@ public class RotationLookAt : MonoBehaviour
     #endregion
 
 
-    /// <summary>
-    /// Make the character game object look around
-    /// </summary>
-    /// <param name="yawDegrees">Euler degrees to pitch the yaw around.</param>
-    /// <param name="pitchDegrees">Euler degrees to pitch the character around.</param>
-    /// <param name="detachedHead">Rotates around the y *and* x axis. So it should be on a separate gameobject than the body (ex camera).</param>
-    /// <param name="body">Rotates around the y axis.</param>
-    protected void CharacterLookAround(ref float yawDegrees, ref float pitchDegrees, Transform detachedHead, Transform body)
-    {
-        // Clamp up and down rotation
-        pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
-
-        // Keep look rotation within -180 to +180. If goes over 180 or less than -180, wrap it by 360* and change the sign.
-        KeepYawBetween180(ref yawDegrees);
-
-        // Rotate camera - assumes its on a separate object from character that follow's character's body
-        if (detachedHead)
-            detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
-
-        // Rotate player body to match camera view rotation
-        if (body)
-            body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
-    }
-
-
     #region (Protected) LookAt Coroutines
     /// <summary>
     /// Make the character controller permanently look at a target (until manually stopped) or this coroutine is called again.
@@ -355,24 +355,6 @@ public class RotationLookAt : MonoBehaviour
     }
 
     /// <summary>
-    /// Make the character controller look towards a target until its within a certain degrees, keeps looking towards it for x seconds, and then stops.
-    /// </summary>
-    /// <param name="target">Target transform to look at.</param>
-    /// <param name="timePeriod">How many seconds to maintain look at target.</param>
-    /// <param name="withinDegrees">The minimum degree difference where it is considered acceptable enough to be "looking" at the target (SmoothDamp can take a long time to reach exact degrees).</param>
-    /// <param name="lookTime">Roughly how many seconds until character's look direction matches to target direction.</param>
-    /// <param name="initialLookVel">How fast the character look speed initially is.</param>
-    protected virtual IEnumerator LookAtTargetForSecondsCoroutine(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
-    {
-        // Look at the object
-        yield return LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel);
-
-        // Hold look there for a time period
-        bool usePreviousLookAtVelocity = true;
-        yield return LookTowardUntilTimePeriodCoroutine(target, timePeriod, lookTime, initialLookVel, usePreviousLookAtVelocity);
-    }
-
-    /// <summary>
     /// Make the character controller's view move towards a target for a time period (in seconds).
     /// </summary>
     /// <param name="timePeriod">How many seconds to move view towards target, no matter the current view yaw/pitch.</param>
@@ -423,6 +405,24 @@ public class RotationLookAt : MonoBehaviour
             timer += Time.deltaTime;
             yield return null;
         }
+    }
+
+    /// <summary>
+    /// Make the character controller look towards a target until its within a certain degrees, keeps looking towards it for x seconds, and then stops.
+    /// </summary>
+    /// <param name="target">Target transform to look at.</param>
+    /// <param name="timePeriod">How many seconds to maintain look at target.</param>
+    /// <param name="withinDegrees">The minimum degree difference where it is considered acceptable enough to be "looking" at the target (SmoothDamp can take a long time to reach exact degrees).</param>
+    /// <param name="lookTime">Roughly how many seconds until character's look direction matches to target direction.</param>
+    /// <param name="initialLookVel">How fast the character look speed initially is.</param>
+    protected virtual IEnumerator LookAtTargetForSecondsCoroutine(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    {
+        // Look at the object
+        yield return LookAtUntilWithinDegreesCoroutine(target, withinDegrees, lookTime, initialLookVel);
+
+        // Hold look there for a time period
+        bool usePreviousLookAtVelocity = true;
+        yield return LookTowardUntilTimePeriodCoroutine(target, timePeriod, lookTime, initialLookVel, usePreviousLookAtVelocity);
     }
 
     /// <summary>
