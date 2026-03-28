@@ -273,14 +273,14 @@ public class Announcer_Tutorial : TalkWithInteractable
         // Save player view info
         float origViewPitch = 0f;
         float origViewYaw = 0f;
-        playerController.rot.GetYawAndPitchDegrees(out origViewPitch, out origViewYaw);
+        playerController.rot.Get_LookAt_YawAndPitchDegrees(out origViewPitch, out origViewYaw);
         // Get gate positional info
         Vector3 gatePosition = castleEntranceLookAtPoint.transform.position;
         float gatePitch = 0f;
         float gateYaw = 0f;
-        playerController.rot.GetTargetPitchAndYawFrom(gatePosition, out gateYaw, out gatePitch);
+        playerController.rot.Get_LookAt_TargetPitchAndYawFrom(gatePosition, out gateYaw, out gatePitch);
         // Make player look at gate entrance
-        playerController.rot.LookAtTargetPitchYaw(gatePitch, gateYaw, withinDegrees:0.1f);
+        playerController.rot.LookAt_TargetPitchYaw(gatePitch, gateYaw, withinDegrees:0.1f);
         // Make gate disappear
         gateToTrebuchet.SetActive(false);
         yield return TextBox("And when you're done, head on over to the next gate over. It's time to teach you how to use our ultimate weapon...", minAppearTime: 1f);
@@ -293,7 +293,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         }
 
         // Wait until player returns to original look position
-        yield return playerController.rot.LookAtTargetPitchYawEnum(origViewPitch, origViewYaw, withinDegrees: 0.1f);
+        yield return playerController.rot.Enum_LookAt_TargetPitchYaw(origViewPitch, origViewYaw, withinDegrees: 0.1f);
 
         // Enable player look & move input again when cutscene ends
         playerController.canInputLook = true;

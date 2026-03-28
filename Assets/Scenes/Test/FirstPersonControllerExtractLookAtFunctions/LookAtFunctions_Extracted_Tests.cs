@@ -42,7 +42,7 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         //obj.LookAtTargetForSeconds(target.transform, 1f, LookAt_WithinDegreesAmt);
         //StartCoroutine(LookAtTargetForSecondsThenSwitchToRandomTarget(target));
         //obj.LookAtTargetPitchYaw(30f, 180f);
-        obj.LookAtTargetPitchYaw_Lerp(30f, 180f, 5f);
+        obj.LookAt_TargetPitchYaw_Lerp(30f, 180f, 5f);
     }
 
 
@@ -57,19 +57,19 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
     {
         Transform target = GetRandomTarget().transform;
 
-        yield return Test_LookAtIEnumFunction(() => obj.LookAtTargetForSecondsEnum(target, 3f), "LookAtTargetForSecondsEnum");
+        yield return Test_LookAtIEnumFunction(() => obj.Enum_LookAt_TargetForSeconds(target, 3f), "LookAtTargetForSecondsEnum");
 
         target = GetRandomTarget().transform;
-        yield return Test_LookAtIEnumFunction(() => obj.LookAtUntilWithinDegreesEnum(target, 1f), "LookAtUntilWithinDegreesEnum");
+        yield return Test_LookAtIEnumFunction(() => obj.Enum_LookAt_UntilWithinDegrees(target, 1f), "LookAtUntilWithinDegreesEnum");
 
-        yield return Test_LookAtIEnumFunction(() => obj.LookTowardUntilTimePeriodEnum(target, 5f), "LookTowardUntilTimePeriodEnum");
+        yield return Test_LookAtIEnumFunction(() => obj.Enum_LookToward_UntilTimePeriod(target, 5f), "LookTowardUntilTimePeriodEnum");
 
         target = GetRandomTarget().transform;
         float yaw, pitch;
-        obj.GetTargetPitchAndYawFrom(target.position, out yaw, out pitch);
-        yield return Test_LookAtIEnumFunction(() => obj.LookAtTargetPitchYaw_LerpEnum(pitch, yaw, 5f), "LookAtTargetPitchYaw_LerpEnum");
+        obj.Get_LookAt_TargetPitchAndYawFrom(target.position, out yaw, out pitch);
+        yield return Test_LookAtIEnumFunction(() => obj.Enum_LookAt_TargetPitchYaw_Lerp(pitch, yaw, 5f), "LookAtTargetPitchYaw_LerpEnum");
 
-        yield return Test_LookAtIEnumFunction(() => obj.LookAtTargetPitchYawEnum(pitch, yaw), "LookAtTargetPitchYaw");
+        yield return Test_LookAtIEnumFunction(() => obj.Enum_LookAt_TargetPitchYaw(pitch, yaw), "LookAtTargetPitchYaw");
 
         Debug.Log("(Done) Finished all tests!");
 
@@ -81,7 +81,7 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         {
             float startPitch = 0f;
             float startYaw = 0f;
-            obj.GetYawAndPitchDegrees(out startPitch, out startYaw);
+            obj.Get_LookAt_YawAndPitchDegrees(out startPitch, out startYaw);
 
             yield return new WaitForSeconds(1f);
 
@@ -94,14 +94,14 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
 
             // Output the final pitch/yaw
             float pitch, yaw = 0;
-            obj.GetYawAndPitchDegrees(out pitch, out yaw);
+            obj.Get_LookAt_YawAndPitchDegrees(out pitch, out yaw);
 
             // How long did it take
             Debug.Log($"(FINISHED!) Time elapsed: {GetTimeElapsed(startTime)} " +
                 $"\nFinal Pitch: {pitch}d | Final Yaw: {yaw}d");
 
             // Return to beginning pitch/yaw values
-            yield return obj.LookAtTargetPitchYawEnum(startPitch, startYaw, withinDegrees: 0.05f);
+            yield return obj.Enum_LookAt_TargetPitchYaw(startPitch, startYaw, withinDegrees: 0.05f);
 
             DebugPrintLine();
         }
@@ -119,7 +119,7 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
 
     protected IEnumerator LookAtTargetForSecondsThenSwitchToRandomTarget(GameObject target)
     {
-        yield return obj.LookAtTargetForSecondsEnum(target.transform, 1f, LookAt_WithinDegreesAmt);
+        yield return obj.Enum_LookAt_TargetForSeconds(target.transform, 1f, LookAt_WithinDegreesAmt);
 
         obj.LookAt(GetRandomTarget().transform);
     }

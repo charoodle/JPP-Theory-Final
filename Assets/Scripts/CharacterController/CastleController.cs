@@ -75,7 +75,7 @@ public class CastleController : MyProject.CharacterController
         float targetYawDegrees = currYawDegrees + degreeDiff;
 
         // Make sure angle is within -180 to 180 euler system
-        rot.KeepYawBetween180(ref targetYawDegrees);
+        rot.LookAt_KeepYawBetween180(ref targetYawDegrees);
 
         // Do the turn
         const float seconds = 5f;
@@ -109,7 +109,7 @@ public class CastleController : MyProject.CharacterController
 
         // Lerp castle rotation from current rotation to target rotation.
         //  Does not change pitch.
-        yield return rot.LookAtTargetPitchYaw_LerpEnum(rot.pitchDegrees, targetYawDegrees, secondsToTurn);
+        yield return rot.Enum_LookAt_TargetPitchYaw_Lerp(rot.pitchDegrees, targetYawDegrees, secondsToTurn);
 
         OnStopMove?.Invoke();
     }
