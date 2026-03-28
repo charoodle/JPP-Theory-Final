@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// TODO:
-///     [x] Port all functions as-is with same names and functions.
-///     [x] Make sure it all works with a psuedo head/body, like how an enemy should behave.
-///         
 ///  TODO when done porting:
-///     Rename and clean up functions for a single generic object. Not just for a character-controller lookaround. 
+///     [ ] Make CharacterController work with this script instead.
+///     [ ] Rename and clean up functions for a single generic object. Not just for a character-controller lookaround. 
 ///         - [ ] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
 ///         - [ ] Rename LookAt functions to be easier to differentiate. Use underscores, like: "LookAt_X" / "LookAt_Y."
 ///     Rework the detached head/body situation.
 ///     Make into a portable, reusable script.
+///     Allow inputting an offset into the functions?
 ///     
 ///  TODO when done making portable and reusable:
 ///     Refactor CharacterController to use the portable script instead.
@@ -23,6 +21,7 @@ using UnityEngine;
 ///  
 ///  See <see cref="MyProject.CharacterController.LookAt"/> and start there.
 /// </summary>
+/// 
 public class RotationLookAt : MonoBehaviour
 {
     #region Exposed Fields
@@ -72,7 +71,7 @@ public class RotationLookAt : MonoBehaviour
         // Look-around character
         CharacterLookAround(ref yawDegrees, ref pitchDegrees, rotateFreedHead, rotateBody);
 
-        if(debugRayVisible)
+        if(debugRayVisible && rotateFreedHead != null)
         {
             // Head
             Debug.DrawRay(rotateFreedHead.transform.position, rotateFreedHead.transform.forward * debugRayMaxDistance_FreedHead, debugRayColor);
