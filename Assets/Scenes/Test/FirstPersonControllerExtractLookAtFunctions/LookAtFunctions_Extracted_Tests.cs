@@ -11,6 +11,7 @@ using Random = UnityEngine.Random;
 public class LookAtFunctions_Extracted_Tests : MonoBehaviour
 {
     [SerializeField] RotationLookAt obj;
+
     public List<GameObject> targets;
     public KeyCode nextTargetKey = KeyCode.Space;
     public KeyCode test_IEnums_Key = KeyCode.I;

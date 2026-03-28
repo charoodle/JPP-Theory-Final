@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 ///  TODO when done porting:
-///     [ ] Make CharacterController work with this script instead.
+///     [x] Make CharacterController work with this script instead.
 ///     [ ] Rename and clean up functions for a single generic object. Not just for a character-controller lookaround. 
 ///         - [ ] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
 ///         - [ ] Rename LookAt functions to be easier to differentiate. Use underscores, like: "LookAt_X" / "LookAt_Y."
@@ -36,10 +36,11 @@ public class RotationLookAt : MonoBehaviour
     /// <summary> Current pitch rotation (for the head). </summary>
     [SerializeField] public float pitchDegrees;
 
-    /// <summary> The body that rotates around (yaw only). </summary>
-    private Transform rotateBody;
-    /// <summary> The head that rotates around (pitch + yaw). </summary>
-    private Transform rotateFreedHead;
+    /// <summary> The body that rotates around (yaw only). Can be assigned from <see cref="AssignBody(Transform)"/> or inspector.</summary>
+    [Header("Transforms")]
+    [SerializeField] Transform rotateBody;
+    /// <summary> The head that rotates around (pitch + yaw). Can be assigned from <see cref="AssignHead(Transform)"/> or inspector.</summary>
+    [SerializeField] Transform rotateFreedHead;
 
     /// <summary> How many degrees can look rotate head upwards. </summary>
     [Header("Settings")]
@@ -71,12 +72,15 @@ public class RotationLookAt : MonoBehaviour
         // Look-around character
         CharacterLookAround(ref yawDegrees, ref pitchDegrees, rotateFreedHead, rotateBody);
 
+#if UNITY_EDITOR
+        // Show debug ray in head's forward direction
         if(debugRayVisible && rotateFreedHead != null)
         {
             // Head
             Debug.DrawRay(rotateFreedHead.transform.position, rotateFreedHead.transform.forward * debugRayMaxDistance_FreedHead, debugRayColor);
         }
     }
+#endif
     #endregion
 
 
@@ -102,6 +106,38 @@ public class RotationLookAt : MonoBehaviour
         // Rotate player body to match camera view rotation
         if (body)
             body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
+    }
+
+
+    private void Start()
+    {
+        StartCoroutine(NullCheckForBodyHeadTransforms());
+    }
+
+
+    /// <summary>
+    /// Waits a second for all the controllers to initialize, then check for body/head assignments.
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator NullCheckForBodyHeadTransforms()
+    {
+        yield return new WaitForSeconds(0.25f);
+
+        if(rotateBody == null && rotateFreedHead == null)
+        {
+            Debug.LogError("No head or body initialized to this LookAt object. LookRotation will not work. Use AssignHead()/AssignBody().", this.gameObject);
+            yield break;
+        }
+
+        if (rotateBody == null)
+        {
+            Debug.LogWarning("No head initialized to this LookAt object. Use AssignBody().", this.gameObject);
+        }
+
+        if (rotateFreedHead == null)
+        {
+            Debug.LogWarning("No body initialized to this LookAt object. Use AssignHead().", this.gameObject);
+        }
     }
 
 
