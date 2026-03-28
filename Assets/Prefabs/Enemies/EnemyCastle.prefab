@@ -386,7 +386,6 @@ GameObject:
   - component: {fileID: 5118907228450858749}
   - component: {fileID: 8373722584410551854}
   - component: {fileID: 9116410746227335640}
-  - component: {fileID: 1220877810847530461}
   m_Layer: 0
   m_Name: EnemyCastle
   m_TagString: Untagged
@@ -478,23 +477,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4de96ae175dba240b4ad54eac144657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1220877810847530461
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5857482965194778221}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 905fac7de6d8e314fba232eac046e362, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debugRayVisible: 0
-  debugRayMaxDistance_FreedHead: 50
-  debugRayColor: {r: 1, g: 0, b: 0, a: 1}
-  yawDegrees: 0
-  pitchDegrees: 0
 --- !u!1 &6001261440685583653
 GameObject:
   m_ObjectHideFlags: 0

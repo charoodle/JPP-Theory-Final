@@ -1874,7 +1874,7 @@ MonoBehaviour:
   playerVelocity: {x: 0, y: 0, z: 0}
   _walkSpeed: 3
   sprintSpeedMultiplier: 2
-  rot: {fileID: 0}
+  rot: {fileID: 6048538552488944595}
   rotateBody: {fileID: 4343326367223915698}
   rotateFreedHead: {fileID: 0}
   jumpHeight: 3
@@ -1914,6 +1914,8 @@ MonoBehaviour:
   debugRayColor: {r: 1, g: 0, b: 0, a: 1}
   yawDegrees: 0
   pitchDegrees: 0
+  head: {fileID: 0}
+  rotationObjects: []
 --- !u!1 &8362174456689190233
 GameObject:
   m_ObjectHideFlags: 0

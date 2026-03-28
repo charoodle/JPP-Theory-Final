@@ -140,5 +140,3 @@ public class LookAtFunctions_Extracted_Tests : MonoBehaviour
         return targets[idx];
     }
 }
-
-

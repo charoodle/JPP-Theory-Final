@@ -22,9 +22,12 @@ using UnityEngine;
 ///  See <see cref="MyProject.CharacterController.LookAt"/> and start there.
 /// </summary>
 /// 
+
+/// <summary>
+/// Provides various functions and coroutines designed for looking at targets. Good for controlling characters (Player first-person view, NPCs).
+/// </summary>
 public class RotationLookAt : MonoBehaviour
 {
-    #region Exposed Fields
     [Header("Debug")]
     [SerializeField] protected bool debugRayVisible = false;
     [SerializeField] protected float debugRayMaxDistance_FreedHead = 50f;
@@ -36,26 +39,35 @@ public class RotationLookAt : MonoBehaviour
     /// <summary> Current pitch rotation (for the head). </summary>
     [SerializeField] public float pitchDegrees;
 
-    /// <summary> The body that rotates around (yaw only). Can be assigned from <see cref="AssignBody(Transform)"/> or inspector.</summary>
     [Header("Transforms")]
-    [SerializeField] Transform rotateBody;
-    /// <summary> The head that rotates around (pitch + yaw). Can be assigned from <see cref="AssignHead(Transform)"/> or inspector.</summary>
-    [SerializeField] Transform rotateFreedHead;
+    /// <summary>
+    /// Main single "head" to compare certain pitch/yaw rotation calculations or debug line drawing. Mainly used in <see cref="GetTargetPitchAndYawFrom(Vector3, out float, out float)"/>
+    /// </summary>
+    public Transform head;
 
     /// <summary> How many degrees can look rotate head upwards. </summary>
     [Header("Settings")]
     private float maxPitchDegreesDown = -90f;
     /// <summary> How many degrees can look rotate head downwards. </summary>
     private float maxPitchDegreesUp = 90f;
-    #endregion
 
+    /// <summary>
+    /// All objects that can rotate along with <see cref="yawDegrees"/> and <see cref="pitchDegrees"/>.
+    ///     <para>
+    ///     EXAMPLE:
+    ///         Player object:
+    ///             (Camera object - rotate yaw AND pitch with the mouse movement)
+    ///             (Body/model object - rotate yaw only with the mouse movement)
+    ///     </para>
+    /// </summary>
+    public List<RotationObject> rotationObjects = new List<RotationObject>();
 
     #region LookAt Fields
     // Used to pass data between LookAt IEnumerators
     protected float lookAt_lastYawVel = 0f;
     protected float lookAt_lastPitchVel = 0f;
 
-    // Parameter constants
+    // Default parameter constants for certain LookAt functions
     protected const float LOOKTIME = 0.5f;
     protected const float LOOKTIME_LERP = 1f;
     protected const float INITIAL_LOOKVEL = 0.5f;
@@ -70,14 +82,14 @@ public class RotationLookAt : MonoBehaviour
     protected void LateUpdate()
     {
         // Look-around character
-        CharacterLookAround(ref yawDegrees, ref pitchDegrees, rotateFreedHead, rotateBody);
+        ObjectsLookAround(ref yawDegrees, ref pitchDegrees, rotationObjects);
 
 #if UNITY_EDITOR
         // Show debug ray in head's forward direction
-        if(debugRayVisible && rotateFreedHead != null)
+        if(debugRayVisible && head != null)
         {
             // Head
-            Debug.DrawRay(rotateFreedHead.transform.position, rotateFreedHead.transform.forward * debugRayMaxDistance_FreedHead, debugRayColor);
+            Debug.DrawRay(head.transform.position, head.transform.forward * debugRayMaxDistance_FreedHead, debugRayColor);
         }
     }
 #endif
@@ -91,7 +103,7 @@ public class RotationLookAt : MonoBehaviour
     /// <param name="pitchDegrees">Euler degrees to pitch the character around.</param>
     /// <param name="detachedHead">Rotates around the y *and* x axis. So it should be on a separate gameobject than the body (ex camera).</param>
     /// <param name="body">Rotates around the y axis.</param>
-    protected void CharacterLookAround(ref float yawDegrees, ref float pitchDegrees, Transform detachedHead, Transform body)
+    protected void ObjectsLookAround(ref float yawDegrees, ref float pitchDegrees, List<RotationObject> rotationObjects)
     {
         // Clamp up and down rotation
         pitchDegrees = Mathf.Clamp(pitchDegrees, maxPitchDegreesDown, maxPitchDegreesUp);
@@ -99,15 +111,30 @@ public class RotationLookAt : MonoBehaviour
         // Keep look rotation within -180 to +180. If goes over 180 or less than -180, wrap it by 360* and change the sign.
         KeepYawBetween180(ref yawDegrees);
 
-        // Rotate camera - assumes its on a separate object from character that follow's character's body
-        if (detachedHead)
-            detachedHead.rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
+        // Rotate x,y of each rotateTarget to exactly match the current pitch/yaw value. Each rotateTarget may individually enable/disable pitch/yaw rotations.
+        //  Example: Player camera rotates on pitch and yaw. But Player model will rotate on yaw only.
+        Vector3 targetRotation;
+        foreach (RotationObject rotateTarget in rotationObjects)
+        {
+            // Reset to 0,0,0 rotation
+            targetRotation = Vector3.zero;
 
-        // Rotate player body to match camera view rotation
-        if (body)
-            body.rotation = Quaternion.Euler(0f, yawDegrees, 0f);
+            // Rotate x axis for pitch
+            if(rotateTarget.allowPitchRotation)
+            {
+                targetRotation.x = pitchDegrees;
+            }
+
+            // Rotate y axis for yaw
+            if(rotateTarget.allowYawRotation)
+            {
+                targetRotation.y = yawDegrees;
+            }
+
+            // Set individual target object rotation.
+            rotateTarget.rotationObject.rotation = Quaternion.Euler(targetRotation);
+        }
     }
-
 
     private void Start()
     {
@@ -123,51 +150,55 @@ public class RotationLookAt : MonoBehaviour
     {
         yield return new WaitForSeconds(0.25f);
 
-        if(rotateBody == null && rotateFreedHead == null)
+        if(head == null)
         {
-            Debug.LogError("No head or body initialized to this LookAt object. LookRotation will not work. Use AssignHead()/AssignBody().", this.gameObject);
-            yield break;
-        }
-
-        if (rotateBody == null)
-        {
-            Debug.LogWarning("No head initialized to this LookAt object. Use AssignBody().", this.gameObject);
-        }
-
-        if (rotateFreedHead == null)
-        {
-            Debug.LogWarning("No body initialized to this LookAt object. Use AssignHead().", this.gameObject);
+            Debug.LogError("No head initialized to this LookAt object. Some LookAt functions may not work.", this.gameObject);
         }
     }
 
 
     #region Init Functions
     /// <summary>
-    /// Must have a body assigned (atm).
+    /// Assign a "body" object that only rotates with <see cref="yawDegrees"/>.
     /// </summary>
-    /// <param name="body"></param>
-    public void AssignBody(Transform body)
+    /// <param name="newBody"></param>
+    public void AssignBody(Transform newBody)
     {
-        if (!body)
+        if (!newBody)
         {
             Debug.LogError("Body is null.", this.gameObject);
             return;
         }
-        rotateBody = body;
+
+        // Add new rotation object.
+        RotationObject newBodyObj = new RotationObject(newBody, allowPitchRotation: false);
+        rotationObjects.Add(newBodyObj);
     }
 
     /// <summary>
-    /// Must have a head assigned to work (atm).
+    /// Assigns a "head" object that rotates with <see cref="yawDegrees"/> and <see cref="pitchDegrees"/>.
     /// </summary>
-    /// <param name="head"></param>
-    public void AssignHead(Transform head)
+    /// <param name="newHead"></param>
+    public void AssignHead(Transform newHead)
     {
-        if (!head)
+        if (!newHead)
         {
-            Debug.LogError("Head is null.", this.gameObject);
+            Debug.LogWarning("Head is null.", this.gameObject);
             return;
         }
-        rotateFreedHead = head;
+
+        // Head already exists. Overwrite it.
+        if(this.head != null)
+        {
+            Debug.LogWarning($"Already have a head assigned: ({this.head.name}). Overwriting with {newHead.name}", this.head.gameObject);
+        }
+
+        // Add new rotation object.
+        RotationObject newRotationObj = new RotationObject(newHead);
+        rotationObjects.Add(newRotationObj);
+
+        // Assign head additionally.
+        this.head = newHead;
     }
 
     public void SetMaxPitchUp(float value)
@@ -288,7 +319,7 @@ public class RotationLookAt : MonoBehaviour
     {
         // Yaw and pitch degrees are relative to the world forward direction
         Vector3 worldForward = Vector3.forward;
-        Vector3 headPosition = rotateFreedHead.transform.position;
+        Vector3 headPosition = head.transform.position;
         Vector3 toDirection = worldPosition - headPosition;
         Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
 
@@ -714,4 +745,28 @@ public class RotationLookAt : MonoBehaviour
         lookAt_lastPitchVel = pitchVel;
     }
     #endregion
+}
+
+///<summary> Represents an object that can follow a <see cref="RotationLookAt"/> component's rotation values.</summary>
+[System.Serializable]
+public class RotationObject
+{
+    /// <param name="rotationObject">Single object that rotates to match pitch/yaw values.</param>
+    /// <param name="allowYawRotation">Allows object to rotate around its y axis to match yaw.</param>
+    /// <param name="allowPitchRotation">Allows object to rotate around its x axis to match pitch.</param>
+    public RotationObject(Transform rotationObject, bool allowYawRotation = true, bool allowPitchRotation = true)
+    {
+        this.rotationObject = rotationObject;
+        this.allowYawRotation = allowYawRotation;
+        this.allowPitchRotation = allowPitchRotation;
+    }
+
+    [Tooltip("The target object to rotate along with RotationLookAt's pitch/yaw fields.")]
+    public Transform rotationObject;
+
+    [Tooltip("Flag object to allow rotation around y axis to follow RotationLookAt's yaw value.")]
+    public bool allowYawRotation = true;
+
+    [Tooltip("Flag object to allow rotation around x axis to follow RotationLookAt's pitch value.")]
+    public bool allowPitchRotation = true;
 }
