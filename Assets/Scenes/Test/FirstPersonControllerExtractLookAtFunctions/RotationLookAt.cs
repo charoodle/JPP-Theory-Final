@@ -5,10 +5,10 @@ using UnityEngine;
 /// <summary>
 ///  TODO when done porting:
 ///     [x] Remake functions for a single generic object. Not just for a character-controller lookaround with forced head/body.
-///         - [ ] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
+///         - [x] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
+///         - [ ] Organize functions (spatially) into correct regions.
 ///         - [x] Rename LookAt functions to be easier to differentiate. Use underscores, like: "LookAt_X" / "LookAt_Y."
 ///     [ ] Allow inputting an offset into the functions?
-///     [ ] Organize functions (spatially) into correct regions.
 ///     [x] Make CharacterController work with this script instead.
 ///     [x] Rework the detached head/body situation.
 ///     [x] Make into a portable, reusable script.
@@ -63,13 +63,25 @@ public class RotationLookAt : MonoBehaviour
 
     #region LookAt Fields
     // Used to pass data between LookAt IEnumerators
-    protected float lastYawVel = 0f;
-    protected float lastPitchVel = 0f;
+    protected float lastSavedYawVel = 0f;
+    protected float lastSavedPitchVel = 0f;
 
     // Default parameter constants for certain LookAt functions
+    /// <summary>
+    /// Roughly how many seconds until a character looks at a target. "Rough" estimate because Mathf.SmoothDamp is different from Lerp (?).
+    /// </summary>
     protected const float LOOKTIME = 0.5f;
+    /// <summary>
+    /// Exactly how many seconds until a character looks at a target, for LookAt functions that use Mathf.Lerp.
+    /// </summary>
     protected const float LOOKTIME_LERP = 1f;
+    /// <summary>
+    /// Used during Mathf.SmoothDamp. Defines how fast the initial look velocity starts out at.
+    /// </summary>
     protected const float INITIAL_LOOKVEL = 0.5f;
+    /// <summary>
+    /// Within what amount of yaw/pitch degrees is considered "looking at" an object?
+    /// </summary>
     protected const float WITHIN_DEGREES = 2f;
 
     // Current look coroutine that is making the character lock their view onto something.
@@ -304,7 +316,7 @@ public class RotationLookAt : MonoBehaviour
     public void LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
     {
         LookAt_StopCoroutine(currentLookAt);
-        currentLookAt = StartCoroutine(Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useSavedYawPitchVelocity: false));
+        currentLookAt = StartCoroutine(Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: false));
     }
 
     /// <summary>
@@ -366,7 +378,7 @@ public class RotationLookAt : MonoBehaviour
     public IEnumerator Enum_LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
     {
         LookAt_StopCoroutine(currentLookAt);
-        yield return Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useSavedYawPitchVelocity: false);
+        yield return Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: false);
     }
 
     /// <summary>
@@ -473,9 +485,10 @@ public class RotationLookAt : MonoBehaviour
     /// <summary>
     /// Make the character controller's view move towards a target for a time period (in seconds).
     /// </summary>
-    /// <param name="timePeriod">How many seconds to move view towards target, no matter the current view yaw/pitch.</param>
+    /// <param name="timePeriod"> How many seconds to move view towards target, no matter the current view yaw/pitch. </param>
+    /// <param name="useLastSavedYawPitchVel"> Uses the last saved pitch/yaw values that <see cref="Coroutine_LookAt_UntilWithinDegrees"/> saved. </param>
     /// <inheritdoc cref="Coroutine_LookAt_TargetForSeconds(Transform, float, float, float, float)"/>
-    protected IEnumerator Coroutine_LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, bool useSavedYawPitchVelocity = false)
+    protected IEnumerator Coroutine_LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, bool useLastSavedYawPitchVel = false)
     {
         // Cannot have negative look time.
         if (lookTime < 0)
@@ -492,10 +505,10 @@ public class RotationLookAt : MonoBehaviour
 
         float yawVel;
         float pitchVel;
-        if (useSavedYawPitchVelocity)
+        if (useLastSavedYawPitchVel)
         {
-            yawVel = lastYawVel;
-            pitchVel = lastPitchVel;
+            yawVel = lastSavedYawVel;
+            pitchVel = lastSavedPitchVel;
         }
         else
         {
@@ -537,8 +550,7 @@ public class RotationLookAt : MonoBehaviour
         yield return Coroutine_LookAt_UntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel);
 
         // Hold look there for a time period
-        bool usePreviousLookAtVelocity = true;
-        yield return Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, usePreviousLookAtVelocity);
+        yield return Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: true);
     }
 
     /// <summary>
@@ -739,8 +751,8 @@ public class RotationLookAt : MonoBehaviour
     /// </summary>
     protected void LookAt_SaveCurrentYawPitchVelocity(float yawVel, float pitchVel)
     {
-        lastYawVel = yawVel;
-        lastPitchVel = pitchVel;
+        lastSavedYawVel = yawVel;
+        lastSavedPitchVel = pitchVel;
     }
     #endregion
 }
