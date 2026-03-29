@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 ///  TODO when done porting:
 ///     [x] Remake functions for a single generic object. Not just for a character-controller lookaround with forced head/body.
-///         - [ ] Organize functions (spatially) into correct regions.
+///         - [x] Organize functions (spatially) into correct regions.
 ///         - [x] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
 ///         - [x] Rename LookAt functions to be easier to differentiate. Use underscores, like: "LookAt_X" / "LookAt_Y."
 ///     [ ] Allow inputting an offset into the functions?
@@ -27,23 +27,23 @@ using UnityEngine;
 /// </summary>
 public class RotationLookAt : MonoBehaviour
 {
+    #region Fields
     /// <summary> Current yaw rotation (for the head + body). </summary>
     [Header("Fields")]
     [SerializeField] public float yawDegrees;
     /// <summary> Current pitch rotation (for the head). </summary>
     [SerializeField] public float pitchDegrees;
 
+    /// <summary> How many degrees can look rotate head upwards. </summary>
+    private float maxPitchDegreesDown = -90f;
+    /// <summary> How many degrees can look rotate head downwards. </summary>
+    private float maxPitchDegreesUp = 90f;
+
     [Header("Transforms")]
     /// <summary>
     /// Main single "head" to compare certain pitch/yaw rotation calculations or debug line drawing. Mainly used in <see cref="Get_LookAt_TargetPitchAndYawFrom(Vector3, out float, out float)"/>
     /// </summary>
     public Transform head;
-
-    /// <summary> How many degrees can look rotate head upwards. </summary>
-    [Header("Settings")]
-    private float maxPitchDegreesDown = -90f;
-    /// <summary> How many degrees can look rotate head downwards. </summary>
-    private float maxPitchDegreesUp = 90f;
 
     /// <summary>
     /// All objects that can rotate along with <see cref="yawDegrees"/> and <see cref="pitchDegrees"/>.
@@ -69,6 +69,8 @@ public class RotationLookAt : MonoBehaviour
     /// Current look coroutine that is making the character lock their view onto something. 
     /// </summary>
     protected Coroutine currentLookAt;
+    #endregion
+
 
     #region Constants
     /// <summary>
@@ -89,7 +91,8 @@ public class RotationLookAt : MonoBehaviour
     protected const float WITHIN_DEGREES = 2f;
     #endregion
 
-    #region Debug
+
+    #region Debug Fields
     [Header("Debug")]
     [SerializeField] protected bool debugRayVisible = false;
     [SerializeField] protected float debugRayMaxDistance_FreedHead = 50f;
@@ -98,6 +101,12 @@ public class RotationLookAt : MonoBehaviour
 
 
     #region LifeCycle Functions
+    private void Start()
+    {
+        // Check for missing 
+        StartCoroutine(NullCheckForHeadTransform());
+    }
+
     protected void LateUpdate()
     {
         // Look-around character
@@ -110,13 +119,11 @@ public class RotationLookAt : MonoBehaviour
             // Head
             Debug.DrawRay(head.transform.position, head.transform.forward * debugRayMaxDistance_FreedHead, debugRayColor);
         }
-    }
 #endif
-    #endregion
-
+    }
 
     /// <summary>
-    /// Make the character game object look around
+    /// Make the game object look around.
     /// </summary>
     /// <param name="yawDegrees">Euler degrees to pitch the yaw around.</param>
     /// <param name="pitchDegrees">Euler degrees to pitch the character around.</param>
@@ -139,13 +146,13 @@ public class RotationLookAt : MonoBehaviour
             targetRotation = Vector3.zero;
 
             // Rotate x axis for pitch
-            if(rotateTarget.allowPitchRotation)
+            if (rotateTarget.allowPitchRotation)
             {
                 targetRotation.x = pitchDegrees;
             }
 
             // Rotate y axis for yaw
-            if(rotateTarget.allowYawRotation)
+            if (rotateTarget.allowYawRotation)
             {
                 targetRotation.y = yawDegrees;
             }
@@ -154,26 +161,7 @@ public class RotationLookAt : MonoBehaviour
             rotateTarget.rotationObject.rotation = Quaternion.Euler(targetRotation);
         }
     }
-
-    private void Start()
-    {
-        StartCoroutine(NullCheckForBodyHeadTransforms());
-    }
-
-
-    /// <summary>
-    /// Waits a second for all the controllers to initialize, then check for body/head assignments.
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator NullCheckForBodyHeadTransforms()
-    {
-        yield return new WaitForSeconds(0.25f);
-
-        if(head == null)
-        {
-            Debug.LogError("No head initialized to this LookAt object. Some LookAt functions may not work.", this.gameObject);
-        }
-    }
+    #endregion
 
 
     #region Init Functions
@@ -240,10 +228,26 @@ public class RotationLookAt : MonoBehaviour
         yawDegrees = startYaw;
         pitchDegrees = startPitch;
     }
+
+    /// <summary>
+    /// Waits a second for all the controllers to initialize, then check for body/head assignments.
+    /// </summary>
+    /// <returns></returns>
+    protected IEnumerator NullCheckForHeadTransform()
+    {
+        // Wait for Start() of other classes, then check.
+        yield return new WaitForSeconds(0.25f);
+
+        // Head transform point/center point required for some LookAt calculations and debug line drawing.
+        if (head == null)
+        {
+            Debug.LogError("No head initialized to this LookAt object. Some LookAt functions may not work.", this.gameObject);
+        }
+    }
     #endregion
 
 
-    #region LookAt Functions (aka stoppable midway)
+    #region LookAt Functions (stoppable midway)
     /// <summary>
     /// Look at a target forever until another LookAt function is called or <see cref="LookAtStop"/> is called.
     /// </summary>
@@ -355,7 +359,7 @@ public class RotationLookAt : MonoBehaviour
     #endregion
 
 
-    #region LookAt IEnum Functions (aka unstoppable midway)
+    #region LookAt IEnum Functions (unstoppable midway)
     /// <summary>
     /// Public coroutine version of <see cref="LookAt_TargetForSeconds"/>.
     /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
