@@ -4,18 +4,14 @@ using UnityEngine;
 
 /// <summary>
 ///  TODO when done porting:
-///     [x] Remake functions for a single generic object. Not just for a character-controller lookaround with forced head/body.
-///         - [x] Organize functions (spatially) into correct regions.
-///         - [x] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
-///         - [x] Rename LookAt functions to be easier to differentiate. Use underscores, like: "LookAt_X" / "LookAt_Y."
-///     [ ] Allow inputting an offset into the functions?
-///     [x] Make CharacterController work with this script instead.
-///     [x] Rework the detached head/body situation.
-///     [x] Make into a portable, reusable script.
+///     [x] Allow inputting an offset into the functions?
 ///     
 ///  TODO when done making portable and reusable:
 ///     [x] Refactor CharacterController to use the portable script instead.
 ///     [ ] Refactor CharacterController to use in BulletPain project.
+///     
+///  TODO
+///     Use Func<> delegate to compress the LookAt functions down.
 ///     
 ///  TODO
 ///     <see cref="LookAt_KeepYawBetween180(ref float)"/> - Uses hardcoded 360 to keep yaw inbetween [-180,180]. Change to modulo?
@@ -252,30 +248,30 @@ public class RotationLookAt : MonoBehaviour
     /// Look at a target forever until another LookAt function is called or <see cref="LookAtStop"/> is called.
     /// </summary>
     /// <inheritdoc cref="Coroutine_LookAt_TargetForSeconds"/>
-    public void LookAt(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    public void LookAt(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         LookAt_StopCoroutine(currentLookAt);
-        currentLookAt = StartCoroutine(Coroutine_LookAt_Permanently(target, lookTime, initialLookVel));
+        currentLookAt = StartCoroutine(Coroutine_LookAt_Permanently(target, lookTime, initialLookVel, targetOffset));
     }
 
     /// <summary>
     /// Look at a target until the pitch/yaw degrees reach a certain degrees.
     /// </summary>
     /// <inheritdoc cref="Coroutine_LookAt_TargetForSeconds"/>
-    public void LookAt_UntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    public void LookAt_UntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         LookAt_StopCoroutine(currentLookAt);
-        currentLookAt = StartCoroutine(Coroutine_LookAt_UntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel));
+        currentLookAt = StartCoroutine(Coroutine_LookAt_UntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel, targetOffset));
     }
 
     /// <summary>
     /// Look toward a target until pitch/yaw of view is <paramref name="withinDegrees"/> of target, and then holds there for <paramref name="timePeriod"/> seconds.
     /// </summary>
     /// <inheritdoc cref="Coroutine_LookAt_TargetForSeconds"/>
-    public void LookAt_TargetForSeconds(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    public void LookAt_TargetForSeconds(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         LookAt_StopCoroutine(currentLookAt);
-        currentLookAt = StartCoroutine(Enum_LookAt_TargetForSeconds(target, timePeriod, withinDegrees, lookTime, initialLookVel));
+        currentLookAt = StartCoroutine(Enum_LookAt_TargetForSeconds(target, timePeriod, withinDegrees, lookTime, initialLookVel, targetOffset));
     }
 
     /// <summary>
@@ -325,10 +321,10 @@ public class RotationLookAt : MonoBehaviour
     /// Look towards a target for <paramref name="timePeriod"/> seconds total (time dependent). Time starts ticking the moment the function is called/rotation starts moving. Doesn't matter if looking close to target or not.
     /// </summary>
     /// <inheritdoc cref="Coroutine_LookAt_TargetForSeconds(Transform, float, float, float, float)"></inheritdoc>
-    public void LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    public void LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         LookAt_StopCoroutine(currentLookAt);
-        currentLookAt = StartCoroutine(Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: false));
+        currentLookAt = StartCoroutine(Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: false, targetOffset));
     }
 
     /// <summary>
@@ -337,12 +333,12 @@ public class RotationLookAt : MonoBehaviour
     /// TODO: Make the <see cref="head"/> a passed-in parameter, Not a hardcoded value.
     /// </summary>
     /// 
-    public void Get_LookAt_TargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch)
+    public void Get_LookAt_TargetPitchAndYawFrom(Vector3 worldPosition, out float yaw, out float pitch, Vector3 worldPositionOffset = default(Vector3))
     {
         // Yaw and pitch degrees are relative to the world forward direction
         Vector3 worldForward = Vector3.forward;
         Vector3 headPosition = head.transform.position;
-        Vector3 toDirection = worldPosition - headPosition;
+        Vector3 toDirection = (worldPosition + worldPositionOffset) - headPosition;
         Quaternion quat = Quaternion.FromToRotation(worldForward, toDirection);
 
         // Assign eulers out
@@ -365,10 +361,10 @@ public class RotationLookAt : MonoBehaviour
     /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
     /// </summary>
     /// <inheritdoc cref="LookAt_TargetForSeconds"/>
-    public IEnumerator Enum_LookAt_TargetForSeconds(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    public IEnumerator Enum_LookAt_TargetForSeconds(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         LookAt_StopCoroutine(currentLookAt);
-        yield return Coroutine_LookAt_TargetForSeconds(target, timePeriod, withinDegrees, lookTime, initialLookVel);
+        yield return Coroutine_LookAt_TargetForSeconds(target, timePeriod, withinDegrees, lookTime, initialLookVel, targetOffset);
     }
 
     /// <summary>
@@ -376,10 +372,10 @@ public class RotationLookAt : MonoBehaviour
     /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
     /// </summary>
     /// <inheritdoc cref="LookAt_UntilWithinDegrees"/>
-    public IEnumerator Enum_LookAt_UntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    public IEnumerator Enum_LookAt_UntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         LookAt_StopCoroutine(currentLookAt);
-        yield return Coroutine_LookAt_UntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel);
+        yield return Coroutine_LookAt_UntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel, targetOffset);
     }
 
     /// <summary>
@@ -387,10 +383,10 @@ public class RotationLookAt : MonoBehaviour
     /// <para> Warning: You must keep track of this coroutine by yourself. It does not have safeguards to stop itself if you forget about it running.</para>
     /// </summary>
     /// <inheritdoc cref="LookToward_UntilTimePeriod"/>
-    public IEnumerator Enum_LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    public IEnumerator Enum_LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         LookAt_StopCoroutine(currentLookAt);
-        yield return Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: false);
+        yield return Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: false, targetOffset);
     }
 
     /// <summary>
@@ -424,7 +420,7 @@ public class RotationLookAt : MonoBehaviour
     /// Uses the look rotation's pitch and yaw system to get a target pitch/yaw to smoothly rotate towards the target transform.
     /// </summary>
     /// <inheritdoc cref="Coroutine_LookAt_TargetForSeconds(Transform, float, float, float, float)"/>
-    protected IEnumerator Coroutine_LookAt_Permanently(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    protected IEnumerator Coroutine_LookAt_Permanently(Transform target, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         // Cannot have negative look time.
         if (lookTime < 0)
@@ -439,7 +435,7 @@ public class RotationLookAt : MonoBehaviour
         // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
 
         // Get target pitch and yaw from a world position for char to look at
-        Get_LookAt_TargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+        Get_LookAt_TargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch, worldPositionOffset: targetOffset);
 
         while (true)
         {
@@ -448,7 +444,7 @@ public class RotationLookAt : MonoBehaviour
                 yield break;
 
             // Update target pitch and yaw, since target can be moving
-            Get_LookAt_TargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
+            Get_LookAt_TargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch, worldPositionOffset: targetOffset);
             SmoothDamp_YawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
             yield return null;
         }
@@ -458,7 +454,7 @@ public class RotationLookAt : MonoBehaviour
     /// Make the character controller's view move towards a target for a time period (in seconds).
     /// </summary>
     /// <inheritdoc cref="Coroutine_LookAt_TargetForSeconds(Transform, float, float, float, float)"></inheritdoc>
-    protected IEnumerator Coroutine_LookAt_UntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    protected IEnumerator Coroutine_LookAt_UntilWithinDegrees(Transform target, float withinDegrees, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         // Degrees should be positive
         withinDegrees = Mathf.Abs(withinDegrees);
@@ -476,7 +472,7 @@ public class RotationLookAt : MonoBehaviour
         // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
 
         // Get target pitch and yaw from a world position for char to look at
-        Get_LookAt_TargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+        Get_LookAt_TargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch, worldPositionOffset: targetOffset);
 
         while (!LookDegreesIsCloseEnough(yawDegrees, targetYaw, withinDegrees) || !LookDegreesIsCloseEnough(pitchDegrees, targetPitch, withinDegrees))
         {
@@ -485,7 +481,7 @@ public class RotationLookAt : MonoBehaviour
                 yield break;
 
             // Update target pitch and yaw, since target can be moving
-            Get_LookAt_TargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
+            Get_LookAt_TargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch, worldPositionOffset: targetOffset);
             SmoothDamp_YawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
             yield return null;
         }
@@ -500,7 +496,7 @@ public class RotationLookAt : MonoBehaviour
     /// <param name="timePeriod"> How many seconds to move view towards target, no matter the current view yaw/pitch. </param>
     /// <param name="useLastSavedYawPitchVel"> Uses the last saved pitch/yaw values that <see cref="Coroutine_LookAt_UntilWithinDegrees"/> saved. </param>
     /// <inheritdoc cref="Coroutine_LookAt_TargetForSeconds(Transform, float, float, float, float)"/>
-    protected IEnumerator Coroutine_LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, bool useLastSavedYawPitchVel = false)
+    protected IEnumerator Coroutine_LookToward_UntilTimePeriod(Transform target, float timePeriod, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, bool useLastSavedYawPitchVel = false, Vector3 targetOffset = default(Vector3))
     {
         // Cannot have negative look time.
         if (lookTime < 0)
@@ -531,7 +527,7 @@ public class RotationLookAt : MonoBehaviour
         // TODO: If initialLookVel has opposite signage of yaw/pitch, then it can make it lerp the opposite way temporarily (even if no movement should happen)
 
         // Get target pitch and yaw from a world position for char to look at
-        Get_LookAt_TargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch);
+        Get_LookAt_TargetPitchAndYawFrom(target.position, out float targetYaw, out float targetPitch, worldPositionOffset:targetOffset);
 
         float timer = 0f;
         while (timer < timePeriod)
@@ -541,7 +537,7 @@ public class RotationLookAt : MonoBehaviour
                 yield break;
 
             // Update target pitch and yaw, since target can be moving
-            Get_LookAt_TargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch);
+            Get_LookAt_TargetPitchAndYawFrom(target.position, out targetYaw, out targetPitch, worldPositionOffset:targetOffset);
             SmoothDamp_YawAndPitchToTarget(ref yawDegrees, ref pitchDegrees, targetYaw, targetPitch, ref yawVel, ref pitchVel, lookTime);
             timer += Time.deltaTime;
             yield return null;
@@ -556,13 +552,13 @@ public class RotationLookAt : MonoBehaviour
     /// <param name="withinDegrees">The minimum degree difference where it is considered acceptable enough to be "looking" at the target (SmoothDamp can take a long time to reach exact degrees).</param>
     /// <param name="lookTime">Roughly how many seconds until character's look direction matches to target direction.</param>
     /// <param name="initialLookVel">How fast the character look speed initially is.</param>
-    protected virtual IEnumerator Coroutine_LookAt_TargetForSeconds(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL)
+    protected virtual IEnumerator Coroutine_LookAt_TargetForSeconds(Transform target, float timePeriod, float withinDegrees = WITHIN_DEGREES, float lookTime = LOOKTIME, float initialLookVel = INITIAL_LOOKVEL, Vector3 targetOffset = default(Vector3))
     {
         // Look at the object
-        yield return Coroutine_LookAt_UntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel);
+        yield return Coroutine_LookAt_UntilWithinDegrees(target, withinDegrees, lookTime, initialLookVel, targetOffset);
 
         // Hold look there for a time period
-        yield return Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: true);
+        yield return Coroutine_LookToward_UntilTimePeriod(target, timePeriod, lookTime, initialLookVel, useLastSavedYawPitchVel: true, targetOffset);
     }
 
     /// <summary>
@@ -768,6 +764,7 @@ public class RotationLookAt : MonoBehaviour
     }
     #endregion
 }
+
 
 ///<summary> Represents an object that can follow a <see cref="RotationLookAt"/> component's rotation values.</summary>
 [System.Serializable]
