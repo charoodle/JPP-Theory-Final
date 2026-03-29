@@ -5,8 +5,8 @@ using UnityEngine;
 /// <summary>
 ///  TODO when done porting:
 ///     [x] Remake functions for a single generic object. Not just for a character-controller lookaround with forced head/body.
-///         - [x] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
 ///         - [ ] Organize functions (spatially) into correct regions.
+///         - [x] <see cref="INITIAL_LOOKVEL"/>: explain more. Which function(s) can returns a lookVel value?
 ///         - [x] Rename LookAt functions to be easier to differentiate. Use underscores, like: "LookAt_X" / "LookAt_Y."
 ///     [ ] Allow inputting an offset into the functions?
 ///     [x] Make CharacterController work with this script instead.
@@ -27,11 +27,6 @@ using UnityEngine;
 /// </summary>
 public class RotationLookAt : MonoBehaviour
 {
-    [Header("Debug")]
-    [SerializeField] protected bool debugRayVisible = false;
-    [SerializeField] protected float debugRayMaxDistance_FreedHead = 50f;
-    [SerializeField] protected Color debugRayColor = Color.red;
-
     /// <summary> Current yaw rotation (for the head + body). </summary>
     [Header("Fields")]
     [SerializeField] public float yawDegrees;
@@ -61,12 +56,21 @@ public class RotationLookAt : MonoBehaviour
     /// </summary>
     public List<RotationObject> rotationObjects = new List<RotationObject>();
 
-    #region LookAt Fields
-    // Used to pass data between LookAt IEnumerators
+    /// <summary>
+    /// Used to pass data between LookAt IEnumerators 
+    /// </summary>
     protected float lastSavedYawVel = 0f;
+    /// <summary>
+    /// Used to pass data between LookAt IEnumerators 
+    /// </summary>
     protected float lastSavedPitchVel = 0f;
 
-    // Default parameter constants for certain LookAt functions
+    /// <summary>
+    /// Current look coroutine that is making the character lock their view onto something. 
+    /// </summary>
+    protected Coroutine currentLookAt;
+
+    #region Constants
     /// <summary>
     /// Roughly how many seconds until a character looks at a target. "Rough" estimate because Mathf.SmoothDamp is different from Lerp (?).
     /// </summary>
@@ -83,12 +87,16 @@ public class RotationLookAt : MonoBehaviour
     /// Within what amount of yaw/pitch degrees is considered "looking at" an object?
     /// </summary>
     protected const float WITHIN_DEGREES = 2f;
-
-    // Current look coroutine that is making the character lock their view onto something.
-    protected Coroutine currentLookAt;
     #endregion
 
-    
+    #region Debug
+    [Header("Debug")]
+    [SerializeField] protected bool debugRayVisible = false;
+    [SerializeField] protected float debugRayMaxDistance_FreedHead = 50f;
+    [SerializeField] protected Color debugRayColor = Color.red;
+    #endregion
+
+
     #region LifeCycle Functions
     protected void LateUpdate()
     {
