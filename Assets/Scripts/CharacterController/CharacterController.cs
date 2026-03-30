@@ -1,28 +1,23 @@
 using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// Controls a character.
-/// </summary>
 
 namespace MyProject
 {
+    /// <summary>
+    /// Controls a character.
+    /// 
+    /// TODO: Refactor so can port into Bulletpain
+    ///     - [ ] Move all functions, events, etc. into clearly defined sections:
+    ///         1. Take input
+    ///         2. Move Object
+    ///         3. Rotate Object
+    ///     - [ ] Add documentation where needed
+    ///     
+    /// </summary>
     public abstract class CharacterController : MonoBehaviour
     {
-        #region Events
-        public delegate void CharacterAction();
-        /// <summary>
-        /// Happens when the character jumps.
-        /// </summary>
-        public event CharacterAction OnCharacterJump;
-         
-        /// <summary>
-        /// Happens when the character lands.
-        /// </summary>
-        public event CharacterAction OnCharacterLand;
-        #endregion
-
-
+        #region Unsorted... or multiple regions
         [SerializeField] protected UnityEngine.CharacterController controller;
         /// <summary>
         /// Property for <see cref="controller"/>, for the (Unity) character controller component.
@@ -39,23 +34,13 @@ namespace MyProject
             }
         }
 
-        /// <summary>
-        /// Is there a higher root object to this character controller?
-        /// Will be parented/unparented when they walk on surfaces.
-        /// </summary>
-        [SerializeField] Transform rootGameObject;
-        /// <summary>
-        /// Original root object on game start. Used to parent/unparent this object back and forth from to this transform (ex: ground checks).
-        /// </summary>
-        protected Transform originalRoot;
-
-        // Input
+        #region Take Input
         Vector2 _moveInput;
         Vector2 _lookInput;
         protected bool _sprintInput = false;
         protected bool _jumpInput = false;
 
-        // Input control
+        [Header("Input")]
         [SerializeField] protected bool _canInputMove = true;
         [SerializeField] protected bool _canInputLook = true;
         [SerializeField] protected bool _canInputSprint = true;
@@ -78,11 +63,6 @@ namespace MyProject
             get { return _lookInput; }
             protected set { _lookInput = value; }
         }
-
-        /// <summary>
-        /// Is the character holding the sprint button while moving in a direction?
-        /// </summary>
-        public bool isSprinting { get { return _sprintInput && moveInput.magnitude > 0; } }
 
         /// <summary>
         /// Is the character allowed to input move?
@@ -120,12 +100,53 @@ namespace MyProject
             set { _canInputJump = value; }
         }
 
+        protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
+        {
+            // Movement, if that input is allowed
+            moveInput = canInputMove ? GetMoveInput() : Vector2.zero;
+            jumpInput = canInputJump ? GetJumpInput() : false;
+            sprintInput = canInputSprint ? GetSprintInput() : false;
 
-        // Movement
+            // Look, if that input is allowed
+            lookInput = canInputLook ? GetLookInput() : Vector2.zero;
+            lookInput = ProcessLookInput(lookInput);
+        }
+
+        /// <summary>
+        /// Process look input here after it's grabbed from some source. (ex: adjust by mouse sensitivity, invert directions, ...)
+        /// </summary>
+        /// <param name="lookInput"></param>
+        /// <returns></returns>
+        protected abstract Vector2 ProcessLookInput(Vector2 lookInput);
+
+
+        /// <summary>
+        /// Get move input. X for horizontal character movement. Y for forward/backward movement.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract Vector2 GetMoveInput();
+
+        /// <summary>
+        /// Get look input. X for yaw (left/right). Y for pitch (up/down).
+        /// </summary>
+        /// <returns></returns>
+        protected abstract Vector2 GetLookInput();
+
+        /// <returns>True if character wants to jump this frame. False otherwise.</returns>
+        protected abstract bool GetJumpInput();
+
+        /// <returns>True if character wants to sprint this frame. False otherwise.</returns>
+        protected abstract bool GetSprintInput();
+        #endregion
+
+
+        #region Move Object (Forward/Sideways)
+        [Header("Movement")]
         /// <summary>
         /// TODO: This only works with gravity. Does not update X/Z velocity.
         /// </summary>
         [SerializeField] Vector3 playerVelocity;
+
         [SerializeField] protected float _walkSpeed = 3.0f;
         protected virtual float walkSpeed
         {
@@ -143,15 +164,10 @@ namespace MyProject
         }
         [SerializeField] protected float sprintSpeedMultiplier = 2.0f;
 
-
-
         /// <summary>
-        /// Controls the character's rotation.
+        /// Is the character holding the sprint button while moving in a direction?
         /// </summary>
-        [Header("Rotation")]
-        public RotationLookAt rot;
-        [SerializeField] Transform rotateBody;
-        [SerializeField] Transform rotateFreedHead;
+        public bool isSprinting { get { return _sprintInput && moveInput.magnitude > 0; } }
 
         [Header("Jump, Ground, and Gravity")]
         [SerializeField] float jumpHeight = 3f;
@@ -179,91 +195,6 @@ namespace MyProject
         // Layers (for jumping)
         [SerializeField] LayerMask characterLayer;
         LayerMask groundCheckLayer;
-
-        // Spawn position
-        Vector3 spawnPosition;
-
-        /// <summary>
-        /// The look at head of the character. Useful for aim target during dialogue.
-        /// </summary>
-        public Transform head
-        {
-            get { return rotateFreedHead; }
-        }
-
-        protected virtual void Start()
-        {
-            // Ground = anything not the character layer
-            groundCheckLayer = ~characterLayer;
-
-            // Original spawn position, in case ever fall out of map
-            spawnPosition = transform.position;
-
-            // Check player from going out of bounds every couple secons
-            StartCoroutine(PreventOutOfBoundsCoroutine());
-
-            // Get one layer above the root game object as the original root. Assumes (!!!) char controller is only one layer deep (?).
-            if (rootGameObject)
-            {
-                originalRoot = rootGameObject.transform.parent;
-            }
-
-            // Initialize LookRotation
-            if (rot == null)
-            {
-                rot = GetComponent<RotationLookAt>();
-                if(rot == null)
-                    Debug.LogWarning("No LookRotate component found on this CharacterController!", this.gameObject);
-            }
-
-            rot.AssignBody(rotateBody);
-            rot.AssignHead(rotateFreedHead);
-
-            // Make the object retain the same rotation it has when the game is started (yaw /Y-rotation only). Because custom-controlled rotation system.
-            rot.InitializeStartingRotation(transform.rotation.eulerAngles.y);
-        }
-
-
-        #region Character Control
-        protected virtual void Update()
-        {
-            // If game is paused, player cannot move, or look
-            if (Time.timeScale == 0)
-                return;
-
-            // Update input
-            UpdateInputs(ref _moveInput, ref _lookInput, ref _jumpInput, ref _sprintInput);
-
-            // Move character
-            MoveCharacter(moveInput, _jumpInput, _sprintInput, ref _isGrounded);
-
-            // Update rotation (values only)
-            if(rot)
-                UpdateLookRotation(lookInput, ref rot.yawDegrees, ref rot.pitchDegrees);
-        }
-
-        protected void LateUpdate()
-        {
-        }
-
-        protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
-        {
-            // Movement, if that input is allowed
-            moveInput = canInputMove ? GetMoveInput() : Vector2.zero;
-            jumpInput = canInputJump ? GetJumpInput() : false;
-            sprintInput = canInputSprint ? GetSprintInput() : false;
-
-            // Look, if that input is allowed
-            lookInput = canInputLook ? GetLookInput() : Vector2.zero;
-            lookInput = ProcessLookInput(lookInput);
-        }
-
-        /// <summary>
-        /// Process look input here after it's grabbed from some source. (ex: adjust by mouse sensitivity, invert directions, ...)
-        /// </summary>
-        /// <param name="lookInput"></param>
-        /// <returns></returns>
-        protected abstract Vector2 ProcessLookInput(Vector2 lookInput);
 
         protected void MoveCharacter(Vector3 moveInput, bool jumpInput, bool sprintInput, ref bool isGrounded)
         {
@@ -347,7 +278,7 @@ namespace MyProject
 
             // Mark time of jump
             float timeOfJump = Time.time;
-            
+
             // Next isGrounded=true can be accepted at this timestamp:
             float timeOfNextIsGrounded = timeOfJump + delayBetweenCheckingJumpAndLand;
             // Wait for player to land on ground after initial jump
@@ -371,47 +302,6 @@ namespace MyProject
             // Allow player to jump again
             isGroundedAndCanJumpAgain = true;
         }
-
-        protected void UpdateLookRotation(Vector2 lookInput, ref float lookXRotation, ref float lookYRotation)
-        {
-            // Change x and y rotations by input
-            lookXRotation += lookInput.x;
-            lookYRotation -= lookInput.y;
-        }
-
-        /// <summary>
-        /// Get move input. X for horizontal character movement. Y for forward/backward movement.
-        /// </summary>
-        /// <returns></returns>
-        protected abstract Vector2 GetMoveInput();
-
-        /// <summary>
-        /// Get look input. X for yaw (left/right). Y for pitch (up/down).
-        /// </summary>
-        /// <returns></returns>
-        protected abstract Vector2 GetLookInput();
-
-        /// <returns>True if character wants to jump this frame. False otherwise.</returns>
-        protected abstract bool GetJumpInput();
-
-        /// <returns>True if character wants to sprint this frame. False otherwise.</returns>
-        protected abstract bool GetSprintInput();
-
-
-        #region GroundCheck - Spherecast Debug
-#if UNITY_EDITOR
-        // Spherecast debug vars
-        Vector3 sc_position;
-        float sc_radius;
-        Vector3 sc_position_end;
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = isGrounded ? Color.green : Color.red;
-            Gizmos.DrawSphere(sc_position, sc_radius);
-            Gizmos.DrawSphere(sc_position_end, sc_radius);
-        }
-#endif
-#endregion
 
         /// <summary>
         /// Is the current character touching a ground surface?
@@ -488,6 +378,141 @@ namespace MyProject
                 yield return new WaitForSeconds(checkSeconds);
             }
         }
-#endregion
+
+        /// <summary>
+        /// Is there a higher root object to this character controller?
+        /// Will be parented/unparented when they walk on surfaces.
+        /// </summary>
+        [SerializeField] Transform rootGameObject;
+        /// <summary>
+        /// Original root object on game start. Used to parent/unparent this object back and forth from to this transform (ex: ground checks).
+        /// </summary>
+        protected Transform originalRoot;
+
+        // Spawn position
+        // TODO: Make protected
+        Vector3 spawnPosition;
+        #endregion
+
+
+        #region Rotate Object
+        /// <summary>
+        /// Controls the character's rotation.
+        /// </summary>
+        [Header("Rotation")]
+        public RotationLookAt rot;
+        [SerializeField] Transform rotateBody;
+        [SerializeField] Transform rotateFreedHead;
+
+        /// <summary>
+        /// The look at head of the character. Useful for aim target during dialogue.
+        /// </summary>
+        public Transform head
+        {
+            get { return rotateFreedHead; }
+        }
+
+        protected void UpdateLookRotation(Vector2 lookInput, ref float lookXRotation, ref float lookYRotation)
+        {
+            // Change x and y rotations by input
+            lookXRotation += lookInput.x;
+            lookYRotation -= lookInput.y;
+        }
+        #endregion
+
+
+        
+
+        
+        #endregion
+
+
+        #region Events
+        public delegate void CharacterAction();
+        /// <summary>
+        /// Happens when the character jumps.
+        /// </summary>
+        public event CharacterAction OnCharacterJump;
+         
+        /// <summary>
+        /// Happens when the character lands.
+        /// </summary>
+        public event CharacterAction OnCharacterLand;
+        #endregion
+
+
+        #region Debug
+        #region GroundCheck - Spherecast Debug
+#if UNITY_EDITOR
+        // Spherecast debug vars
+        Vector3 sc_position;
+        float sc_radius;
+        Vector3 sc_position_end;
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = isGrounded ? Color.green : Color.red;
+            Gizmos.DrawSphere(sc_position, sc_radius);
+            Gizmos.DrawSphere(sc_position_end, sc_radius);
+        }
+#endif
+        #endregion
+        #endregion
+
+
+
+        #region LifeCycle Functions
+        protected virtual void Start()
+        {
+            // Ground = anything not the character layer
+            groundCheckLayer = ~characterLayer;
+
+            // Original spawn position, in case ever fall out of map
+            spawnPosition = transform.position;
+
+            // Check player from going out of bounds every couple secons
+            StartCoroutine(PreventOutOfBoundsCoroutine());
+
+            // Get one layer above the root game object as the original root. Assumes (!!!) char controller is only one layer deep (?).
+            if (rootGameObject)
+            {
+                originalRoot = rootGameObject.transform.parent;
+            }
+
+            // Initialize LookRotation
+            if (rot == null)
+            {
+                rot = GetComponent<RotationLookAt>();
+                if(rot == null)
+                    Debug.LogWarning("No LookRotate component found on this CharacterController!", this.gameObject);
+            }
+
+            rot.AssignBody(rotateBody);
+            rot.AssignHead(rotateFreedHead);
+
+            // Make the object retain the same rotation it has when the game is started (yaw /Y-rotation only). Because custom-controlled rotation system.
+            rot.InitializeStartingRotation(transform.rotation.eulerAngles.y);
+        }
+
+        protected virtual void Update()
+        {
+            // If game is paused, player cannot move, or look
+            if (Time.timeScale == 0)
+                return;
+
+            // Update input
+            UpdateInputs(ref _moveInput, ref _lookInput, ref _jumpInput, ref _sprintInput);
+
+            // Move character
+            MoveCharacter(moveInput, _jumpInput, _sprintInput, ref _isGrounded);
+
+            // Update rotation (values only)
+            if(rot)
+                UpdateLookRotation(lookInput, ref rot.yawDegrees, ref rot.pitchDegrees);
+        }
+
+        protected void LateUpdate()
+        {
+        }
+        #endregion
     }
 }
