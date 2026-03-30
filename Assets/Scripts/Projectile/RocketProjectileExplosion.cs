@@ -106,7 +106,7 @@ public class RocketProjectileExplosion : MonoBehaviour
 
         // Wait for character controller to be grounded until give control back
         MyProject.CharacterController myCC = rb.gameObject.GetComponent<MyProject.CharacterController>();
-        while(!myCC.isGrounded)
+        while(!myCC.IsGrounded)
         {
             yield return null;
         }

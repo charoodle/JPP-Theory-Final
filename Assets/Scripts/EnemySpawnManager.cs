@@ -131,7 +131,7 @@ public class EnemySpawnManager : MonoBehaviour
         enemyCtrl.canMove = false;
 
         // Wait until enemy hits ground to allow movement
-        while(!enemyCtrl.isGrounded)
+        while(!enemyCtrl.IsGrounded)
         {
             yield return new WaitForFixedUpdate();
         }

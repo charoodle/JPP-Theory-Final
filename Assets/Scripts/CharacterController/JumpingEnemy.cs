@@ -23,7 +23,7 @@ public class JumpingEnemy : EnemyController
         while(true)
         {
             // Jump as soon as on ground and cooldown is over
-            yield return new WaitUntil(() => isGrounded);
+            yield return new WaitUntil(() => IsGrounded);
 
             // Jump the moment it can jump
             wantsToJump = true;
@@ -32,7 +32,7 @@ public class JumpingEnemy : EnemyController
             yield return null;
 
             // If no longer on ground, then jump probably happened. Wait a few seconds before next jump.
-            if(!isGrounded)
+            if(!IsGrounded)
             {
                 wantsToJump = false;
                 // Cooldown time

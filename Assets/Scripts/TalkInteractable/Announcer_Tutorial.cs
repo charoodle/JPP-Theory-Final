@@ -810,7 +810,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         float runTimer = 0f;
         while(runTimer < enoughSec)
         {
-            if (charController.isSprinting)
+            if (charController.IsSprinting)
                 runTimer += Time.deltaTime;
 
             yield return null;

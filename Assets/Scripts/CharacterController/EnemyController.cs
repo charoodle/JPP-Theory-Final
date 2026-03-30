@@ -15,9 +15,9 @@ public class EnemyController : MyProject.CharacterController
     /// </summary>
     public string castleTargetName;
 
-    protected override float walkSpeed
+    protected override float WalkSpeed
     { 
-        get => base.walkSpeed;
+        get => base.WalkSpeed;
         set
         {
             // Enemies cannot have speed <= 1
@@ -58,8 +58,8 @@ public class EnemyController : MyProject.CharacterController
         // Pct goes from 0% - 100%
         deviationPct = Mathf.Clamp(deviationPct, 0f, 1f);
         // Speed up/slow down by a percent of walk speed
-        float fractionOfWalkSpeed = deviationPct * walkSpeed;
-        walkSpeed += Random.Range(-fractionOfWalkSpeed, fractionOfWalkSpeed);
+        float fractionOfWalkSpeed = deviationPct * WalkSpeed;
+        WalkSpeed += Random.Range(-fractionOfWalkSpeed, fractionOfWalkSpeed);
     }
 
     protected override bool GetJumpInput()

@@ -6,18 +6,18 @@ namespace MyProject
 {
     /// <summary>
     /// Controls a character.
+    /// Must be a child of some parent GameObject. I think for parenting to moving objects.
     /// 
     /// TODO: Refactor so can port into Bulletpain
     ///     - [ ] Move all functions, events, etc. into clearly defined sections:
     ///         1. Take input
     ///         2. Move Object
     ///         3. Rotate Object
-    ///     - [ ] Add documentation where needed
+    ///     - [ ] Add documentation where needed + make consistent variable naming
     ///     
     /// </summary>
     public abstract class CharacterController : MonoBehaviour
     {
-        #region Unsorted... or multiple regions
         [SerializeField] protected UnityEngine.CharacterController controller;
         /// <summary>
         /// Property for <see cref="controller"/>, for the (Unity) character controller component.
@@ -34,16 +34,47 @@ namespace MyProject
             }
         }
 
+
         #region Take Input
+        /// <summary>
+        /// Current movement input being fed in.
+        /// </summary>
         Vector2 _moveInput;
+
+        /// <summary>
+        /// Current look input being fed in.
+        /// </summary>
         Vector2 _lookInput;
+
+        /// <summary>
+        /// Current sprint input being fed in.
+        /// </summary>
         protected bool _sprintInput = false;
+
+        /// <summary>
+        /// Current jump input being fed in.
+        /// </summary>
         protected bool _jumpInput = false;
 
+        /// <summary>
+        /// Allow/disallow move input.
+        /// </summary>
         [Header("Input")]
         [SerializeField] protected bool _canInputMove = true;
+
+        /// <summary>
+        /// Allow/disallow look input.
+        /// </summary>
         [SerializeField] protected bool _canInputLook = true;
+
+        /// <summary>
+        /// Allows/disallows sprint input.
+        /// </summary>
         [SerializeField] protected bool _canInputSprint = true;
+
+        /// <summary>
+        /// Allows/disallows jump input.
+        /// </summary>
         [SerializeField] protected bool _canInputJump = true;
 
         /// <summary>
@@ -100,6 +131,13 @@ namespace MyProject
             set { _canInputJump = value; }
         }
 
+        /// <summary>
+        /// Update all inputs for this frame.
+        /// </summary>
+        /// <param name="moveInput"></param>
+        /// <param name="lookInput"></param>
+        /// <param name="jumpInput"></param>
+        /// <param name="sprintInput"></param>
         protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
         {
             // Movement, if that input is allowed
@@ -109,6 +147,7 @@ namespace MyProject
 
             // Look, if that input is allowed
             lookInput = canInputLook ? GetLookInput() : Vector2.zero;
+            // Process look input if needed
             lookInput = ProcessLookInput(lookInput);
         }
 
@@ -118,7 +157,6 @@ namespace MyProject
         /// <param name="lookInput"></param>
         /// <returns></returns>
         protected abstract Vector2 ProcessLookInput(Vector2 lookInput);
-
 
         /// <summary>
         /// Get move input. X for horizontal character movement. Y for forward/backward movement.
@@ -141,14 +179,20 @@ namespace MyProject
 
 
         #region Move Object (Forward/Sideways)
-        [Header("Movement")]
-        /// <summary>
-        /// TODO: This only works with gravity. Does not update X/Z velocity.
-        /// </summary>
-        [SerializeField] Vector3 playerVelocity;
+        /// <inheritdoc cref="_isGrounded"/>
+        public bool IsGrounded
+        {
+            get { return _isGrounded; }
+            protected set { _isGrounded = value; }
+        }
 
-        [SerializeField] protected float _walkSpeed = 3.0f;
-        protected virtual float walkSpeed
+        /// <summary>
+        /// Is the character holding the sprint button while moving in a direction?
+        /// </summary>
+        public bool IsSprinting { get { return _sprintInput && moveInput.magnitude > 0; } }
+
+        /// <inheritdoc cref="_walkSpeed"/>
+        protected virtual float WalkSpeed
         {
             get { return _walkSpeed; }
             set
@@ -162,27 +206,38 @@ namespace MyProject
                 _walkSpeed = value;
             }
         }
-        [SerializeField] protected float sprintSpeedMultiplier = 2.0f;
+
+        [Header("Movement")]
+        /// <summary>
+        /// TODO: This only works with gravity. Does not update X/Z velocity.
+        /// </summary>
+        [SerializeField] Vector3 _characterVelocity;
 
         /// <summary>
-        /// Is the character holding the sprint button while moving in a direction?
+        /// How fast the character walks at.
         /// </summary>
-        public bool isSprinting { get { return _sprintInput && moveInput.magnitude > 0; } }
+        [SerializeField] protected float _walkSpeed = 3.0f;
 
-        [Header("Jump, Ground, and Gravity")]
-        [SerializeField] float jumpHeight = 3f;
-        Vector3 worldGravity = new Vector3(0f, -9.81f, 0f);
+        /// <summary>
+        /// How much faster the character sprints at. Depends on <see cref="_walkSpeed"/>.
+        /// </summary>
+        [SerializeField] protected float _sprintSpeedMultiplier = 2.0f;
+
+        /// <summary>
+        /// Is this character touching a ground surface?
+        /// </summary>
         [SerializeField] protected bool _isGrounded;
-        public bool isGrounded
-        {
-            get { return _isGrounded; }
-            protected set { _isGrounded = value; }
-        }
+
         /// <summary>
-        /// Flag to manage allowing one jump command per accepted character jump inpu. This should initially be true on game start to let the character jump.
-        /// <para>Triggered by <see cref="WaitForCharacterToLandOnGround"/>, and is used in the jump section of <see cref="MoveCharacter(Vector3, bool, bool, ref bool)"/></para>
+        /// Is there a higher root object to this character controller?
+        /// Will be parented/unparented when they walk on surfaces.
         /// </summary>
-        protected bool isGroundedAndCanJumpAgain = true;
+        [Header("Movement (Relative Velocity)")]
+        [SerializeField] Transform rootGameObject;
+        /// <summary>
+        /// Original root object on game start. Used to parent/unparent this object back and forth from to this transform (ex: ground checks).
+        /// </summary>
+        protected Transform originalRoot;
 
         // Movement with a parent
         /// <summary>
@@ -192,6 +247,29 @@ namespace MyProject
         [SerializeField] Vector3 currentGroundVelocity;
         [SerializeField] Vector3 lastTouchedGroundVelocity;
 
+        /// <summary>
+        /// How high the character jumps (in default Unity units) before gravity pulls them down.
+        /// </summary>
+        [Header("Jump, Ground, and Gravity")]
+        [SerializeField] float _jumpHeight = 3f;
+
+        /// <summary>
+        /// Gravity for this character.
+        /// </summary>
+        Vector3 _worldGravity = new Vector3(0f, -9.81f, 0f);
+
+        /// <summary>
+        /// Spawn position
+        /// TODO: Make protected
+        /// </summary>
+        Vector3 spawnPosition;
+
+        /// <summary>
+        /// Flag to manage allowing one jump command per accepted character jump inpu. This should initially be true on game start to let the character jump.
+        /// <para>Triggered by <see cref="WaitForCharacterToLandOnGround"/>, and is used in the jump section of <see cref="MoveCharacter(Vector3, bool, bool, ref bool)"/></para>
+        /// </summary>
+        protected bool isGroundedAndCanJumpAgain = true;
+
         // Layers (for jumping)
         [SerializeField] LayerMask characterLayer;
         LayerMask groundCheckLayer;
@@ -199,12 +277,12 @@ namespace MyProject
         protected void MoveCharacter(Vector3 moveInput, bool jumpInput, bool sprintInput, ref bool isGrounded)
         {
             // Update ground check
-            isGrounded = IsGrounded();
+            isGrounded = CheckIsGrounded();
 
             // Sprinting - modify final move speed
-            float moveSpeed = walkSpeed;
+            float moveSpeed = WalkSpeed;
             if (sprintInput)
-                moveSpeed *= sprintSpeedMultiplier;
+                moveSpeed *= _sprintSpeedMultiplier;
 
             // Player move around (x and z values only)
             Vector3 moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
@@ -239,13 +317,13 @@ namespace MyProject
             // Reset player velocity while touching ground.
             if (isGrounded)
             {
-                playerVelocity = Vector3.zero;
+                _characterVelocity = Vector3.zero;
             }
 
             // Jump if on ground - do this once per isGrounded only
             if (jumpInput && isGrounded && isGroundedAndCanJumpAgain)
             {
-                playerVelocity.y += Mathf.Sqrt(jumpHeight * -2.0f * worldGravity.y);
+                _characterVelocity.y += Mathf.Sqrt(_jumpHeight * -2.0f * _worldGravity.y);
 
                 // Only allow one jump per accepted jump input. Waits for character to land again before can jump again.
                 StartCoroutine(WaitForCharacterToLandOnGround());
@@ -253,54 +331,12 @@ namespace MyProject
 
             // Apply gravity if not on ground
             if (!isGrounded)
-                playerVelocity += worldGravity * Time.deltaTime;
+                _characterVelocity += _worldGravity * Time.deltaTime;
             #endregion
 
             // Move with gravity (y value affected only)
             //  Combined into one movement movement so CharacterController.velocity reading is accurate.
-            controller.Move(finalHorizontalMovement + (playerVelocity * Time.deltaTime));
-        }
-
-        /// <summary>
-        /// Manages forcing player to jump only once per accepted jump input (since jumping is processed each frame; want to prevent doubling up on jump events across first couple jump frames).
-        /// Sends out jump event and land event once.
-        /// </summary>
-        /// <returns></returns>
-        protected IEnumerator WaitForCharacterToLandOnGround()
-        {
-            // Minimum time between a jump and a land. Since after a jump can still be considered grounded for first couple frames.
-            const float delayBetweenCheckingJumpAndLand = 0.25f;
-
-            isGroundedAndCanJumpAgain = false;
-
-            // Send jump event out
-            OnCharacterJump?.Invoke();
-
-            // Mark time of jump
-            float timeOfJump = Time.time;
-
-            // Next isGrounded=true can be accepted at this timestamp:
-            float timeOfNextIsGrounded = timeOfJump + delayBetweenCheckingJumpAndLand;
-            // Wait for player to land on ground after initial jump
-            while (true)
-            {
-                // If past timestamp, check if grounded
-                if (Time.time > timeOfNextIsGrounded)
-                {
-                    // If grounded again after acceptable timestamp, break out
-                    if (isGrounded)
-                        break;
-                }
-
-                // TODO: Moving and jumping doesn't really happen in fixed update at the moment (prevent jittery camera)...
-                yield return new WaitForFixedUpdate();
-            }
-
-            // Send land event out
-            OnCharacterLand?.Invoke();
-
-            // Allow player to jump again
-            isGroundedAndCanJumpAgain = true;
+            controller.Move(finalHorizontalMovement + (_characterVelocity * Time.deltaTime));
         }
 
         /// <summary>
@@ -308,7 +344,7 @@ namespace MyProject
         /// <para>Additionally detects and sets <see cref="currentMovingGroundSurface"/> if the surface underneath is a <see cref="MovableGroundSurface"/>.</para>
         /// </summary>
         /// <returns>True if character is touching ground (depends on CharacterController.skinWidth).</returns>
-        protected bool IsGrounded()
+        protected bool CheckIsGrounded()
         {
             // Ground = anything not on the player layer
             LayerMask groundCheckLayer = this.groundCheckLayer;
@@ -362,6 +398,48 @@ namespace MyProject
             return hitGround;
         }
 
+        /// <summary>
+        /// Manages forcing player to jump only once per accepted jump input (since jumping is processed each frame; want to prevent doubling up on jump events across first couple jump frames).
+        /// Sends out jump event and land event once.
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerator WaitForCharacterToLandOnGround()
+        {
+            // Minimum time between a jump and a land. Since after a jump can still be considered grounded for first couple frames.
+            const float delayBetweenCheckingJumpAndLand = 0.25f;
+
+            isGroundedAndCanJumpAgain = false;
+
+            // Send jump event out
+            OnCharacterJump?.Invoke();
+
+            // Mark time of jump
+            float timeOfJump = Time.time;
+
+            // Next isGrounded=true can be accepted at this timestamp:
+            float timeOfNextIsGrounded = timeOfJump + delayBetweenCheckingJumpAndLand;
+            // Wait for player to land on ground after initial jump
+            while (true)
+            {
+                // If past timestamp, check if grounded
+                if (Time.time > timeOfNextIsGrounded)
+                {
+                    // If grounded again after acceptable timestamp, break out
+                    if (IsGrounded)
+                        break;
+                }
+
+                // TODO: Moving and jumping doesn't really happen in fixed update at the moment (prevent jittery camera)...
+                yield return new WaitForFixedUpdate();
+            }
+
+            // Send land event out
+            OnCharacterLand?.Invoke();
+
+            // Allow player to jump again
+            isGroundedAndCanJumpAgain = true;
+        }
+
         protected IEnumerator PreventOutOfBoundsCoroutine()
         {
             float checkSeconds = 5f;
@@ -378,20 +456,6 @@ namespace MyProject
                 yield return new WaitForSeconds(checkSeconds);
             }
         }
-
-        /// <summary>
-        /// Is there a higher root object to this character controller?
-        /// Will be parented/unparented when they walk on surfaces.
-        /// </summary>
-        [SerializeField] Transform rootGameObject;
-        /// <summary>
-        /// Original root object on game start. Used to parent/unparent this object back and forth from to this transform (ex: ground checks).
-        /// </summary>
-        protected Transform originalRoot;
-
-        // Spawn position
-        // TODO: Make protected
-        Vector3 spawnPosition;
         #endregion
 
 
@@ -421,12 +485,6 @@ namespace MyProject
         #endregion
 
 
-        
-
-        
-        #endregion
-
-
         #region Events
         public delegate void CharacterAction();
         /// <summary>
@@ -450,7 +508,7 @@ namespace MyProject
         Vector3 sc_position_end;
         private void OnDrawGizmos()
         {
-            Gizmos.color = isGrounded ? Color.green : Color.red;
+            Gizmos.color = IsGrounded ? Color.green : Color.red;
             Gizmos.DrawSphere(sc_position, sc_radius);
             Gizmos.DrawSphere(sc_position_end, sc_radius);
         }
@@ -469,10 +527,11 @@ namespace MyProject
             // Original spawn position, in case ever fall out of map
             spawnPosition = transform.position;
 
-            // Check player from going out of bounds every couple secons
+            // Checks player from going out of bounds every couple seconds
             StartCoroutine(PreventOutOfBoundsCoroutine());
 
             // Get one layer above the root game object as the original root. Assumes (!!!) char controller is only one layer deep (?).
+            // TODO: This seems bad...
             if (rootGameObject)
             {
                 originalRoot = rootGameObject.transform.parent;
@@ -508,10 +567,6 @@ namespace MyProject
             // Update rotation (values only)
             if(rot)
                 UpdateLookRotation(lookInput, ref rot.yawDegrees, ref rot.pitchDegrees);
-        }
-
-        protected void LateUpdate()
-        {
         }
         #endregion
     }
