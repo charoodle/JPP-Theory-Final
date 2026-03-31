@@ -260,7 +260,6 @@ namespace MyProject
 
         /// <summary>
         /// Spawn position
-        /// TODO: Make protected
         /// </summary>
         Vector3 spawnPosition;
 
@@ -273,6 +272,11 @@ namespace MyProject
         // Layers (for jumping)
         [SerializeField] LayerMask characterLayer;
         LayerMask groundCheckLayer;
+
+        /// <summary>
+        /// If a character falls below this y-value, they are considered out of bounds and will be reset to their original spawn position.
+        /// </summary>
+        protected const float Y_AXIS_OUTOFBOUNDS = -30f;
 
         protected void MoveCharacter(Vector3 moveInput, bool jumpInput, bool sprintInput, ref bool isGrounded)
         {
@@ -439,13 +443,17 @@ namespace MyProject
             // Allow player to jump again
             isGroundedAndCanJumpAgain = true;
         }
-
+        
+        /// <summary>
+        /// Respawns the character at its original instantiation position if it goes out of bounds.
+        /// </summary>
+        /// <returns></returns>
         protected IEnumerator PreventOutOfBoundsCoroutine()
         {
             float checkSeconds = 5f;
             while (true)
             {
-                if (transform.position.y < -30f)
+                if (transform.position.y < Y_AXIS_OUTOFBOUNDS)
                 {
                     // Disable character controller to allow for movement
                     controller.enabled = false;
@@ -465,17 +473,31 @@ namespace MyProject
         /// </summary>
         [Header("Rotation")]
         public RotationLookAt rot;
+
+        /// <summary>
+        /// The body of the character that rotates around its y-axis to match a pitch/yaw degrees value.
+        /// </summary>
         [SerializeField] Transform rotateBody;
+
+        /// <summary>
+        /// The head of the character that will rotate around its x and y-axis to match a pitch/yaw degrees value.
+        /// </summary>
         [SerializeField] Transform rotateFreedHead;
 
         /// <summary>
-        /// The look at head of the character. Useful for aim target during dialogue.
+        /// The look at head of the character. Useful for an aim target during dialogue.
         /// </summary>
         public Transform head
         {
             get { return rotateFreedHead; }
         }
 
+        /// <summary>
+        /// Update the look rotation degrees by some input.
+        /// </summary>
+        /// <param name="lookInput"></param>
+        /// <param name="lookXRotation"></param>
+        /// <param name="lookYRotation"></param>
         protected void UpdateLookRotation(Vector2 lookInput, ref float lookXRotation, ref float lookYRotation)
         {
             // Change x and y rotations by input
