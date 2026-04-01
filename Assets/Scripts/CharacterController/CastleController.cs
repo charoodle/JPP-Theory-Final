@@ -138,7 +138,7 @@ public class CastleController : MyProject.CharacterController
         return false;
     }
 
-    protected override Vector2 ProcessLookInput(Vector2 lookInput)
+    protected override Vector2 PostProcessLookInput(Vector2 lookInput)
     {
         // Not needed?
         return lookInput;

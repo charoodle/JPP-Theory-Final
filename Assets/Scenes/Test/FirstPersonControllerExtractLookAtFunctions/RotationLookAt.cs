@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-///  TODO when done porting:
-///     [x] Allow inputting an offset into the functions?
-///     
 ///  TODO when done making portable and reusable:
 ///     [x] Refactor CharacterController to use the portable script instead.
 ///     [ ] Refactor CharacterController to use in BulletPain project.

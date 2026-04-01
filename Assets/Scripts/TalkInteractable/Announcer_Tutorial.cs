@@ -151,10 +151,10 @@ public class Announcer_Tutorial : TalkWithInteractable
     protected void DisableAllPlayerControls()
     {
         // Disable player controls initially, tutorial will enable them one by one
-        playerController.canInputLook = false;
-        playerController.canInputMove = false;
-        playerController.canInputJump = false;
-        playerController.canInputSprint = false;
+        playerController.input.canInputLook = false;
+        playerController.input.canInputMove = false;
+        playerController.input.canInputJump = false;
+        playerController.input.canInputSprint = false;
         // Disable player weapon controls; will be unlocked in the shooting tutorial
         playerController.canSwitchToPistol = false;
         playerController.canSwitchToRocketLauncher = false;
@@ -174,7 +174,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return TextBox("I will not repeat myself, so listen up very carefully!", minAppearTime: 2.5f);
         yield return TextBox("You can use [W A S D] to move around, and your [Mouse] to look around.", waitCondition: WaitUntilCharacterMovesAndLooksAround(playerController));
         // Player can run if they want to bug out tutorial
-        playerController.canInputSprint = true;
+        playerController.input.canInputSprint = true;
         yield return TextBox("Press [SPACEBAR] to jump.", waitCondition: WaitUntilCharacterJumpsOverFence(playerController, jumpFenceTrigger));
         yield return TextBox("Hold [LEFT SHIFT] to run.", waitCondition: WaitUntilCharacterRuns(playerController));
         yield return TextBox("Fairly standard FPS shooter controls.");
@@ -268,8 +268,8 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return TextBox("Keep practicing your shots until you're comfortable enough with both weapons.", minAppearTime:2f);
 
         // Prevent player from looking & moving
-        playerController.canInputLook = false;
-        playerController.canInputMove = false;
+        playerController.input.canInputLook = false;
+        playerController.input.canInputMove = false;
         // Save player view info
         float origViewPitch = 0f;
         float origViewYaw = 0f;
@@ -296,8 +296,8 @@ public class Announcer_Tutorial : TalkWithInteractable
         yield return playerController.rot.Enum_LookAt_TargetPitchYaw(origViewPitch, origViewYaw, withinDegrees: 0.1f);
 
         // Enable player look & move input again when cutscene ends
-        playerController.canInputLook = true;
-        playerController.canInputMove = true;
+        playerController.input.canInputLook = true;
+        playerController.input.canInputMove = true;
 
         yield return EndTalk();
 
@@ -434,9 +434,9 @@ public class Announcer_Tutorial : TalkWithInteractable
             playerController.rot.LookAt(rock.transform, lookTime: 0.25f);
 
         // Freeze player controls
-        playerController.canInputLook = false;
-        playerController.canInputMove = false;
-        playerController.canInputJump = false;
+        playerController.input.canInputLook = false;
+        playerController.input.canInputMove = false;
+        playerController.input.canInputJump = false;
 
         // Make player view follow trebuchet ball and wait for it to land
         yield return WaitUntilRockLands(rock);
@@ -447,9 +447,9 @@ public class Announcer_Tutorial : TalkWithInteractable
         playerController.rot.LookAtStop();
 
         // Let player move again
-        playerController.canInputLook = true;
-        playerController.canInputMove = true;
-        playerController.canInputJump = true;
+        playerController.input.canInputLook = true;
+        playerController.input.canInputMove = true;
+        playerController.input.canInputJump = true;
 
         // WaitCond: Wait until player presses reload button on trebuchet
         yield return TextBox("In order to reload it, just press the white cube button that appears after the projectile is launched.", waitCondition:WaitUntilPlayerPressesButton(trebuchetReloadButton));
@@ -490,9 +490,9 @@ public class Announcer_Tutorial : TalkWithInteractable
     protected IEnumerator WaitUntilCharacterMovesAndLooksAround(CharacterController charController)
     {
         // Reenable character movement
-        charController.canInputMove = true;
+        charController.input.canInputMove = true;
         // Reenable character look so player doesn't think their mouse/look controls doesn't work
-        charController.canInputLook = true;
+        charController.input.canInputLook = true;
 
         #region Wait until player moves around
         float timeWentForward = 0f;
@@ -552,7 +552,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         // Wait until player presses each direction for enough seconds
         while (!MovedForEnoughSec())
         {
-            Vector2 moveInput = charController.moveInput;
+            Vector2 moveInput = charController.input.moveInput;
             float time = Time.deltaTime;
 
             // Right
@@ -595,7 +595,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         #region Look Around
 
         // Reenable character looking
-        charController.canInputLook = true;
+        charController.input.canInputLook = true;
 
         string lookAroundStr = "Look Around: --\n";
 
@@ -613,7 +613,7 @@ public class Announcer_Tutorial : TalkWithInteractable
         enoughSec = 0.75f;
         while(timeLookAround < enoughSec)
         {
-            Vector2 lookInput = charController.lookInput;
+            Vector2 lookInput = charController.input.lookInput;
             if (lookInput.magnitude > 0)
                 timeLookAround += Time.deltaTime;
             yield return null;
@@ -640,7 +640,7 @@ public class Announcer_Tutorial : TalkWithInteractable
     protected IEnumerator WaitUntilCharacterJumpsOverFence(CharacterController charController, PlayerTrigger fenceTrigger)
     {
         // Reenable jumping for character
-        charController.canInputJump = true;
+        charController.input.canInputJump = true;
 
         bool playerJumped = false;
         bool playerLanded = false;
@@ -804,7 +804,7 @@ public class Announcer_Tutorial : TalkWithInteractable
     protected IEnumerator WaitUntilCharacterRuns(CharacterController charController)
     {
         // Reenable sprinting for character
-        charController.canInputSprint = true;
+        charController.input.canInputSprint = true;
 
         const float enoughSec = 2f;
         float runTimer = 0f;

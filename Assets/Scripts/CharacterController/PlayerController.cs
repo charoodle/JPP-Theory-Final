@@ -254,7 +254,7 @@ public class PlayerController : MyProject.CharacterController
 
     protected override bool GetJumpInput()
     {
-        if (!canInputMove)
+        if (!input.canInputMove)
             return false;
 
         return Input.GetKey(KeyCode.Space);
@@ -262,7 +262,7 @@ public class PlayerController : MyProject.CharacterController
 
     protected override bool GetSprintInput()
     {
-        if (!canInputMove)
+        if (!input.canInputMove)
             return false;
 
         return Input.GetKey(KeyCode.LeftShift);
@@ -273,10 +273,10 @@ public class PlayerController : MyProject.CharacterController
         return Input.GetKeyDown(KeyCode.E);
     }
 
-    protected override Vector2 ProcessLookInput(Vector2 lookInput)
+    protected override Vector2 PostProcessLookInput(Vector2 lookInput)
     {
         // Adjust by sensitivity
-        lookInput.x *= lookXSens;
+        lookInput.x *= lookXSens; 
         lookInput.y *= lookYSens;
 
         // Invert look if desired

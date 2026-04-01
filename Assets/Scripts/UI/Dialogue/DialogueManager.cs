@@ -175,8 +175,8 @@ public class DialogueManager : MonoBehaviour
         PlayerController player = _player as PlayerController;
         if (player)
         {
-            player.canInputLook = true;
-            player.canInputMove = true;
+            player.input.canInputLook = true;
+            player.input.canInputMove = true;
         }
         
         Interactable.showInteractTextOnScreen = true;

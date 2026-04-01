@@ -91,7 +91,7 @@ public class EnemyController : MyProject.CharacterController
         return false;
     }
 
-    protected override Vector2 ProcessLookInput(Vector2 lookInput)
+    protected override Vector2 PostProcessLookInput(Vector2 lookInput)
     {
         // No extra processing of look input
         return lookInput;

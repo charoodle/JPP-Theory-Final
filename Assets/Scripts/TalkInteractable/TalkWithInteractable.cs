@@ -202,9 +202,9 @@ public abstract class TalkWithInteractable : Interactable
     protected void EnablePlayerCharacterControl(bool enabled)
     {
         PlayerController player = dialogue.Player as PlayerController;
-        player.canInputMove = enabled;
-        player.canInputLook = enabled;
-        player.canInputJump = enabled;
+        player.input.canInputMove = enabled;
+        player.input.canInputLook = enabled;
+        player.input.canInputJump = enabled;
         player.canFireWeaponInHand = enabled;
         player.canSwitchToPistol = enabled;
         player.canSwitchToRocketLauncher = enabled;

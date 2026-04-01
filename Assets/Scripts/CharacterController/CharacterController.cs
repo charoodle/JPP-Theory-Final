@@ -10,10 +10,12 @@ namespace MyProject
     /// 
     /// TODO: Refactor so can port into Bulletpain
     ///     - [ ] Move all functions, events, etc. into clearly defined sections:
-    ///         1. Take input
-    ///         2. Move Object
-    ///         3. Rotate Object
+    ///         [ ] 1. Take input
+    ///             - [ ] After refactoring the inputs into a class, test the AnnouncerTutorial to make sure it works with new moveInput.
+    ///         [ ] 2. Move Object
+    ///         [ ] 3. Rotate Object
     ///     - [ ] Add documentation where needed + make consistent variable naming
+    ///     
     ///     
     /// </summary>
     public abstract class CharacterController : MonoBehaviour
@@ -37,126 +39,146 @@ namespace MyProject
 
         #region Take Input
         /// <summary>
-        /// Current movement input being fed in.
+        /// Represents inputs that a <see cref="MyProject.CharacterController"/> will use to move/rotate itself this frame.
+        /// <para>
+        /// Meant to use a "protected" instance of this class, and use in conjunction a "public" <see cref="CharacterControllerInputsProperties"/> for controlled getters/setters to specific fields.
+        /// </para>
         /// </summary>
-        Vector2 _moveInput;
-
-        /// <summary>
-        /// Current look input being fed in.
-        /// </summary>
-        Vector2 _lookInput;
-
-        /// <summary>
-        /// Current sprint input being fed in.
-        /// </summary>
-        protected bool _sprintInput = false;
-
-        /// <summary>
-        /// Current jump input being fed in.
-        /// </summary>
-        protected bool _jumpInput = false;
-
-        /// <summary>
-        /// Allow/disallow move input.
-        /// </summary>
-        [Header("Input")]
-        [SerializeField] protected bool _canInputMove = true;
-
-        /// <summary>
-        /// Allow/disallow look input.
-        /// </summary>
-        [SerializeField] protected bool _canInputLook = true;
-
-        /// <summary>
-        /// Allows/disallows sprint input.
-        /// </summary>
-        [SerializeField] protected bool _canInputSprint = true;
-
-        /// <summary>
-        /// Allows/disallows jump input.
-        /// </summary>
-        [SerializeField] protected bool _canInputJump = true;
-
-        /// <summary>
-        /// The current character's move input.
-        /// </summary>
-        public Vector2 moveInput
+        [System.Serializable]
+        public class CharacterControllerInputs
         {
-            get { return _moveInput; }
-            protected set { _moveInput = value; }
+            /// <summary>
+            /// Current move input being fed in.
+            /// </summary>
+            [Header("Current Input")]
+            public Vector2 moveInput;
+
+            /// <summary>
+            /// Current look input being fed in.
+            /// </summary>
+            public Vector2 lookInput;
+
+            /// <summary>
+            /// Current jump input being fed in.
+            /// </summary>
+            public bool jumpInput;
+
+            /// <summary>
+            /// Current sprint input being fed in.
+            /// </summary>
+            public bool sprintInput;
+
+            /// <summary>
+            /// Allows/disallows move input.
+            /// </summary>
+            [Header("Settings")]
+            public bool canInputMove = true;
+
+            /// <summary>
+            /// Allows/disallows look input.
+            /// </summary>
+            public bool canInputLook = true;
+
+            /// <summary>
+            /// Allows/disallows jump input.
+            /// </summary>
+            public bool canInputJump = true;
+
+            /// <summary>
+            /// Allows/disallows sprint input.
+            /// </summary>
+            public bool canInputSprint = true;
         }
 
         /// <summary>
-        /// The current character's look input.
+        /// Helper class. Allows/disallows public access to appropriate properties of the <see cref="CharacterControllerInputs"/> class.
+        /// Weird workaround but (maybe) it will work. Untested atm.
+        /// Works in conjuntion with a (preferably) protected variable of <see cref="CharacterControllerInputs"/>.
         /// </summary>
-        public Vector2 lookInput
+        public class CharacterControllerInputsProperties
         {
-            get { return _lookInput; }
-            protected set { _lookInput = value; }
+            /// <summary>
+            /// The inputs this class is directly accessing.
+            /// </summary>
+            protected CharacterControllerInputs input;
+
+
+            /// <param name="input">The input to directly read from.</param>
+            public CharacterControllerInputsProperties(CharacterControllerInputs input)
+            {
+                this.input = input;
+            }
+
+
+            #region Current Input
+            /// <inheritdoc cref="CharacterControllerInputs.moveInput"/>
+            public Vector2 moveInput
+            {
+                get { return input.moveInput; }
+            }
+
+            /// <inheritdoc cref="CharacterControllerInputs.lookInput"/>
+            public Vector2 lookInput
+            {
+                get { return input.lookInput; }
+            }
+            #endregion
+
+
+            #region Settings
+            /// <inheritdoc cref="CharacterControllerInputs.canInputMove"/>
+            public bool canInputMove
+            {
+                get { return input.canInputMove; }
+                set { input.canInputMove = value; }
+            }
+
+            /// <inheritdoc cref="CharacterControllerInputs.canInputLook"/>
+            public bool canInputLook
+            {
+                get { return input.canInputLook; }
+                set { input.canInputLook = value; }
+            }
+
+            /// <inheritdoc cref="CharacterControllerInputs.canInputSprint"/>
+            public bool canInputSprint
+            {
+                get { return input.canInputSprint; }
+                set { input.canInputSprint = value; }
+            }
+
+            /// <inheritdoc cref="CharacterControllerInputs.canInputJump"/>
+            public bool canInputJump
+            {
+                get { return input.canInputJump; }
+                set { input.canInputJump = value; }
+            }
+            #endregion
         }
 
         /// <summary>
-        /// Is the character allowed to input move?
+        /// The current input that gets updated each frame, which controls this character.
         /// </summary>
-        public bool canInputMove
-        {
-            get { return _canInputMove; }
-            set { _canInputMove = value; }
-        }
-
-        /// <summary>
-        /// Is the character allowed to input look?
-        /// </summary>
-        public bool canInputLook
-        {
-            get { return _canInputLook; }
-            set { _canInputLook = value; }
-        }
-
-        /// <summary>
-        /// Is the character allowed to input sprint?
-        /// </summary>
-        public bool canInputSprint
-        {
-            get { return _canInputSprint; }
-            set { _canInputSprint = value; }
-        }
-
-        /// <summary>
-        /// Is the character allowed to input jump?
-        /// </summary>
-        public bool canInputJump
-        {
-            get { return _canInputJump; }
-            set { _canInputJump = value; }
-        }
+        [SerializeField] protected CharacterControllerInputs _input = new CharacterControllerInputs();
+        public CharacterControllerInputsProperties input;
 
         /// <summary>
         /// Update all inputs for this frame.
         /// </summary>
-        /// <param name="moveInput"></param>
-        /// <param name="lookInput"></param>
-        /// <param name="jumpInput"></param>
-        /// <param name="sprintInput"></param>
-        protected virtual void UpdateInputs(ref Vector2 moveInput, ref Vector2 lookInput, ref bool jumpInput, ref bool sprintInput)
+        /// <param name="input"></param>
+        protected virtual void UpdateControllerInputs(CharacterControllerInputs input)
         {
             // Movement, if that input is allowed
-            moveInput = canInputMove ? GetMoveInput() : Vector2.zero;
-            jumpInput = canInputJump ? GetJumpInput() : false;
-            sprintInput = canInputSprint ? GetSprintInput() : false;
+            input.moveInput = input.canInputMove ? GetMoveInput() : Vector2.zero;
+            input.jumpInput = input.canInputJump ? GetJumpInput() : false;
+            input.sprintInput= input.canInputSprint ? GetSprintInput() : false;
 
             // Look, if that input is allowed
-            lookInput = canInputLook ? GetLookInput() : Vector2.zero;
-            // Process look input if needed
-            lookInput = ProcessLookInput(lookInput);
+            input.lookInput = input.canInputLook ? GetLookInput() : Vector2.zero;
+            // Postprocess look input if needed
+            input.lookInput = PostProcessLookInput(input.lookInput);
         }
 
-        /// <summary>
-        /// Process look input here after it's grabbed from some source. (ex: adjust by mouse sensitivity, invert directions, ...)
-        /// </summary>
-        /// <param name="lookInput"></param>
-        /// <returns></returns>
-        protected abstract Vector2 ProcessLookInput(Vector2 lookInput);
 
         /// <summary>
         /// Get move input. X for horizontal character movement. Y for forward/backward movement.
@@ -165,7 +187,7 @@ namespace MyProject
         protected abstract Vector2 GetMoveInput();
 
         /// <summary>
-        /// Get look input. X for yaw (left/right). Y for pitch (up/down).
+        /// Get look input. X for yaw rotation (left/right). Y for pitch rotation (up/down).
         /// </summary>
         /// <returns></returns>
         protected abstract Vector2 GetLookInput();
@@ -175,6 +197,13 @@ namespace MyProject
 
         /// <returns>True if character wants to sprint this frame. False otherwise.</returns>
         protected abstract bool GetSprintInput();
+
+        /// <summary>
+        /// Process look input here after it's grabbed from some source. (ex: adjust by mouse sensitivity, invert directions, ...)
+        /// </summary>
+        /// <param name="lookInput"></param>
+        /// <returns></returns>
+        protected abstract Vector2 PostProcessLookInput(Vector2 lookInput);
         #endregion
 
 
@@ -189,7 +218,7 @@ namespace MyProject
         /// <summary>
         /// Is the character holding the sprint button while moving in a direction?
         /// </summary>
-        public bool IsSprinting { get { return _sprintInput && moveInput.magnitude > 0; } }
+        public bool IsSprinting { get { return _input.sprintInput && _input.moveInput.magnitude > 0; } }
 
         /// <inheritdoc cref="_walkSpeed"/>
         protected virtual float WalkSpeed
@@ -572,6 +601,9 @@ namespace MyProject
 
             // Make the object retain the same rotation it has when the game is started (yaw /Y-rotation only). Because custom-controlled rotation system.
             rot.InitializeStartingRotation(transform.rotation.eulerAngles.y);
+
+            // Initialize input accessors/properties where to read character's input from
+            input = new CharacterControllerInputsProperties(_input);
         }
 
         protected virtual void Update()
@@ -581,14 +613,14 @@ namespace MyProject
                 return;
 
             // Update input
-            UpdateInputs(ref _moveInput, ref _lookInput, ref _jumpInput, ref _sprintInput);
+            UpdateControllerInputs(_input);
 
             // Move character
-            MoveCharacter(moveInput, _jumpInput, _sprintInput, ref _isGrounded);
+            MoveCharacter(_input.moveInput, _input.jumpInput, _input.sprintInput, ref _isGrounded);
 
             // Update rotation (values only)
             if(rot)
-                UpdateLookRotation(lookInput, ref rot.yawDegrees, ref rot.pitchDegrees);
+                UpdateLookRotation(_input.lookInput, ref rot.yawDegrees, ref rot.pitchDegrees);
         }
         #endregion
     }
