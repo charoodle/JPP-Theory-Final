@@ -763,7 +763,7 @@ public class RotationLookAt : MonoBehaviour
 }
 
 
-///<summary> Represents an object that can follow a <see cref="RotationLookAt"/> component's rotation values.</summary>
+///<summary> Represents an object that can follow a <see cref="RotationLookAt"/> component's pitch/yaw rotation values.</summary>
 [System.Serializable]
 public class RotationObject
 {

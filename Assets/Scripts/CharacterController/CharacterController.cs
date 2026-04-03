@@ -10,10 +10,14 @@ namespace MyProject
     /// 
     /// TODO: Refactor so can port into Bulletpain
     ///     - [ ] Move all functions, events, etc. into clearly defined sections:
-    ///         [ ] 1. Take input
-    ///             - [ ] After refactoring the inputs into a class, test the AnnouncerTutorial to make sure it works with new moveInput.
+    ///         [x] 1. Take input
+    ///             - [x] After refactoring the inputs into a class, test the AnnouncerTutorial to make sure it works with new moveInput.
     ///         [ ] 2. Move Object
-    ///         [ ] 3. Rotate Object
+    ///         [x] 3. Rotate Object
+    ///     - [ ] Refactor each section into separate scripts?
+    ///         [ ] Input
+    ///         [ ] Move Object
+    ///         [ ] Rotate Object
     ///     - [ ] Add documentation where needed + make consistent variable naming
     ///     
     ///     
@@ -35,6 +39,62 @@ namespace MyProject
                 controller = value;
             }
         }
+
+
+        #region LifeCycle Functions
+        protected virtual void Start()
+        {
+            // Ground = anything not the character layer
+            groundCheckLayer = ~characterLayer;
+
+            // Original spawn position, in case ever fall out of map
+            spawnPosition = transform.position;
+
+            // Checks player from going out of bounds every couple seconds
+            StartCoroutine(PreventOutOfBoundsCoroutine());
+
+            // Get one layer above the root game object as the original root. Assumes (!!!) char controller is only one layer deep (?).
+            // TODO: This seems bad...
+            if (rootGameObject)
+            {
+                originalRoot = rootGameObject.transform.parent;
+            }
+
+            // Initialize LookRotation
+            if (rot == null)
+            {
+                rot = GetComponent<RotationLookAt>();
+                if (rot == null)
+                    Debug.LogWarning("No LookRotate component found on this CharacterController!", this.gameObject);
+            }
+
+            rot.AssignBody(rotateBody);
+            rot.AssignHead(rotateFreedHead);
+
+            // Make the object retain the same rotation it has when the game is started (yaw /Y-rotation only). Because custom-controlled rotation system.
+            rot.InitializeStartingRotation(transform.rotation.eulerAngles.y);
+
+            // Initialize input accessors/properties where to read character's input from
+            input = new CharacterControllerInputsProperties(_input);
+        }
+
+        protected virtual void Update()
+        {
+            // If game is paused, player cannot move, or look
+            if (Time.timeScale == 0)
+                return;
+
+            // Update input
+            UpdateControllerInputs(_input);
+
+            // Move character
+            MoveCharacter(_input.moveInput, _input.jumpInput, _input.sprintInput, ref _isGrounded);
+
+            // Update rotation (values only)
+            if (rot)
+                UpdateLookRotation(_input.lookInput, ref rot.yawDegrees, ref rot.pitchDegrees);
+        }
+        #endregion
 
 
         #region Take Input
@@ -565,63 +625,6 @@ namespace MyProject
         }
 #endif
         #endregion
-        #endregion
-
-
-
-        #region LifeCycle Functions
-        protected virtual void Start()
-        {
-            // Ground = anything not the character layer
-            groundCheckLayer = ~characterLayer;
-
-            // Original spawn position, in case ever fall out of map
-            spawnPosition = transform.position;
-
-            // Checks player from going out of bounds every couple seconds
-            StartCoroutine(PreventOutOfBoundsCoroutine());
-
-            // Get one layer above the root game object as the original root. Assumes (!!!) char controller is only one layer deep (?).
-            // TODO: This seems bad...
-            if (rootGameObject)
-            {
-                originalRoot = rootGameObject.transform.parent;
-            }
-
-            // Initialize LookRotation
-            if (rot == null)
-            {
-                rot = GetComponent<RotationLookAt>();
-                if(rot == null)
-                    Debug.LogWarning("No LookRotate component found on this CharacterController!", this.gameObject);
-            }
-
-            rot.AssignBody(rotateBody);
-            rot.AssignHead(rotateFreedHead);
-
-            // Make the object retain the same rotation it has when the game is started (yaw /Y-rotation only). Because custom-controlled rotation system.
-            rot.InitializeStartingRotation(transform.rotation.eulerAngles.y);
-
-            // Initialize input accessors/properties where to read character's input from
-            input = new CharacterControllerInputsProperties(_input);
-        }
-
-        protected virtual void Update()
-        {
-            // If game is paused, player cannot move, or look
-            if (Time.timeScale == 0)
-                return;
-
-            // Update input
-            UpdateControllerInputs(_input);
-
-            // Move character
-            MoveCharacter(_input.moveInput, _input.jumpInput, _input.sprintInput, ref _isGrounded);
-
-            // Update rotation (values only)
-            if(rot)
-                UpdateLookRotation(_input.lookInput, ref rot.yawDegrees, ref rot.pitchDegrees);
-        }
         #endregion
     }
 }
