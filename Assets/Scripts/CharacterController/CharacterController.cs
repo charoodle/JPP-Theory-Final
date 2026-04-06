@@ -78,6 +78,10 @@ namespace MyProject
             input = new CharacterControllerInputsProperties(_input);
         }
 
+
+        /// <summary>
+        /// Update input, and move/rotate the character based on the given input this frame.
+        /// </summary>
         protected virtual void Update()
         {
             // If game is paused, player cannot move, or look
@@ -339,7 +343,7 @@ namespace MyProject
         /// <summary>
         /// How high the character jumps (in default Unity units) before gravity pulls them down.
         /// </summary>
-        [Header("Jump, Ground, and Gravity")]
+        [Header("Jump/Gravity")]
         [SerializeField] float _jumpHeight = 3f;
 
         /// <summary>
@@ -372,15 +376,24 @@ namespace MyProject
             // Update ground check
             isGrounded = CheckIsGrounded();
 
-            // Sprinting - modify final move speed
+            // --------------------------------------------------
+
+            // Does input tell the character to sprint? - Multiply current base move speed (don't really need this each frame but w/e for now)
             float moveSpeed = WalkSpeed;
             if (sprintInput)
                 moveSpeed *= _sprintSpeedMultiplier;
 
-            // Player move around (x and z values only)
-            Vector3 moveDirection = transform.forward * moveInput.y + transform.right * moveInput.x;
-            Vector3 playerMovement = moveDirection.normalized * Time.deltaTime * moveSpeed;
+            // Does input tell the character to move? (Horizontal only - x/z)
+            //  Get world direction based on (character dir * input dir)
+            Vector3 moveDirection = (transform.forward * moveInput.y) + (transform.right * moveInput.x);
+            //  Normalize movement direction. Account for game frame rate.
+            Vector3 playerMovement = moveDirection.normalized * Time.deltaTime;
+            //  Account for character's move speed stat.
+            playerMovement *= moveSpeed;
 
+            // --------------------------------------------------
+
+            // Check if below surface is moving ground.
             // Movable ground additional velocity - is there a surface we're grounded on that is currently moving? Add additional velocity from it.
             Vector3 additionalMovement = Vector3.zero;
             if (currentMovingGroundSurface != null)
@@ -402,6 +415,8 @@ namespace MyProject
 
             // Character will add velocity of the ground they last touched (ex: while in the air).
             additionalMovement = (lastTouchedGroundVelocity * Time.deltaTime);
+
+            // --------------------------------------------------
 
             //  Add in movable ground velocity, from the last moving ground surface that player touched.
             Vector3 finalHorizontalMovement = playerMovement + additionalMovement;
@@ -428,8 +443,17 @@ namespace MyProject
             #endregion
 
             // Move with gravity (y value affected only)
-            //  Combined into one movement movement so CharacterController.velocity reading is accurate.
+            //  Combined into one movement so CharacterController.velocity reading is accurate.
             controller.Move(finalHorizontalMovement + (_characterVelocity * Time.deltaTime));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        protected Vector3 UpdateCurrentGroundVelocity()
+        {
+            return Vector3.zero;
         }
 
         /// <summary>
