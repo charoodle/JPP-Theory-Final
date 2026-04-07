@@ -45,19 +45,19 @@ namespace MyProject
         protected virtual void Start()
         {
             // Ground = anything not the character layer
-            groundCheckLayer = ~characterLayer;
+            _groundCheckLayer = ~_characterLayer;
 
             // Original spawn position, in case ever fall out of map
-            spawnPosition = transform.position;
+            _spawnPosition = transform.position;
 
             // Checks player from going out of bounds every couple seconds
             StartCoroutine(PreventOutOfBoundsCoroutine());
 
             // Get one layer above the root game object as the original root. Assumes (!!!) char controller is only one layer deep (?).
             // TODO: This seems bad...
-            if (rootGameObject)
+            if (_rootGameObject)
             {
-                originalRoot = rootGameObject.transform.parent;
+                _originalRoot = _rootGameObject.transform.parent;
             }
 
             // Initialize LookRotation
@@ -289,7 +289,7 @@ namespace MyProject
         public bool IsSprinting { get { return _input.sprintInput && _input.moveInput.magnitude > 0; } }
 
         /// <inheritdoc cref="_walkSpeed"/>
-        protected virtual float WalkSpeed
+        protected virtual float _WalkSpeed
         {
             get { return _walkSpeed; }
             set
@@ -309,7 +309,7 @@ namespace MyProject
         /// TODO: For some reason it gets used to add gravity in the MoveCharacter function. Take this member var out of that function.
         /// TODO: This only works with gravity. Does not update X/Z velocity.
         /// </summary>
-        [SerializeField] Vector3 _characterVelocity;
+        [SerializeField] protected Vector3 _characterVelocity;
 
         /// <summary>
         /// How fast the character walks at.
@@ -331,45 +331,45 @@ namespace MyProject
         /// Will be parented/unparented when they walk on surfaces.
         /// </summary>
         [Header("Movement (Relative Velocity)")]
-        [SerializeField] Transform rootGameObject;
+        [SerializeField] private Transform _rootGameObject;
         /// <summary>
         /// Original root object on game start. Used to parent/unparent this object back and forth from to this transform (ex: ground checks).
         /// </summary>
-        protected Transform originalRoot;
+        protected Transform _originalRoot;
 
         // Movement with a parent
         /// <summary>
         /// Is the character controller currently grounded on something that can move? May need to supply additional movement to the CharacterController.Move() function.
         /// </summary>
-        [SerializeField] MovableGroundSurface currentMovingGroundSurface;
-        [SerializeField] Vector3 currentGroundVelocity;
-        [SerializeField] Vector3 lastTouchedGroundVelocity;
+        [SerializeField] protected MovableGroundSurface _currentMovingGroundSurface;
+        [SerializeField] protected Vector3 _currentGroundVelocity;
+        [SerializeField] protected Vector3 _lastTouchedGroundVelocity;
 
         /// <summary>
         /// How high the character jumps (in default Unity units) before gravity pulls them down.
         /// </summary>
         [Header("Jump/Gravity")]
-        [SerializeField] float _jumpHeight = 3f;
+        [SerializeField] protected float _jumpHeight = 3f;
 
         /// <summary>
         /// Gravity for this character.
         /// </summary>
-        Vector3 _worldGravity = new Vector3(0f, -9.81f, 0f);
+        private Vector3 _worldGravity = new Vector3(0f, -9.81f, 0f);
 
         /// <summary>
         /// Spawn position
         /// </summary>
-        Vector3 spawnPosition;
+        protected Vector3 _spawnPosition;
 
         /// <summary>
         /// Flag to manage allowing one jump command per accepted character jump inpu. This should initially be true on game start to let the character jump.
         /// <para>Triggered by <see cref="WaitForCharacterToLandOnGround"/>, and is used in the jump section of <see cref="MoveCharacter(Vector3, bool, bool, ref bool)"/></para>
         /// </summary>
-        protected bool isGroundedAndCanJumpAgain = true;
+        protected bool _isGroundedAndCanJumpAgain = true;
 
         // Layers (for jumping)
-        [SerializeField] LayerMask characterLayer;
-        LayerMask groundCheckLayer;
+        [SerializeField] private LayerMask _characterLayer;
+        private LayerMask _groundCheckLayer;
 
         /// <summary>
         /// If a character falls below this y-value, they are considered out of bounds and will be reset to their original spawn position.
@@ -392,7 +392,7 @@ namespace MyProject
         protected void MoveCharacter(Vector3 moveInput, bool sprintInput, Vector3 extraVelocityForces, Vector3 gravityForce)
         {
             // Does input tell the character to sprint? - Multiply current base move speed (don't really need this each frame but w/e for now)
-            float moveSpeed = WalkSpeed;
+            float moveSpeed = _WalkSpeed;
             if (sprintInput)
                 moveSpeed *= _sprintSpeedMultiplier;
 
@@ -435,7 +435,7 @@ namespace MyProject
             }
 
             // Jump if on ground - do this once per isGrounded only
-            if (jumpInput && isGrounded && isGroundedAndCanJumpAgain)
+            if (jumpInput && isGrounded && _isGroundedAndCanJumpAgain)
             {
                 // (?) -2 is some kind of constant, so if set jumpHeight to 1, then character actually jumps up 1 unity unit.
                 _characterVelocity.y += Mathf.Sqrt(_jumpHeight * -2.0f * _worldGravity.y);
@@ -467,29 +467,29 @@ namespace MyProject
             // Check if below surface is moving ground.
 
             // Movable ground additional velocity - is there a surface we're grounded on that is currently moving? Add additional velocity from it.
-            if (currentMovingGroundSurface != null)
+            if (_currentMovingGroundSurface != null)
             {
                 // Get the current ground velocity
-                groundVelocity = currentMovingGroundSurface.velocity;
+                groundVelocity = _currentMovingGroundSurface.velocity;
 
                 // Cache current ground velocity (for inspector?)
-                currentGroundVelocity = groundVelocity;
+                _currentGroundVelocity = groundVelocity;
 
                 // Update the last touched ground velocity
                 //  Character will keep velocity of the ground they last touched while in the air.
                 //  When they touch a new ground and that has velocity of 0, then there will be no additional velocity from moving ground.
-                lastTouchedGroundVelocity = currentGroundVelocity;
+                _lastTouchedGroundVelocity = _currentGroundVelocity;
             }
             else
             {
                 // No ground = no extra velocity to add. Unless jumped off from a moving ground surface.
 
                 // Seems like this is useless atm but it does clear up any confusion from looking at inspector values.
-                currentGroundVelocity = Vector3.zero;
+                _currentGroundVelocity = Vector3.zero;
             }
 
             // Character will add velocity of the ground they last touched (ex: while in the air).
-            groundVelocity = (lastTouchedGroundVelocity * Time.deltaTime);
+            groundVelocity = (_lastTouchedGroundVelocity * Time.deltaTime);
 
             return groundVelocity;
         }
@@ -497,13 +497,13 @@ namespace MyProject
 
         /// <summary>
         /// Is the current character touching a ground surface?
-        /// <para>Additionally detects and sets <see cref="currentMovingGroundSurface"/> if the surface underneath is a <see cref="MovableGroundSurface"/>.</para>
+        /// <para>Additionally detects and sets <see cref="_currentMovingGroundSurface"/> if the surface underneath is a <see cref="MovableGroundSurface"/>.</para>
         /// </summary>
         /// <returns>True if character is touching ground (depends on CharacterController.skinWidth).</returns>
         protected bool CheckIsGrounded(UnityEngine.CharacterController charController)
         {
             // Ground = anything not on the player layer
-            LayerMask groundCheckLayer = this.groundCheckLayer;
+            LayerMask groundCheckLayer = this._groundCheckLayer;
 
             // Account for the controller's skin width in raycast + a little more
             Vector3 characterFeet = transform.position;
@@ -529,19 +529,19 @@ namespace MyProject
                 // Is the ground that was touched have a component to mark it as movable?
                 MovableGroundSurface movableGround = hitInfo.collider.gameObject.GetComponentInParent<MovableGroundSurface>();
                 if (movableGround)
-                    currentMovingGroundSurface = movableGround;
+                    _currentMovingGroundSurface = movableGround;
                 /// If hit some kind of ground object, but is not marked as movable ground, then set to null (no additional velocity to account for in <see cref="MoveCharacter"/>).
                 else
                 {
-                    currentMovingGroundSurface = null;
+                    _currentMovingGroundSurface = null;
                     // Additional movement velocity = 0.
-                    lastTouchedGroundVelocity = Vector3.zero;
+                    _lastTouchedGroundVelocity = Vector3.zero;
                 }
             }
             else
             {
                 // If not grounded - move character with previous ground's velocity
-                currentMovingGroundSurface = null;
+                _currentMovingGroundSurface = null;
             }
 
             // Green = is grounded, red = not grounded.
@@ -564,7 +564,7 @@ namespace MyProject
             // Minimum time between a jump and a land. Since after a jump can still be considered grounded for first couple frames.
             const float delayBetweenCheckingJumpAndLand = 0.25f;
 
-            isGroundedAndCanJumpAgain = false;
+            _isGroundedAndCanJumpAgain = false;
 
             // Send jump event out
             OnCharacterJump?.Invoke();
@@ -593,7 +593,7 @@ namespace MyProject
             OnCharacterLand?.Invoke();
 
             // Allow player to jump again
-            isGroundedAndCanJumpAgain = true;
+            _isGroundedAndCanJumpAgain = true;
         }
         
         /// <summary>
@@ -609,7 +609,7 @@ namespace MyProject
                 {
                     // Disable character controller to allow for movement
                     controller.enabled = false;
-                    transform.position = spawnPosition;
+                    transform.position = _spawnPosition;
                     controller.enabled = true;
                 }
 
