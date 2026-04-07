@@ -91,8 +91,12 @@ namespace MyProject
             // Update input
             UpdateControllerInputs(_input);
 
+            // Check for ground before moving character
+            Vector3 movingSurfaceVelocity = UpdateCurrentGroundVelocity(ref _isGrounded, this.controller);
+            Vector3 gravityForce = UpdateGravity(_isGrounded, _input.jumpInput);
+
             // Move character
-            MoveCharacter(_input.moveInput, _input.jumpInput, _input.sprintInput, ref _isGrounded);
+            MoveCharacter(_input.moveInput, _input.sprintInput, movingSurfaceVelocity, gravityForce);
 
             // Update rotation (values only)
             if (rot)
@@ -302,6 +306,7 @@ namespace MyProject
 
         [Header("Movement")]
         /// <summary>
+        /// TODO: For some reason it gets used to add gravity in the MoveCharacter function. Take this member var out of that function.
         /// TODO: This only works with gravity. Does not update X/Z velocity.
         /// </summary>
         [SerializeField] Vector3 _characterVelocity;
@@ -371,13 +376,21 @@ namespace MyProject
         /// </summary>
         protected const float Y_AXIS_OUTOFBOUNDS = -30f;
 
-        protected void MoveCharacter(Vector3 moveInput, bool jumpInput, bool sprintInput, ref bool isGrounded)
+        /// <summary>
+        /// 
+        /// TODO:
+        ///     Refactor
+        ///         What does moving the character need to do?
+        ///             Use given input to determine how to move the character this frame
+        ///             
+        /// 
+        /// </summary>
+        /// <param name="moveInput"></param>
+        /// <param name="sprintInput"></param>
+        /// <param name="extraVelocityForces">Extra velocity that is added onto final character movement vector (ex: if the ground underneath can move). Multiply by Time.deltaTime before passing in.</param>
+        /// <param name="gravityForce"></param>
+        protected void MoveCharacter(Vector3 moveInput, bool sprintInput, Vector3 extraVelocityForces, Vector3 gravityForce)
         {
-            // Update ground check
-            isGrounded = CheckIsGrounded();
-
-            // --------------------------------------------------
-
             // Does input tell the character to sprint? - Multiply current base move speed (don't really need this each frame but w/e for now)
             float moveSpeed = WalkSpeed;
             if (sprintInput)
@@ -393,36 +406,29 @@ namespace MyProject
 
             // --------------------------------------------------
 
-            // Check if below surface is moving ground.
-            // Movable ground additional velocity - is there a surface we're grounded on that is currently moving? Add additional velocity from it.
-            Vector3 additionalMovement = Vector3.zero;
-            if (currentMovingGroundSurface != null)
-            {
-                // Get the current ground velocity
-                currentGroundVelocity = currentMovingGroundSurface.velocity;
+            // Add in any external forces (ex: relative velocity from moving surfaces)
+            Vector3 finalHorizontalMovement = playerMovement + extraVelocityForces;
 
-                // Update the last touched ground velocity
-                //  Character will keep velocity of the ground they last touched while in the air.
-                //  When they touch a new ground and that has velocity of 0, then there will be no additional velocity from moving ground.
-                lastTouchedGroundVelocity = currentGroundVelocity;
-            }
-            else
-            {
-                // No ground = no extra velocity.
-                // Seems like this is useless atm but does clear up any confusion from looking at inspector values.
-                currentGroundVelocity = Vector3.zero;
-            }
+            
 
-            // Character will add velocity of the ground they last touched (ex: while in the air).
-            additionalMovement = (lastTouchedGroundVelocity * Time.deltaTime);
+            // Move with gravity (y value affected only)
+            //  Combined into one movement so CharacterController.velocity reading is accurate.
+            controller.Move(finalHorizontalMovement + (_characterVelocity * Time.deltaTime));
+        }
 
-            // --------------------------------------------------
+        #region Grounded stuff
 
-            //  Add in movable ground velocity, from the last moving ground surface that player touched.
-            Vector3 finalHorizontalMovement = playerMovement + additionalMovement;
+        /// <summary>
+        /// Calculate gravity for the character this frame.
+        /// </summary>
+        /// <returns></returns>
+        protected Vector3 UpdateGravity(bool isGrounded, bool jumpInput)
+        {
+            // TODO: Set gravity force to something before returning
+            //  Change out the _characterVelocity member var stuff
+            Vector3 gravityForce = Vector3.zero;
 
-            #region Ground & Jumping
-            // Reset player velocity while touching ground.
+            // Reset character's velocity while touching ground.
             if (isGrounded)
             {
                 _characterVelocity = Vector3.zero;
@@ -431,6 +437,7 @@ namespace MyProject
             // Jump if on ground - do this once per isGrounded only
             if (jumpInput && isGrounded && isGroundedAndCanJumpAgain)
             {
+                // (?) -2 is some kind of constant, so if set jumpHeight to 1, then character actually jumps up 1 unity unit.
                 _characterVelocity.y += Mathf.Sqrt(_jumpHeight * -2.0f * _worldGravity.y);
 
                 // Only allow one jump per accepted jump input. Waits for character to land again before can jump again.
@@ -440,28 +447,60 @@ namespace MyProject
             // Apply gravity if not on ground
             if (!isGrounded)
                 _characterVelocity += _worldGravity * Time.deltaTime;
-            #endregion
 
-            // Move with gravity (y value affected only)
-            //  Combined into one movement so CharacterController.velocity reading is accurate.
-            controller.Move(finalHorizontalMovement + (_characterVelocity * Time.deltaTime));
+            return gravityForce;
         }
 
         /// <summary>
-        /// 
+        /// Checks for relative velocity from the current surface underneath the character.
         /// </summary>
-        /// <returns></returns>
-        protected Vector3 UpdateCurrentGroundVelocity()
+        /// <returns>The velocity to add to the character controller's current movement velocity. (already accounts for Time.deltaTime).</returns>
+        protected Vector3 UpdateCurrentGroundVelocity(ref bool isGrounded, UnityEngine.CharacterController charController)
         {
-            return Vector3.zero;
+            // Is the character controller touching a ground surface?
+            isGrounded = CheckIsGrounded(charController);
+
+            // ---
+
+            Vector3 groundVelocity = Vector3.zero;
+
+            // Check if below surface is moving ground.
+
+            // Movable ground additional velocity - is there a surface we're grounded on that is currently moving? Add additional velocity from it.
+            if (currentMovingGroundSurface != null)
+            {
+                // Get the current ground velocity
+                groundVelocity = currentMovingGroundSurface.velocity;
+
+                // Cache current ground velocity (for inspector?)
+                currentGroundVelocity = groundVelocity;
+
+                // Update the last touched ground velocity
+                //  Character will keep velocity of the ground they last touched while in the air.
+                //  When they touch a new ground and that has velocity of 0, then there will be no additional velocity from moving ground.
+                lastTouchedGroundVelocity = currentGroundVelocity;
+            }
+            else
+            {
+                // No ground = no extra velocity to add. Unless jumped off from a moving ground surface.
+
+                // Seems like this is useless atm but it does clear up any confusion from looking at inspector values.
+                currentGroundVelocity = Vector3.zero;
+            }
+
+            // Character will add velocity of the ground they last touched (ex: while in the air).
+            groundVelocity = (lastTouchedGroundVelocity * Time.deltaTime);
+
+            return groundVelocity;
         }
+        #endregion
 
         /// <summary>
         /// Is the current character touching a ground surface?
         /// <para>Additionally detects and sets <see cref="currentMovingGroundSurface"/> if the surface underneath is a <see cref="MovableGroundSurface"/>.</para>
         /// </summary>
         /// <returns>True if character is touching ground (depends on CharacterController.skinWidth).</returns>
-        protected bool CheckIsGrounded()
+        protected bool CheckIsGrounded(UnityEngine.CharacterController charController)
         {
             // Ground = anything not on the player layer
             LayerMask groundCheckLayer = this.groundCheckLayer;

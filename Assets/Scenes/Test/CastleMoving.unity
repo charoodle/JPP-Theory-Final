@@ -1113,24 +1113,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 176022277}
-  rootGameObject: {fileID: 0}
-  playerVelocity: {x: 0, y: 0, z: 0}
+  _input:
+    moveInput: {x: 0, y: 0}
+    lookInput: {x: 0, y: 0}
+    jumpInput: 0
+    sprintInput: 0
+    canInputMove: 1
+    canInputLook: 1
+    canInputJump: 1
+    canInputSprint: 1
+  _characterVelocity: {x: 0, y: 0, z: 0}
   _walkSpeed: 3
-  sprintSpeedMultiplier: 2
-  rotateBody: {fileID: 176022274}
-  rotateFreedHead: {fileID: 551680712}
-  yawDegrees: 0
-  pitchDegrees: 0
-  maxPitchDegreesUp: 90
-  maxPitchDegreesDown: -90
-  jumpHeight: 3
+  _sprintSpeedMultiplier: 2
   _isGrounded: 0
+  rootGameObject: {fileID: 0}
   currentMovingGroundSurface: {fileID: 0}
   currentGroundVelocity: {x: 0, y: 0, z: 0}
   lastTouchedGroundVelocity: {x: 0, y: 0, z: 0}
+  _jumpHeight: 3
   characterLayer:
     serializedVersion: 2
     m_Bits: 64
+  rot: {fileID: 0}
+  rotateBody: {fileID: 176022274}
+  rotateFreedHead: {fileID: 551680712}
   lookXSens: 750
   lookYSens: 750
   invertLookX: 0
@@ -1138,8 +1144,11 @@ MonoBehaviour:
   weapons:
   - {fileID: 914650133}
   - {fileID: 669424564}
-  _canInputMove: 1
-  _canInputLook: 1
+  canSwitchToPistol: 1
+  canSwitchToRocketLauncher: 1
+  canSwitchToUnarmed: 1
+  canFireWeaponInHand: 1
+  fireWeaponKey: 323
 --- !u!1001 &215085428
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1162,7 +1171,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4343326367223915698, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 4343326367223915698, guid: f6b1c48cd9170334abca957877aa7372, type: 3}
       propertyPath: m_LocalPosition.z
@@ -11833,10 +11842,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52674459531fd87429749cdb5b30bbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemiesSpawnFolder: {fileID: 0}
   enemyPrefabs:
   - {fileID: 4532908670143493318, guid: 4aad3cb2ae163034698a7f558974dfb5, type: 3}
   spawnBox: {fileID: 0}
   enemySpawnParticles: {fileID: 1589471957979294004, guid: b2d113623e51d6f41a5c1dfe4508c3bb, type: 3}
+  secondsBetweenEnemySpawn: 2
+  secondsBetweenSpawnRateIncrease: 25
+  minSecondsBetweenEnemySpawn: 0.25
+  castleTargetName: 
   isDebugSpawner: 1
   maxSpawnEnemies: 2
   enemiesSpawned: 0
@@ -13123,6 +13137,7 @@ MonoBehaviour:
   allowCollisions: 0
   _damage: 100
   _destroyAfterSeconds: 60
+  hasLanded: 0
   particles: {fileID: 315661241}
   collision_dirtParticles: {fileID: 393900365}
   embedIntoMaterialPrefab: {fileID: 0}
@@ -14608,6 +14623,7 @@ MonoBehaviour:
   allowCollisions: 0
   _damage: 100
   _destroyAfterSeconds: 60
+  hasLanded: 0
   particles: {fileID: 223923010}
   collision_dirtParticles: {fileID: 393900365}
   embedIntoMaterialPrefab: {fileID: 0}
@@ -17001,7 +17017,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9177073618542173261, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 9177073618542173261, guid: ec2a7a87c16bbb543b8f86f75839199a, type: 3}
       propertyPath: m_LocalPosition.z
