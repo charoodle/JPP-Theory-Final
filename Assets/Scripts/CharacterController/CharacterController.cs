@@ -91,12 +91,19 @@ namespace MyProject
             // Update input
             UpdateControllerInputs(_input);
 
+
+            /// TODO:
+            ///     Clean up function call order for MoveCharacter, UpdateGravity, etc. Out of order/looks too messy.
+
             // Check for ground before moving character
-            Vector3 movingSurfaceVelocity = UpdateCurrentGroundVelocity(ref _isGrounded, this.controller);
-            Vector3 gravityForce = UpdateGravity(_isGrounded, _input.jumpInput);
+            Vector3 movingSurfaceVelocity = GetCurrentGroundVelocity();
+            // Is the character controller touching a ground surface?
+            _isGrounded = CheckIsGrounded(charController);
+            // What is the gravity force?
+            UpdateGravity(_isGrounded, _input.jumpInput, ref _currentGravityForce, _jumpHeight, _worldGravity);
 
             // Move character
-            MoveCharacter(_input.moveInput, _input.sprintInput, movingSurfaceVelocity, gravityForce);
+            MoveCharacter(_input.moveInput, _input.sprintInput, movingSurfaceVelocity, _currentGravityForce, this.controller);
 
             // Update rotation (values only)
             if (rot)
@@ -304,12 +311,16 @@ namespace MyProject
             }
         }
 
+        /// <summary>
+        /// Without deltaTime.
+        /// </summary>
         [Header("Movement")]
+        [SerializeField] protected Vector3 _movementVector;
         /// <summary>
         /// TODO: For some reason it gets used to add gravity in the MoveCharacter function. Take this member var out of that function.
         /// TODO: This only works with gravity. Does not update X/Z velocity.
         /// </summary>
-        [SerializeField] protected Vector3 _characterVelocity;
+        [SerializeField] protected Vector3 _movementVectorDeltaTime;
 
         /// <summary>
         /// How fast the character walks at.
@@ -357,13 +368,18 @@ namespace MyProject
         private Vector3 _worldGravity = new Vector3(0f, -9.81f, 0f);
 
         /// <summary>
+        /// Current gravity value acting on player this frame. Added more and more gets added until player touches ground again. Gets modified by <see cref="UpdateGravity(bool, bool)"/>
+        /// </summary>
+        protected Vector3 _currentGravityForce = Vector3.zero;
+
+        /// <summary>
         /// Spawn position
         /// </summary>
         protected Vector3 _spawnPosition;
 
         /// <summary>
         /// Flag to manage allowing one jump command per accepted character jump inpu. This should initially be true on game start to let the character jump.
-        /// <para>Triggered by <see cref="WaitForCharacterToLandOnGround"/>, and is used in the jump section of <see cref="MoveCharacter(Vector3, bool, bool, ref bool)"/></para>
+        /// <para>Triggered by <see cref="WaitForCharacterToLandOnGround"/>, and is used in the jump section of <see cref="MoveCharacter(Vector3, bool, Vector3, Vector3)"/></para>
         /// </summary>
         protected bool _isGroundedAndCanJumpAgain = true;
 
@@ -387,9 +403,9 @@ namespace MyProject
         /// </summary>
         /// <param name="moveInput"></param>
         /// <param name="sprintInput"></param>
-        /// <param name="extraVelocityForces">Extra velocity that is added onto final character movement vector (ex: if the ground underneath can move). Multiply by Time.deltaTime before passing in.</param>
-        /// <param name="gravityForce"></param>
-        protected void MoveCharacter(Vector3 moveInput, bool sprintInput, Vector3 extraVelocityForces, Vector3 gravityForce)
+        /// <param name="extraVelocityForces">Extra velocity that is added onto final character movement vector (ex: if the ground underneath can move). Gets multiplied by Time.deltaTime after passing in.</param>
+        /// <param name="gravityForces">How much gravity is added to pull player down this frame.</param>
+        protected void MoveCharacter(Vector3 moveInput, bool sprintInput, Vector3 extraVelocityForces, Vector3 gravityForces, UnityEngine.CharacterController controller)
         {
             // Does input tell the character to sprint? - Multiply current base move speed (don't really need this each frame but w/e for now)
             float moveSpeed = _WalkSpeed;
@@ -398,70 +414,69 @@ namespace MyProject
 
             // Does input tell the character to move? (Horizontal only - x/z)
             //  Get world direction based on (character dir * input dir)
-            Vector3 moveDirection = (transform.forward * moveInput.y) + (transform.right * moveInput.x);
-            //  Normalize movement direction. Account for game frame rate.
-            Vector3 playerMovement = moveDirection.normalized * Time.deltaTime;
+            Vector3 moveDirection = ((transform.forward * moveInput.y) + (transform.right * moveInput.x)).normalized;
             //  Account for character's move speed stat.
-            playerMovement *= moveSpeed;
+            Vector3 movement = moveDirection * moveSpeed;
 
             // --------------------------------------------------
 
             // Add in any external forces (ex: relative velocity from moving surfaces)
-            Vector3 finalHorizontalMovement = playerMovement + extraVelocityForces;
-
-            
+            Vector3 finalHorizontalMovement = movement + extraVelocityForces;
 
             // Move with gravity (y value affected only)
             //  Combined into one movement so CharacterController.velocity reading is accurate.
-            controller.Move(finalHorizontalMovement + (_characterVelocity * Time.deltaTime));
+            Vector3 finalMovementVector = finalHorizontalMovement + gravityForces;
+
+            // Show movement vector in inspector
+            _movementVector = finalMovementVector;
+
+            // Time.deltaTime to account for game frame rate
+            finalMovementVector *= Time.deltaTime;
+
+            // Show movement vector in inspector (without delta time)
+            _movementVectorDeltaTime = finalMovementVector;
+
+            // Move the character
+            controller.Move(finalMovementVector);
         }
 
         #region Grounded stuff
 
         /// <summary>
-        /// Calculate gravity for the character this frame.
+        /// Calculate amount of gravity force for the character this frame. Not accounting for Time.delta time.
         /// </summary>
         /// <returns></returns>
-        protected Vector3 UpdateGravity(bool isGrounded, bool jumpInput)
+        /// <param name="currentAccumulatedGravityDeltaTime">How much gravity is acting on this player. Accumulates over time as character keeps falling.</param>
+        protected void UpdateGravity(bool isGrounded, bool jumpInput, ref Vector3 currentAccumulatedGravityDeltaTime, float jumpHeight, Vector3 worldGravity)
         {
-            // TODO: Set gravity force to something before returning
-            //  Change out the _characterVelocity member var stuff
-            Vector3 gravityForce = Vector3.zero;
-
             // Reset character's velocity while touching ground.
             if (isGrounded)
             {
-                _characterVelocity = Vector3.zero;
+                currentAccumulatedGravityDeltaTime = Vector3.zero;
             }
 
             // Jump if on ground - do this once per isGrounded only
             if (jumpInput && isGrounded && _isGroundedAndCanJumpAgain)
             {
                 // (?) -2 is some kind of constant, so if set jumpHeight to 1, then character actually jumps up 1 unity unit.
-                _characterVelocity.y += Mathf.Sqrt(_jumpHeight * -2.0f * _worldGravity.y);
+                currentAccumulatedGravityDeltaTime.y += Mathf.Sqrt(jumpHeight * -2.0f * worldGravity.y);
 
                 // Only allow one jump per accepted jump input. Waits for character to land again before can jump again.
                 StartCoroutine(WaitForCharacterToLandOnGround());
             }
 
             // Apply gravity if not on ground
+            //  TODO: I have no idea why this works. Time.deltaTime is multiplied twice. Character.Move multiplies the second time. But it seems like it works with this here...?
             if (!isGrounded)
-                _characterVelocity += _worldGravity * Time.deltaTime;
-
-            return gravityForce;
+                currentAccumulatedGravityDeltaTime += (worldGravity * Time.deltaTime);
         }
 
         /// <summary>
         /// Checks for relative velocity from the current surface underneath the character.
         /// </summary>
-        /// <returns>The velocity to add to the character controller's current movement velocity. (already accounts for Time.deltaTime).</returns>
-        protected Vector3 UpdateCurrentGroundVelocity(ref bool isGrounded, UnityEngine.CharacterController charController)
+        /// <returns>The velocity to add to the character controller's current movement velocity. (Does NOT account for Time.deltaTime).</returns>
+        protected Vector3 GetCurrentGroundVelocity()
         {
-            // Is the character controller touching a ground surface?
-            isGrounded = CheckIsGrounded(charController);
-
-            // ---
-
             Vector3 groundVelocity = Vector3.zero;
 
             // Check if below surface is moving ground.
@@ -489,7 +504,8 @@ namespace MyProject
             }
 
             // Character will add velocity of the ground they last touched (ex: while in the air).
-            groundVelocity = (_lastTouchedGroundVelocity * Time.deltaTime);
+            //  Does not account for Time.delta time.
+            groundVelocity = (_lastTouchedGroundVelocity);
 
             return groundVelocity;
         }
@@ -622,6 +638,7 @@ namespace MyProject
         #region Rotate Object
         /// <summary>
         /// Controls the character's rotation.
+        /// TODO: Make into a property instead.
         /// </summary>
         [Header("Rotation")]
         public RotationLookAt rot;

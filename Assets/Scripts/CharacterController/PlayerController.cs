@@ -11,6 +11,7 @@ public class PlayerController : MyProject.CharacterController
     [SerializeField] bool invertLookY = false;
     public const float interactRange = 5f;
 
+    [Header("Player Weapons")]
     [SerializeField] protected ProjectileLauncher[] weapons;
     protected ProjectileLauncher currentWeapon;
 
