@@ -484,11 +484,8 @@ namespace MyProject
             // Movable ground additional velocity - is there a surface we're grounded on that is currently moving? Add additional velocity from it.
             if (_currentMovingGroundSurface != null)
             {
-                // Get the current ground velocity
-                groundVelocity = _currentMovingGroundSurface.velocity;
-
                 // Cache current ground velocity (for inspector?)
-                _currentGroundVelocity = groundVelocity;
+                _currentGroundVelocity = _currentMovingGroundSurface.velocity;
 
                 // Update the last touched ground velocity
                 //  Character will keep velocity of the ground they last touched while in the air.
@@ -529,9 +526,9 @@ namespace MyProject
 
             bool hitGround = false;
             Vector3 spherePosition = characterFeet;
-            spherePosition.y = characterFeet.y + controller.radius;
-            float radius = controller.radius + additionalRadius;
-            float distance = controller.skinWidth + additionalDistance;
+            spherePosition.y = characterFeet.y + charController.radius;
+            float radius = charController.radius + additionalRadius;
+            float distance = charController.skinWidth + additionalDistance;
 #if UNITY_EDITOR
             sc_position = spherePosition;
             sc_position_end = spherePosition + (Vector3.down * distance);
