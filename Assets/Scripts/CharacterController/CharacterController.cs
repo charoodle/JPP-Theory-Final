@@ -9,18 +9,15 @@ namespace MyProject
     /// Must be a child of some parent GameObject. I think for parenting to moving objects.
     /// 
     /// TODO: Refactor so can port into Bulletpain
-    ///     - [ ] Move all functions, events, etc. into clearly defined sections:
-    ///         [x] 1. Take input
-    ///             - [x] After refactoring the inputs into a class, test the AnnouncerTutorial to make sure it works with new moveInput.
-    ///         [ ] 2. Move Object
-    ///         [x] 3. Rotate Object
     ///     - [ ] Refactor each section into separate scripts?
     ///         [ ] Input
     ///         [ ] Move Object
     ///         [ ] Rotate Object
     ///     - [ ] Add documentation where needed + make consistent variable naming
     ///     
-    ///     
+    /// Issues:
+    ///     - Character jumping is slightly higher than <see cref="_jumpHeight"/> on different machines?
+    ///         - Works fine on mine though...
     /// </summary>
     public abstract class CharacterController : MonoBehaviour
     {
@@ -91,19 +88,21 @@ namespace MyProject
             // Update input
             UpdateControllerInputs(_input);
 
-
             /// TODO:
             ///     Clean up function call order for MoveCharacter, UpdateGravity, etc. Out of order/looks too messy.
 
             // Check for ground before moving character
             Vector3 movingSurfaceVelocity = GetCurrentGroundVelocity();
+            
             // Is the character controller touching a ground surface?
             _isGrounded = CheckIsGrounded(charController);
+
             // What is the gravity force?
-            UpdateGravity(_isGrounded, _input.jumpInput, ref _currentGravityForce, _jumpHeight, _worldGravity);
+            UpdateCurrentGravityVelocity(_isGrounded, _input.jumpInput, ref _currentGravityVelocity, _jumpHeight, _worldGravity);
+            Vector3 gravityVelocity = _currentGravityVelocity;
 
             // Move character
-            MoveCharacter(_input.moveInput, _input.sprintInput, movingSurfaceVelocity, _currentGravityForce, this.controller);
+            MoveCharacter(_input.moveInput, _input.sprintInput, movingSurfaceVelocity, gravityVelocity, this.controller);
 
             // Update rotation (values only)
             if (rot)
@@ -368,9 +367,9 @@ namespace MyProject
         private Vector3 _worldGravity = new Vector3(0f, -9.81f, 0f);
 
         /// <summary>
-        /// Current gravity value acting on player this frame. Added more and more gets added until player touches ground again. Gets modified by <see cref="UpdateGravity(bool, bool)"/>
+        /// Current gravity value acting on player this frame. Adds more and more gets added until player touches ground again. Gets modified by <see cref="UpdateCurrentGravityVelocity(bool, bool, ref Vector3, float, Vector3)"/>
         /// </summary>
-        protected Vector3 _currentGravityForce = Vector3.zero;
+        protected Vector3 _currentGravityVelocity = Vector3.zero;
 
         /// <summary>
         /// Spawn position
@@ -440,26 +439,26 @@ namespace MyProject
             controller.Move(finalMovementVector);
         }
 
-        #region Grounded stuff
-
         /// <summary>
-        /// Calculate amount of gravity force for the character this frame. Not accounting for Time.delta time.
+        /// Calculate amount of gravity force for the character this frame.
         /// </summary>
         /// <returns></returns>
-        /// <param name="currentAccumulatedGravityDeltaTime">How much gravity is acting on this player. Accumulates over time as character keeps falling.</param>
-        protected void UpdateGravity(bool isGrounded, bool jumpInput, ref Vector3 currentAccumulatedGravityDeltaTime, float jumpHeight, Vector3 worldGravity)
+        /// <param name="currentAccumulatedGravity">How much gravity is acting on this player. Accumulates over time as character keeps falling. Does not apply Time.delta time.</param>
+        protected void UpdateCurrentGravityVelocity(bool isGrounded, bool jumpInput, ref Vector3 currentAccumulatedGravity, float jumpHeight, Vector3 worldGravity)
         {
             // Reset character's velocity while touching ground.
             if (isGrounded)
             {
-                currentAccumulatedGravityDeltaTime = Vector3.zero;
+                currentAccumulatedGravity = Vector3.zero;
             }
 
             // Jump if on ground - do this once per isGrounded only
             if (jumpInput && isGrounded && _isGroundedAndCanJumpAgain)
             {
+                // Impulse jump. If jump, go against gravity for one frame. No time.deltaTime needed?
+
                 // (?) -2 is some kind of constant, so if set jumpHeight to 1, then character actually jumps up 1 unity unit.
-                currentAccumulatedGravityDeltaTime.y += Mathf.Sqrt(jumpHeight * -2.0f * worldGravity.y);
+                currentAccumulatedGravity.y += Mathf.Sqrt(jumpHeight * -2.0f * worldGravity.y);
 
                 // Only allow one jump per accepted jump input. Waits for character to land again before can jump again.
                 StartCoroutine(WaitForCharacterToLandOnGround());
@@ -468,7 +467,7 @@ namespace MyProject
             // Apply gravity if not on ground
             //  TODO: I have no idea why this works. Time.deltaTime is multiplied twice. Character.Move multiplies the second time. But it seems like it works with this here...?
             if (!isGrounded)
-                currentAccumulatedGravityDeltaTime += (worldGravity * Time.deltaTime);
+                currentAccumulatedGravity += (worldGravity * Time.deltaTime);
         }
 
         /// <summary>
@@ -506,10 +505,9 @@ namespace MyProject
 
             return groundVelocity;
         }
-        #endregion
 
         /// <summary>
-        /// Is the current character touching a ground surface?
+        /// Is this character touching a ground surface?
         /// <para>Additionally detects and sets <see cref="_currentMovingGroundSurface"/> if the surface underneath is a <see cref="MovableGroundSurface"/>.</para>
         /// </summary>
         /// <returns>True if character is touching ground (depends on CharacterController.skinWidth).</returns>
@@ -534,6 +532,8 @@ namespace MyProject
             sc_position_end = spherePosition + (Vector3.down * distance);
             sc_radius = radius;
 #endif
+
+            // Raycast down to find a moving surface
             if (Physics.SphereCast(spherePosition, radius, Vector3.down, out RaycastHit hitInfo, distance, groundCheckLayer))
             {
                 //Debug.Log("Hit: " + hitInfo.collider.gameObject + " " + LayerMask.LayerToName(hitInfo.collider.gameObject.layer), hitInfo.collider.gameObject);
