@@ -21,7 +21,16 @@ namespace MyProject
     /// </summary>
     public abstract class CharacterController : MonoBehaviour
     {
-        [SerializeField] protected UnityEngine.CharacterController controller;
+        #region Constants
+        /// <summary>
+        /// If a character falls below this y-value, they are considered out of bounds and will be reset to their original spawn position.
+        /// </summary>
+        protected const float Y_AXIS_OUTOFBOUNDS = -30f;
+        #endregion
+
+
+
+        #region Properties
         /// <summary>
         /// Property for <see cref="controller"/>, for the (Unity) character controller component.
         /// </summary>
@@ -36,6 +45,186 @@ namespace MyProject
                 controller = value;
             }
         }
+
+        #region Movement
+        /// <inheritdoc cref="_isGrounded"/>
+        public bool IsGrounded
+        {
+            get { return _isGrounded; }
+            protected set { _isGrounded = value; }
+        }
+
+        /// <summary>
+        /// Is the character holding the sprint button while moving in a direction?
+        /// </summary>
+        public bool IsSprinting { get { return _input.sprintInput && _input.moveInput.magnitude > 0; } }
+
+        /// <inheritdoc cref="_walkSpeed"/>
+        protected virtual float _WalkSpeed
+        {
+            get { return _walkSpeed; }
+            set
+            {
+                // Cannot have negative speed
+                if (value <= 0)
+                {
+                    Debug.LogError("Cannot have negative walk speed: " + value, gameObject);
+                    value = 0;
+                }
+                _walkSpeed = value;
+            }
+        }
+        #endregion
+
+        #region Rotation
+        /// <summary>
+        /// The look at head of the character. Useful for an aim target during dialogue.
+        /// </summary>
+        public Transform head
+        {
+            get { return _rotateFreedHead; }
+        }
+        #endregion
+        #endregion
+
+
+
+        #region Events
+        public delegate void CharacterAction();
+        /// <summary>
+        /// Happens when the character jumps.
+        /// </summary>
+        public event CharacterAction OnCharacterJump;
+
+        /// <summary>
+        /// Happens when the character lands.
+        /// </summary>
+        public event CharacterAction OnCharacterLand;
+        #endregion
+
+
+
+        #region Public Fields
+        /// <summary>
+        /// Allows access to specific parts of (<see cref="CharacterControllerInputs"/>) <see cref="_input"/>.
+        /// Gets initialized in Start.
+        /// </summary>
+        public CharacterControllerInputsProperties input;
+        #endregion
+
+
+
+        #region Protected Fields
+        [SerializeField] protected UnityEngine.CharacterController controller;
+        /// <summary>
+        /// The current input that gets updated each frame, which controls this character. Can be shown in inspector.
+        /// </summary>
+        [SerializeField] protected CharacterControllerInputs _input = new CharacterControllerInputs();
+
+        #region Movement
+        /// <summary>
+        /// Without deltaTime.
+        /// </summary>
+        [Header("Movement")]
+        [SerializeField] protected Vector3 _movementVector;
+        /// <summary>
+        /// TODO: For some reason it gets used to add gravity in the MoveCharacter function. Take this member var out of that function.
+        /// TODO: This only works with gravity. Does not update X/Z velocity.
+        /// </summary>
+        [SerializeField] protected Vector3 _movementVectorDeltaTime;
+
+        /// <summary>
+        /// How fast the character walks at.
+        /// </summary>
+        [SerializeField] protected float _walkSpeed = 3.0f;
+
+        /// <summary>
+        /// How much faster the character sprints at. Depends on <see cref="_walkSpeed"/>.
+        /// </summary>
+        [SerializeField] protected float _sprintSpeedMultiplier = 2.0f;
+
+        /// <summary>
+        /// Is this character touching a ground surface?
+        /// </summary>
+        [SerializeField] protected bool _isGrounded;
+
+        /// <summary>
+        /// Is there a higher root object to this character controller?
+        /// Will be parented/unparented when they walk on surfaces.
+        /// </summary>
+        [Header("Movement (Relative Velocity)")]
+        [SerializeField] protected Transform _rootGameObject;
+        /// <summary>
+        /// Original root object on game start. Used to parent/unparent this object back and forth from to this transform (ex: ground checks).
+        /// </summary>
+        protected Transform _originalRoot;
+
+        // Movement with a parent
+        /// <summary>
+        /// Is the character controller currently grounded on something that can move? May need to supply additional movement to the CharacterController.Move() function.
+        /// </summary>
+        [SerializeField] protected MovableGroundSurface _currentMovingGroundSurface;
+        [SerializeField] protected Vector3 _currentGroundVelocity;
+        [SerializeField] protected Vector3 _lastTouchedGroundVelocity;
+
+        /// <summary>
+        /// How high the character jumps (in default Unity units) before gravity pulls them down.
+        /// </summary>
+        [Header("Jump/Gravity")]
+        [SerializeField] protected float _jumpHeight = 3f;
+        /// <summary>
+        /// Layers (for jumping)
+        /// </summary>
+        [SerializeField] protected LayerMask _characterLayer;
+
+        /// <summary>
+        /// For jumping? Opposite layers of _characterLayer.
+        /// </summary>
+        protected LayerMask _groundCheckLayer;
+
+        /// <summary>
+        /// Gravity for this character.
+        /// </summary>
+        protected Vector3 _worldGravity = new Vector3(0f, -9.81f, 0f);
+
+        /// <summary>
+        /// Current gravity value acting on player this frame. Adds more and more gets added until player touches ground again. Gets modified by <see cref="UpdateCurrentGravityVelocity(bool, bool, ref Vector3, float, Vector3)"/>
+        /// </summary>
+        protected Vector3 _currentGravityVelocity = Vector3.zero;
+
+        /// <summary>
+        /// Spawn position
+        /// </summary>
+        protected Vector3 _spawnPosition;
+
+        /// <summary>
+        /// Flag to manage allowing one jump command per accepted character jump inpu. This should initially be true on game start to let the character jump.
+        /// <para>Triggered by <see cref="WaitForCharacterToLandOnGround"/>, and is used in the jump section of <see cref="MoveCharacter(Vector3, bool, Vector3, Vector3)"/></para>
+        /// </summary>
+        protected bool _isGroundedAndCanJumpAgain = true;
+        #endregion
+
+
+        #region Rotation
+        /// <summary>
+        /// Controls the character's rotation.
+        /// TODO: Make into a property instead.
+        /// </summary>
+        [Header("Rotation")]
+        public RotationLookAt rot;
+
+        /// <summary>
+        /// The body of the character that rotates around its y-axis to match a pitch/yaw degrees value.
+        /// </summary>
+        [SerializeField] protected Transform _rotateBody;
+
+        /// <summary>
+        /// The head of the character that will rotate around its x and y-axis to match a pitch/yaw degrees value.
+        /// </summary>
+        [SerializeField] protected Transform _rotateFreedHead;
+        #endregion
+        #endregion
+
 
 
         #region LifeCycle Functions
@@ -65,13 +254,13 @@ namespace MyProject
                     Debug.LogWarning("No LookRotate component found on this CharacterController!", this.gameObject);
             }
 
-            rot.AssignBody(rotateBody);
-            rot.AssignHead(rotateFreedHead);
+            rot.AssignBody(_rotateBody);
+            rot.AssignHead(_rotateFreedHead);
 
             // Make the object retain the same rotation it has when the game is started (yaw /Y-rotation only). Because custom-controlled rotation system.
             rot.InitializeStartingRotation(transform.rotation.eulerAngles.y);
 
-            // Initialize input accessors/properties where to read character's input from
+            // Initialize other classes to access to this character's direct input without allowing them to modify certain input fields.
             input = new CharacterControllerInputsProperties(_input);
         }
 
@@ -111,131 +300,14 @@ namespace MyProject
         #endregion
 
 
-        #region Take Input
-        /// <summary>
-        /// Represents inputs that a <see cref="MyProject.CharacterController"/> will use to move/rotate itself this frame.
-        /// <para>
-        /// Meant to use a "protected" instance of this class, and use in conjunction a "public" <see cref="CharacterControllerInputsProperties"/> for controlled getters/setters to specific fields.
-        /// </para>
-        /// </summary>
-        [System.Serializable]
-        public class CharacterControllerInputs
-        {
-            /// <summary>
-            /// Current move input being fed in.
-            /// </summary>
-            [Header("Current Input")]
-            public Vector2 moveInput;
 
-            /// <summary>
-            /// Current look input being fed in.
-            /// </summary>
-            public Vector2 lookInput;
-
-            /// <summary>
-            /// Current jump input being fed in.
-            /// </summary>
-            public bool jumpInput;
-
-            /// <summary>
-            /// Current sprint input being fed in.
-            /// </summary>
-            public bool sprintInput;
-
-            /// <summary>
-            /// Allows/disallows move input.
-            /// </summary>
-            [Header("Settings")]
-            public bool canInputMove = true;
-
-            /// <summary>
-            /// Allows/disallows look input.
-            /// </summary>
-            public bool canInputLook = true;
-
-            /// <summary>
-            /// Allows/disallows jump input.
-            /// </summary>
-            public bool canInputJump = true;
-
-            /// <summary>
-            /// Allows/disallows sprint input.
-            /// </summary>
-            public bool canInputSprint = true;
-        }
-
-        /// <summary>
-        /// Helper class. Allows/disallows public access to appropriate properties of the <see cref="CharacterControllerInputs"/> class.
-        /// Weird workaround but (maybe) it will work. Untested atm.
-        /// Works in conjuntion with a (preferably) protected variable of <see cref="CharacterControllerInputs"/>.
-        /// </summary>
-        public class CharacterControllerInputsProperties
-        {
-            /// <summary>
-            /// The inputs this class is directly accessing.
-            /// </summary>
-            protected CharacterControllerInputs input;
+        #region Public Functions
+        #endregion
 
 
-            /// <param name="input">The input to directly read from.</param>
-            public CharacterControllerInputsProperties(CharacterControllerInputs input)
-            {
-                this.input = input;
-            }
 
-
-            #region Current Input
-            /// <inheritdoc cref="CharacterControllerInputs.moveInput"/>
-            public Vector2 moveInput
-            {
-                get { return input.moveInput; }
-            }
-
-            /// <inheritdoc cref="CharacterControllerInputs.lookInput"/>
-            public Vector2 lookInput
-            {
-                get { return input.lookInput; }
-            }
-            #endregion
-
-
-            #region Settings
-            /// <inheritdoc cref="CharacterControllerInputs.canInputMove"/>
-            public bool canInputMove
-            {
-                get { return input.canInputMove; }
-                set { input.canInputMove = value; }
-            }
-
-            /// <inheritdoc cref="CharacterControllerInputs.canInputLook"/>
-            public bool canInputLook
-            {
-                get { return input.canInputLook; }
-                set { input.canInputLook = value; }
-            }
-
-            /// <inheritdoc cref="CharacterControllerInputs.canInputSprint"/>
-            public bool canInputSprint
-            {
-                get { return input.canInputSprint; }
-                set { input.canInputSprint = value; }
-            }
-
-            /// <inheritdoc cref="CharacterControllerInputs.canInputJump"/>
-            public bool canInputJump
-            {
-                get { return input.canInputJump; }
-                set { input.canInputJump = value; }
-            }
-            #endregion
-        }
-
-        /// <summary>
-        /// The current input that gets updated each frame, which controls this character.
-        /// </summary>
-        [SerializeField] protected CharacterControllerInputs _input = new CharacterControllerInputs();
-        public CharacterControllerInputsProperties input;
-
+        #region Protected Functions
+        #region Input
         /// <summary>
         /// Update all inputs for this frame.
         /// </summary>
@@ -245,14 +317,13 @@ namespace MyProject
             // Movement, if that input is allowed
             input.moveInput = input.canInputMove ? GetMoveInput() : Vector2.zero;
             input.jumpInput = input.canInputJump ? GetJumpInput() : false;
-            input.sprintInput= input.canInputSprint ? GetSprintInput() : false;
+            input.sprintInput = input.canInputSprint ? GetSprintInput() : false;
 
             // Look, if that input is allowed
             input.lookInput = input.canInputLook ? GetLookInput() : Vector2.zero;
             // Postprocess look input if needed
             input.lookInput = PostProcessLookInput(input.lookInput);
         }
-
 
         /// <summary>
         /// Get move input. X for horizontal character movement. Y for forward/backward movement.
@@ -280,117 +351,7 @@ namespace MyProject
         protected abstract Vector2 PostProcessLookInput(Vector2 lookInput);
         #endregion
 
-
-        #region Move Object (Forward/Sideways)
-        /// <inheritdoc cref="_isGrounded"/>
-        public bool IsGrounded
-        {
-            get { return _isGrounded; }
-            protected set { _isGrounded = value; }
-        }
-
-        /// <summary>
-        /// Is the character holding the sprint button while moving in a direction?
-        /// </summary>
-        public bool IsSprinting { get { return _input.sprintInput && _input.moveInput.magnitude > 0; } }
-
-        /// <inheritdoc cref="_walkSpeed"/>
-        protected virtual float _WalkSpeed
-        {
-            get { return _walkSpeed; }
-            set
-            {
-                // Cannot have negative speed
-                if (value <= 0)
-                {
-                    Debug.LogError("Cannot have negative walk speed: " + value, gameObject);
-                    value = 0;
-                }
-                _walkSpeed = value;
-            }
-        }
-
-        /// <summary>
-        /// Without deltaTime.
-        /// </summary>
-        [Header("Movement")]
-        [SerializeField] protected Vector3 _movementVector;
-        /// <summary>
-        /// TODO: For some reason it gets used to add gravity in the MoveCharacter function. Take this member var out of that function.
-        /// TODO: This only works with gravity. Does not update X/Z velocity.
-        /// </summary>
-        [SerializeField] protected Vector3 _movementVectorDeltaTime;
-
-        /// <summary>
-        /// How fast the character walks at.
-        /// </summary>
-        [SerializeField] protected float _walkSpeed = 3.0f;
-
-        /// <summary>
-        /// How much faster the character sprints at. Depends on <see cref="_walkSpeed"/>.
-        /// </summary>
-        [SerializeField] protected float _sprintSpeedMultiplier = 2.0f;
-
-        /// <summary>
-        /// Is this character touching a ground surface?
-        /// </summary>
-        [SerializeField] protected bool _isGrounded;
-
-        /// <summary>
-        /// Is there a higher root object to this character controller?
-        /// Will be parented/unparented when they walk on surfaces.
-        /// </summary>
-        [Header("Movement (Relative Velocity)")]
-        [SerializeField] private Transform _rootGameObject;
-        /// <summary>
-        /// Original root object on game start. Used to parent/unparent this object back and forth from to this transform (ex: ground checks).
-        /// </summary>
-        protected Transform _originalRoot;
-
-        // Movement with a parent
-        /// <summary>
-        /// Is the character controller currently grounded on something that can move? May need to supply additional movement to the CharacterController.Move() function.
-        /// </summary>
-        [SerializeField] protected MovableGroundSurface _currentMovingGroundSurface;
-        [SerializeField] protected Vector3 _currentGroundVelocity;
-        [SerializeField] protected Vector3 _lastTouchedGroundVelocity;
-
-        /// <summary>
-        /// How high the character jumps (in default Unity units) before gravity pulls them down.
-        /// </summary>
-        [Header("Jump/Gravity")]
-        [SerializeField] protected float _jumpHeight = 3f;
-
-        /// <summary>
-        /// Gravity for this character.
-        /// </summary>
-        private Vector3 _worldGravity = new Vector3(0f, -9.81f, 0f);
-
-        /// <summary>
-        /// Current gravity value acting on player this frame. Adds more and more gets added until player touches ground again. Gets modified by <see cref="UpdateCurrentGravityVelocity(bool, bool, ref Vector3, float, Vector3)"/>
-        /// </summary>
-        protected Vector3 _currentGravityVelocity = Vector3.zero;
-
-        /// <summary>
-        /// Spawn position
-        /// </summary>
-        protected Vector3 _spawnPosition;
-
-        /// <summary>
-        /// Flag to manage allowing one jump command per accepted character jump inpu. This should initially be true on game start to let the character jump.
-        /// <para>Triggered by <see cref="WaitForCharacterToLandOnGround"/>, and is used in the jump section of <see cref="MoveCharacter(Vector3, bool, Vector3, Vector3)"/></para>
-        /// </summary>
-        protected bool _isGroundedAndCanJumpAgain = true;
-
-        // Layers (for jumping)
-        [SerializeField] private LayerMask _characterLayer;
-        private LayerMask _groundCheckLayer;
-
-        /// <summary>
-        /// If a character falls below this y-value, they are considered out of bounds and will be reset to their original spawn position.
-        /// </summary>
-        protected const float Y_AXIS_OUTOFBOUNDS = -30f;
-
+        #region Movement
         /// <summary>
         /// 
         /// TODO:
@@ -608,7 +569,7 @@ namespace MyProject
             // Allow player to jump again
             _isGroundedAndCanJumpAgain = true;
         }
-        
+
         /// <summary>
         /// Respawns the character at its original instantiation position if it goes out of bounds.
         /// </summary>
@@ -631,33 +592,7 @@ namespace MyProject
         }
         #endregion
 
-
-        #region Rotate Object
-        /// <summary>
-        /// Controls the character's rotation.
-        /// TODO: Make into a property instead.
-        /// </summary>
-        [Header("Rotation")]
-        public RotationLookAt rot;
-
-        /// <summary>
-        /// The body of the character that rotates around its y-axis to match a pitch/yaw degrees value.
-        /// </summary>
-        [SerializeField] Transform rotateBody;
-
-        /// <summary>
-        /// The head of the character that will rotate around its x and y-axis to match a pitch/yaw degrees value.
-        /// </summary>
-        [SerializeField] Transform rotateFreedHead;
-
-        /// <summary>
-        /// The look at head of the character. Useful for an aim target during dialogue.
-        /// </summary>
-        public Transform head
-        {
-            get { return rotateFreedHead; }
-        }
-
+        #region Rotation
         /// <summary>
         /// Update the look rotation degrees by some input.
         /// </summary>
@@ -671,20 +606,130 @@ namespace MyProject
             lookYRotation -= lookInput.y;
         }
         #endregion
-
-
-        #region Events
-        public delegate void CharacterAction();
-        /// <summary>
-        /// Happens when the character jumps.
-        /// </summary>
-        public event CharacterAction OnCharacterJump;
-         
-        /// <summary>
-        /// Happens when the character lands.
-        /// </summary>
-        public event CharacterAction OnCharacterLand;
         #endregion
+
+
+
+        #region Classes
+        /// <summary>
+        /// Represents inputs that a <see cref="MyProject.CharacterController"/> will use to move/rotate itself this frame.
+        /// <para>
+        /// Meant to use a "protected" instance of this class, and use in conjunction a "public" <see cref="CharacterControllerInputsProperties"/> for controlled getters/setters to specific fields.
+        /// </para>
+        /// </summary>
+        [System.Serializable]
+        public class CharacterControllerInputs
+        {
+            /// <summary>
+            /// Current move input being fed in.
+            /// </summary>
+            [Header("Current Input")]
+            public Vector2 moveInput;
+
+            /// <summary>
+            /// Current look input being fed in.
+            /// </summary>
+            public Vector2 lookInput;
+
+            /// <summary>
+            /// Current jump input being fed in.
+            /// </summary>
+            public bool jumpInput;
+
+            /// <summary>
+            /// Current sprint input being fed in.
+            /// </summary>
+            public bool sprintInput;
+
+            /// <summary>
+            /// Allows/disallows move input.
+            /// </summary>
+            [Header("Settings")]
+            public bool canInputMove = true;
+
+            /// <summary>
+            /// Allows/disallows look input.
+            /// </summary>
+            public bool canInputLook = true;
+
+            /// <summary>
+            /// Allows/disallows jump input.
+            /// </summary>
+            public bool canInputJump = true;
+
+            /// <summary>
+            /// Allows/disallows sprint input.
+            /// </summary>
+            public bool canInputSprint = true;
+        }
+
+        /// <summary>
+        /// Helper class. Allows/disallows public access to appropriate properties of the <see cref="CharacterControllerInputs"/> class.
+        /// Weird workaround but (maybe) it will work. Untested atm.
+        /// Works in conjuntion with a (preferably) protected variable of <see cref="CharacterControllerInputs"/>.
+        /// </summary>
+        public class CharacterControllerInputsProperties
+        {
+            /// <summary>
+            /// The inputs this class is directly accessing.
+            /// </summary>
+            protected CharacterControllerInputs input;
+
+
+            /// <param name="input">The input to directly read from.</param>
+            public CharacterControllerInputsProperties(CharacterControllerInputs input)
+            {
+                this.input = input;
+            }
+
+
+            #region Current Input
+            /// <inheritdoc cref="CharacterControllerInputs.moveInput"/>
+            public Vector2 moveInput
+            {
+                get { return input.moveInput; }
+            }
+
+            /// <inheritdoc cref="CharacterControllerInputs.lookInput"/>
+            public Vector2 lookInput
+            {
+                get { return input.lookInput; }
+            }
+            #endregion
+
+
+            #region Settings
+            /// <inheritdoc cref="CharacterControllerInputs.canInputMove"/>
+            public bool canInputMove
+            {
+                get { return input.canInputMove; }
+                set { input.canInputMove = value; }
+            }
+
+            /// <inheritdoc cref="CharacterControllerInputs.canInputLook"/>
+            public bool canInputLook
+            {
+                get { return input.canInputLook; }
+                set { input.canInputLook = value; }
+            }
+
+            /// <inheritdoc cref="CharacterControllerInputs.canInputSprint"/>
+            public bool canInputSprint
+            {
+                get { return input.canInputSprint; }
+                set { input.canInputSprint = value; }
+            }
+
+            /// <inheritdoc cref="CharacterControllerInputs.canInputJump"/>
+            public bool canInputJump
+            {
+                get { return input.canInputJump; }
+                set { input.canInputJump = value; }
+            }
+            #endregion
+        }
+        #endregion
+
 
 
         #region Debug

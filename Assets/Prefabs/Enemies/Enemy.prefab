@@ -110,25 +110,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 3334675364185676375}
-  rootGameObject: {fileID: 0}
-  _canInputMove: 1
-  _canInputLook: 1
-  _canInputSprint: 1
-  _canInputJump: 1
-  playerVelocity: {x: 0, y: 0, z: 0}
+  _input:
+    moveInput: {x: 0, y: 0}
+    lookInput: {x: 0, y: 0}
+    jumpInput: 0
+    sprintInput: 0
+    canInputMove: 1
+    canInputLook: 1
+    canInputJump: 1
+    canInputSprint: 1
+  _movementVector: {x: 0, y: 0, z: 0}
+  _movementVectorDeltaTime: {x: 0, y: 0, z: 0}
   _walkSpeed: 3
-  sprintSpeedMultiplier: 2
-  rot: {fileID: 1464603638047049381}
-  rotateBody: {fileID: 6382267599755501001}
-  rotateFreedHead: {fileID: 3643293438439803783}
-  jumpHeight: 3
+  _sprintSpeedMultiplier: 2
   _isGrounded: 0
-  currentMovingGroundSurface: {fileID: 0}
-  currentGroundVelocity: {x: 0, y: 0, z: 0}
-  lastTouchedGroundVelocity: {x: 0, y: 0, z: 0}
-  characterLayer:
+  _rootGameObject: {fileID: 0}
+  _currentMovingGroundSurface: {fileID: 0}
+  _currentGroundVelocity: {x: 0, y: 0, z: 0}
+  _lastTouchedGroundVelocity: {x: 0, y: 0, z: 0}
+  _jumpHeight: 3
+  _characterLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
+  rot: {fileID: 1464603638047049381}
+  _rotateBody: {fileID: 6382267599755501001}
+  _rotateFreedHead: {fileID: 3643293438439803783}
   canMove: 1
   isAlliedNPC: 0
   castleTargetName: 
@@ -187,11 +193,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 905fac7de6d8e314fba232eac046e362, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  yawDegrees: 0
+  pitchDegrees: 0
+  head: {fileID: 0}
+  rotationObjects: []
   debugRayVisible: 0
   debugRayMaxDistance_FreedHead: 50
   debugRayColor: {r: 1, g: 0, b: 0, a: 1}
-  yawDegrees: 0
-  pitchDegrees: 0
 --- !u!1 &2208434775185217470
 GameObject:
   m_ObjectHideFlags: 0
